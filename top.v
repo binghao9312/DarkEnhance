@@ -56,7 +56,7 @@ always @(*) begin
         POS_RESET:  next_state = calculate;
         calculate:  next_state = (posX == img_width_sub2 && posY == img_width_sub2)? POS_RESET2 : calculate;
         POS_RESET2: next_state = data_out; 
-        data_out:   next_state = IDLE;
+        data_out:   next_state = (posX == img_width_sub2 + 1 && posY == img_width_sub2 + 1)?  IDLE: data_out;
         default:    next_state = IDLE; // Default case
     endcase
 end
@@ -371,10 +371,10 @@ always @(posedge clk or posedge rst) begin
     else begin
         if (now_state == calculate) begin
             if(posX == 7'd6 && posY == 7'd6) begin
-                cal_end <= 1'b0;
+                cal_end <= 1'b1;
             end
             else begin
-                cal_end <= 1'b1;
+                cal_end <= cal_end;
             end
             cal_reg[index4] <= 1 - div2;
         end
