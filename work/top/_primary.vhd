@@ -9,6 +9,7 @@ entity top is
         POS_RESET       : vl_logic_vector(3 downto 0) := (Hi0, Hi1, Hi0, Hi0);
         POS_RESET2      : vl_logic_vector(3 downto 0) := (Hi0, Hi1, Hi0, Hi1);
         data_out        : vl_logic_vector(3 downto 0) := (Hi0, Hi1, Hi1, Hi0);
+        delayOneCycle   : vl_logic_vector(3 downto 0) := (Hi0, Hi1, Hi1, Hi1);
         img_width_sub2  : vl_logic_vector(3 downto 0) := (Hi0, Hi1, Hi1, Hi0)
     );
     port(
@@ -27,5 +28,6 @@ entity top is
     attribute mti_svvh_generic_type of POS_RESET : constant is 2;
     attribute mti_svvh_generic_type of POS_RESET2 : constant is 2;
     attribute mti_svvh_generic_type of data_out : constant is 2;
+    attribute mti_svvh_generic_type of delayOneCycle : constant is 2;
     attribute mti_svvh_generic_type of img_width_sub2 : constant is 2;
 end top;

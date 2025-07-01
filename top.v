@@ -21,7 +21,7 @@ reg     [7:0] cal_reg[0:63];
 reg     [8:0] min_r1, min_r2, min_r3, min_r4, min_r5, min_r6, min_r7, min_r8;
 reg     [8:0] min_g1, min_g2, min_g3, min_g4, min_g5, min_g6, min_g7, min_g8;
 reg     [8:0] min_b1, min_b2, min_b3, min_b4, min_b5, min_b6, min_b7, min_b8;
-reg     [8:0] min1, min2, min3;
+reg     [8:0] min1, min2, j_value;
 reg     [8:0] posX,posY;
 reg     [10:0] div1,div2,mul1,check1_mul1,mul2,mul3,mul4;
 reg     [3:0] div_index;
@@ -30,15 +30,20 @@ reg     [3:0] now_state, next_state;
 reg     [8:0] R_pixel_reg, G_pixel_reg, B_pixel_reg;
 reg     [8:0] R_pixel_reg1, G_pixel_reg1, B_pixel_reg1;
 reg     [9:0] pixel_index;
+reg     [10:0] j_counter;
 //================ parameter ========================
-parameter [3:0] IDLE            = 4'd0,
+parameter [3:0] //statement    
+                IDLE            = 4'd0,
                 Masking         = 4'd1,
                 find_min        = 4'd2, 
                 calculate       = 4'd3,
                 POS_RESET       = 4'd4,
                 POS_RESET2      = 4'd5,
                 data_out        = 4'd6,
+                delayOneCycle   = 4'd7,
+                //num
                 img_width_sub2  = 8'd6;
+
 //================ State Machine ========================
 always @(posedge clk or posedge rst) begin
     if (rst) begin
@@ -50,14 +55,15 @@ end
 
 always @(*) begin
     case (now_state)
-        IDLE:       next_state = Masking; 
-        Masking:    next_state = find_min; 
-        find_min:   next_state = (posX == img_width_sub2 && posY == img_width_sub2)? POS_RESET : Masking;//(min_ready == 1'b1) ? find_min   : Masking; 
-        POS_RESET:  next_state = calculate;
-        calculate:  next_state = (posX == img_width_sub2 && posY == img_width_sub2)? POS_RESET2 : calculate;
-        POS_RESET2: next_state = data_out; 
-        data_out:   next_state = (posX == img_width_sub2 + 1 && posY == img_width_sub2 + 1)?  IDLE: data_out;
-        default:    next_state = IDLE; // Default case
+        IDLE:           next_state = Masking; 
+        Masking:        next_state = find_min; 
+        find_min:       next_state = (posX == img_width_sub2 && posY == img_width_sub2)? delayOneCycle : Masking;//(min_ready == 1'b1) ? find_min   : Masking; 
+        delayOneCycle:  next_state = POS_RESET;
+        POS_RESET:      next_state = calculate;
+        calculate:      next_state = (posX == img_width_sub2 && posY == img_width_sub2)? POS_RESET2 : calculate;
+        POS_RESET2:     next_state = data_out; 
+        data_out:       next_state = (posX == img_width_sub2 + 1 && posY == img_width_sub2 + 1)?  IDLE: data_out;
+        default:        next_state = IDLE; // Default case
     endcase
 end
 //================ x y shift ========================
@@ -256,11 +262,28 @@ always @(*) begin
 end
 //================ transmission rate calculation ================
 always @(*) begin  
+    if(now_state == IDLE)begin
+        j_value = 9'dz;
+        div1    = 11'dz;
+        mul1    = 11'dz;
+        div2    = 11'dz;    
+    end
+
     //w = 0.75
-    div1 = j_reg[posY * 8 + posX] >> 2;  // divide by 4
-    mul1 = div1 << 1 + div1;             // multiply by 3
-    div2 = mul1 >> 8 + 8'd256;           // div 255 = A
-    // notice if it overflow 0.1 < div2 < 1
+    if(now_state == calculate)begin
+        j_value = j_reg[j_counter];
+        div1 = j_reg[j_counter] >> 2;  // divide by 4
+        mul1 = (div1 << 1) + div1;             // multiply by 3
+        div2 = (mul1 >> 8) + 8'd256;           // div 255 = A
+        // notice if it overflow 0.1 < div2 < 1
+        
+        
+    end
+    else begin
+        div1 = 11'dz;
+        mul1 = 11'dz;
+        div2 = 11'dz;
+    end
  
 end
 //================ lastest calculation ================
@@ -340,7 +363,7 @@ always @(*) begin
         B_pixel_reg1 = 8'd255;
     end
     
-    pixel_index = posY << 3 + posX; // calculate pixel index
+    pixel_index = (posY << 3) + posX; // calculate pixel index
     
 end
 
@@ -350,13 +373,24 @@ always @(posedge clk or posedge rst) begin
         for (x = 0; x < 64; x = x + 1) begin
             j_reg[x] <= 8'b0;
         end
+        j_counter = 11'd0;
     end 
     else begin 
-        if (now_state == find_min) begin
-            j_reg[index4] <= min2;
+        
+        if (now_state == calculate)begin
+            j_counter <= j_counter + 1;    
+        end
+        else if (now_state == find_min) begin
+            if(posX == img_width_sub2 && posY == img_width_sub2)begin
+                j_counter <= 11'd0;    
+            end
+            else begin
+                j_counter <= j_counter + 1;
+            end
+            j_reg[j_counter] <= min2;
         end
         else begin
-            j_reg[0] <= j_reg[0];
+            j_counter <= j_counter;
         end
     end
 end
