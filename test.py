@@ -75,3 +75,5 @@ plt.imshow(enhanced_np)
 plt.axis('off')
 plt.tight_layout()
 plt.show()
+
+print("Exit")
