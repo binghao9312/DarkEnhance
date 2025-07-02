@@ -22,7 +22,7 @@ reg     [8:0] min_r1, min_r2, min_r3, min_r4, min_r5, min_r6, min_r7, min_r8;
 reg     [8:0] min_g1, min_g2, min_g3, min_g4, min_g5, min_g6, min_g7, min_g8;
 reg     [8:0] min_b1, min_b2, min_b3, min_b4, min_b5, min_b6, min_b7, min_b8;
 reg     [8:0] min1, min2, j_value;
-reg     [8:0] posX,posY;
+reg     [8:0] posX,posY,R_AsubR,G_AsubR,B_AsubR;
 reg     [8:0] t_ans;
 reg     [10:0] div1,div2,mul1,check1_mul1,mul2,mul3,mul4;
 reg     [3:0] div_index;
@@ -32,6 +32,11 @@ reg     [8:0] R_pixel_reg, G_pixel_reg, B_pixel_reg;
 reg     [8:0] R_pixel_reg1, G_pixel_reg1, B_pixel_reg1;
 reg     [9:0] pixel_index;
 reg     [10:0] j_counter;
+reg     [14:0] R_shift_L1,G_shift_L1,B_shift_L1;
+reg     [14:0] R_shift_L2,G_shift_L2,B_shift_L2;
+reg     [14:0] R_shift_L3,G_shift_L3,B_shift_L3;
+reg     [14:0] R_shift_L4,G_shift_L4,B_shift_L4;
+
 //================ parameter ========================
 parameter [3:0] //statement    
                 IDLE            = 4'd0,
@@ -75,7 +80,7 @@ always @(posedge clk or posedge rst) begin
         mask_end <= 1'b0;
     end 
     else begin
-        if(now_state == POS_RESET || now_state == POS_RESET2)begin
+        if(now_state == POS_RESET)begin
             posX <= 7'b1;
             posY <= 7'b1;
         end
@@ -270,8 +275,9 @@ always @(*) begin
         div2    = 11'dz;    
     end
     //w = 0.75
+    j_value = j_reg[index4]; 
     if(now_state == calculate)begin
-        j_value = j_reg[index4]; 
+        
         
         case(j_reg[index4])    
             8'd0 , 8'd1 , 8'd2 , 8'd3           :t_ans = 25;
@@ -364,24 +370,126 @@ end
 //================ lastest calculation ================
 always @(*) begin
     if(now_state == IDLE)begin
-        R_pixel_reg = 8'd0;
-        G_pixel_reg = 8'd0;
-        B_pixel_reg = 8'd0;
-        pixel_R     = 8'dz;
-        pixel_G     = 8'dz;
-        pixel_B     = 8'dz;
-        div_index   = 4'd0;
+        R_pixel_reg1 = 8'dz;
+        G_pixel_reg1 = 8'dz;
+        B_pixel_reg1 = 8'dz;
+        pixel_R      = 8'dz;
+        pixel_G      = 8'dz;
+        pixel_B      = 8'dz;
+        div_index    = 4'd0;
     end
-    else begin
+    
+    else begin    
         R_pixel_reg = 8'd255 - R_ram[posY * 8 + posX];
         G_pixel_reg = 8'd255 - G_ram[posY * 8 + posX];
         B_pixel_reg = 8'd255 - B_ram[posY * 8 + posX];
     end
     
-    check1_mul1 = cal_reg[index4]; // check if mul1 is overflow
-    //case(cal_reg[index4]);
-        
-    //endcase
+    check1_mul1 = cal_reg[index4]; 
+    //A - R
+    R_AsubR = 255 - R_ram[posY * 8 + posX];
+    G_AsubR = 255 - G_ram[posY * 8 + posX];
+    B_AsubR = 255 - B_ram[posY * 8 + posX];
+    R_shift_L1 = (R_AsubR << 1);
+    R_shift_L2 = (R_AsubR << 2);
+    R_shift_L3 = (R_AsubR << 3);
+    R_shift_L4 = (R_AsubR << 4);
+
+    G_shift_L1 = (G_AsubR << 1);
+    G_shift_L2 = (G_AsubR << 2);
+    G_shift_L3 = (G_AsubR << 3);
+    G_shift_L4 = (G_AsubR << 4);
+    
+    B_shift_L1 = (B_AsubR << 1);
+    B_shift_L2 = (B_AsubR << 2);
+    B_shift_L3 = (B_AsubR << 3);
+    B_shift_L4 = (B_AsubR << 4);
+    
+    
+
+    case(cal_reg[index4])
+        8'd25, 8'd26, 8'd27, 8'd28, 8'd29 : begin
+            R_pixel_reg1 = R_shift_L4; // *4
+            G_pixel_reg1 = G_shift_L4; // *4
+            B_pixel_reg1 = B_shift_L4; // *4
+        end
+        8'd30, 8'd31, 8'd32, 8'd33, 8'd34 : begin
+            R_pixel_reg1 = R_shift_L1 + R_shift_L2; // *3
+            G_pixel_reg1 = G_shift_L1 + G_shift_L2; // *3
+            B_pixel_reg1 = B_shift_L1 + B_shift_L2; // *3
+        end
+        8'd35, 8'd36, 8'd37, 8'd38, 8'd39 : begin
+            R_pixel_reg1 = ((R_shift_L4 + R_shift_L3 + R_shift_L2) >> 3) + ((R_shift_L4 + R_shift_L3 + R_shift_L2) >> 1); // *27/10
+            G_pixel_reg1 = ((G_shift_L4 + G_shift_L3 + G_shift_L2) >> 3) + ((G_shift_L4 + G_shift_L3 + G_shift_L2) >> 1);
+            B_pixel_reg1 = ((B_shift_L4 + B_shift_L3 + B_shift_L2) >> 3) + ((B_shift_L4 + B_shift_L3 + B_shift_L2) >> 1);
+        end
+        8'd40, 8'd41, 8'd42, 8'd43, 8'd44 : begin
+            R_pixel_reg1 = ((R_shift_L4 + R_shift_L3) >> 3) + ((R_shift_L4 + R_shift_L3) >> 1); // *24/10
+            G_pixel_reg1 = ((G_shift_L4 + G_shift_L3) >> 3) + ((G_shift_L4 + G_shift_L3) >> 1);
+            B_pixel_reg1 = ((B_shift_L4 + B_shift_L3) >> 3) + ((B_shift_L4 + B_shift_L3) >> 1);
+        end
+        8'd45, 8'd46, 8'd47, 8'd48, 8'd49 : begin
+            R_pixel_reg1 = ((R_shift_L4 + R_shift_L2 + R_AsubR) >> 3) + ((R_shift_L4 + R_shift_L2 + R_AsubR) >> 1); // *21.2/10
+            G_pixel_reg1 = ((G_shift_L4 + G_shift_L2 + G_AsubR) >> 3) + ((G_shift_L4 + G_shift_L2 + G_AsubR) >> 1);
+            B_pixel_reg1 = ((B_shift_L4 + B_shift_L2 + B_AsubR) >> 3) + ((B_shift_L4 + B_shift_L2 + B_AsubR) >> 1);
+        end
+        8'd50, 8'd51, 8'd52, 8'd53, 8'd54 : begin
+            R_pixel_reg1 = R_shift_L1; // *2
+            G_pixel_reg1 = G_shift_L1; // *2
+            B_pixel_reg1 = B_shift_L1; // *2
+        end
+        8'd55, 8'd56, 8'd57, 8'd58, 8'd59 : begin
+            R_pixel_reg1 = ((R_shift_L4 + R_shift_L1) >> 3) + ((R_shift_L4 + R_shift_L1) >> 2); // *18/10
+            G_pixel_reg1 = ((G_shift_L4 + G_shift_L1) >> 3) + ((G_shift_L4 + G_shift_L1) >> 2);
+            B_pixel_reg1 = ((B_shift_L4 + B_shift_L1) >> 3) + ((B_shift_L4 + B_shift_L1) >> 2);
+        end
+        8'd60, 8'd61, 8'd62, 8'd63, 8'd64 : begin
+            R_pixel_reg1 = (R_shift_L4 >> 3) + (R_shift_L4 >> 3); // *16/10
+            G_pixel_reg1 = (G_shift_L4 >> 3) + (G_shift_L4 >> 3);
+            B_pixel_reg1 = (B_shift_L4 >> 3) + (B_shift_L4 >> 3);
+        end
+        8'd65, 8'd66, 8'd67, 8'd68, 8'd69 : begin
+            R_pixel_reg1 = ((R_shift_L4 - 1'd1) >> 3) + ((R_shift_L4 - 1'd1) >> 3); // *15/10
+            G_pixel_reg1 = ((G_shift_L4 - 1'd1) >> 3) + ((G_shift_L4 - 1'd1) >> 3);
+            B_pixel_reg1 = ((B_shift_L4 - 1'd1) >> 3) + ((B_shift_L4 - 1'd1) >> 3);
+        end
+        8'd70, 8'd71, 8'd72, 8'd73, 8'd74 : begin
+            R_pixel_reg1 = ((R_shift_L3 + R_shift_L2 + R_shift_L1) >> 3) + ((R_shift_L3 + R_shift_L2 + R_shift_L1) >> 1); // *14/10
+            G_pixel_reg1 = ((G_shift_L3 + G_shift_L2 + G_shift_L1) >> 3) + ((G_shift_L3 + G_shift_L2 + G_shift_L1) >> 1);
+            B_pixel_reg1 = ((B_shift_L3 + B_shift_L2 + B_shift_L1) >> 3) + ((B_shift_L3 + B_shift_L2 + B_shift_L1) >> 1);
+        end
+        8'd75, 8'd76, 8'd77, 8'd78, 8'd79 : begin
+            R_pixel_reg1 = ((R_shift_L3 + R_shift_L2 + R_AsubR) >> 3) + ((R_shift_L3 + R_shift_L2 + R_AsubR) >> 1); // *13/10
+            G_pixel_reg1 = ((G_shift_L3 + G_shift_L2 + G_AsubR) >> 3) + ((G_shift_L3 + G_shift_L2 + G_AsubR) >> 1);
+            B_pixel_reg1 = ((B_shift_L3 + B_shift_L2 + B_AsubR) >> 3) + ((B_shift_L3 + B_shift_L2 + B_AsubR) >> 1);
+        end
+        8'd80, 8'd81, 8'd82, 8'd83, 8'd84 : begin
+            R_pixel_reg1 = ((R_shift_L3 + R_shift_L2) >> 3) + ((R_shift_L3 + R_shift_L2) >> 1); // *12/10
+            G_pixel_reg1 = ((G_shift_L3 + G_shift_L2) >> 3) + ((G_shift_L3 + G_shift_L2) >> 1);
+            B_pixel_reg1 = ((B_shift_L3 + B_shift_L2) >> 3) + ((B_shift_L3 + B_shift_L2) >> 1);
+        end
+        8'd85, 8'd86, 8'd87, 8'd88, 8'd89,
+        8'd90, 8'd91, 8'd92, 8'd93, 8'd94 : begin
+            R_pixel_reg1 = ((R_shift_L3 + R_shift_L1 + R_AsubR) >> 3) + ((R_shift_L3 + R_shift_L1 + R_AsubR) >> 1); // *11/10
+            G_pixel_reg1 = ((G_shift_L3 + G_shift_L1 + G_AsubR) >> 3) + ((G_shift_L3 + G_shift_L1 + G_AsubR) >> 1);
+            B_pixel_reg1 = ((B_shift_L3 + B_shift_L1 + B_AsubR) >> 3) + ((B_shift_L3 + B_shift_L1 + B_AsubR) >> 1);
+        end
+        8'd95, 8'd96, 8'd97, 8'd98, 8'd99, 8'd100 : begin
+            R_pixel_reg1 = R_AsubR;
+            G_pixel_reg1 = G_AsubR;
+            B_pixel_reg1 = B_AsubR;
+        end
+        default: begin
+            R_pixel_reg1 = R_AsubR;
+            G_pixel_reg1 = G_AsubR;
+            B_pixel_reg1 = B_AsubR;
+        end
+
+    endcase
+
+
+
+
     R_pixel_reg1 = 8'd255;
     G_pixel_reg1 = 8'd255;
     B_pixel_reg1 = 8'd255;
@@ -452,9 +560,9 @@ always @(posedge clk or posedge rst) begin
                     pixel_B = B_ram[pixel_index];
                 end
                 else begin
-                    pixel_R = R_pixel_reg1;
-                    pixel_G = G_pixel_reg1;
-                    pixel_B = B_pixel_reg1;
+                    pixel_R = 255 - R_pixel_reg1;
+                    pixel_G = 255 - G_pixel_reg1;
+                    pixel_B = 255 - B_pixel_reg1;
                 end
             end
         end
