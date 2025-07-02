@@ -16,7 +16,7 @@ reg     [2:0] min_counter;
 reg     [7:0] mask1[0:63];
 reg     [7:0] mask2[0:63];
 reg     [7:0] mask3[0:63];
-reg     [7:0] j_reg[0:35];  // dark channel
+reg     [7:0] j_reg[0:63];  // dark channel
 reg     [7:0] cal_reg[0:63];
 reg     [8:0] min_r1, min_r2, min_r3, min_r4, min_r5, min_r6, min_r7, min_r8;
 reg     [8:0] min_g1, min_g2, min_g3, min_g4, min_g5, min_g6, min_g7, min_g8;
