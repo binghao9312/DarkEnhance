@@ -170,9 +170,18 @@ end
 //================ combination ========================
 always @(*) begin
     mul4 = posY << 3; // calculate index
-    index0 = (posY == 1)? (posX - 1) : (mul4  + posX - 9); //posX - 1 - 8
-    index1 = (posY == 1)? (posX    ) : (mul4  + posX - 8); //posX     - 8
-    index2 = (posY == 1)? (posX + 1) : (mul4  + posX - 7); //posX + 1 - 8
+    if(now_state == data_out)begin
+        index0 = (mul4  + posX - 9); //posX - 1 - 8
+        index1 = (mul4  + posX - 8); //posX     - 8
+        index2 = (mul4  + posX - 7); //posX + 1 - 8
+    
+    end
+    else begin
+        index0 = (posY == 1)? (posX - 1) : (mul4  + posX - 9); //posX - 1 - 8
+        index1 = (posY == 1)? (posX    ) : (mul4  + posX - 8); //posX     - 8
+        index2 = (posY == 1)? (posX + 1) : (mul4  + posX - 7); //posX + 1 - 8
+    end
+    
     index3 = (mul4)  + posX - 1;
     index4 = (mul4)  + posX    ;
     index5 = (mul4)  + posX + 1;
@@ -488,12 +497,6 @@ always @(*) begin
     endcase
 
 
-
-
-    R_pixel_reg1 = 8'd255;
-    G_pixel_reg1 = 8'd255;
-    B_pixel_reg1 = 8'd255;
-    
     
     pixel_index = (posY << 3) + posX; // calculate pixel index
     
@@ -555,9 +558,9 @@ always @(posedge clk or posedge rst) begin
                 //boundary direct give original pixel
                 if( posX == 9'd0 || posY == 9'd0 ||
                     posX == 9'd7 || posY == 9'd7   )begin
-                    pixel_R = R_ram[pixel_index];
-                    pixel_G = G_ram[pixel_index];
-                    pixel_B = B_ram[pixel_index];
+                    pixel_R = 255 - R_ram[pixel_index];
+                    pixel_G = 255 - G_ram[pixel_index];
+                    pixel_B = 255 - B_ram[pixel_index];
                 end
                 else begin
                     pixel_R = 255 - R_pixel_reg1;
