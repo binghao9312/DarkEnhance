@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-
+//64 bit
 module testbench;
     // 定義訊號
     reg clk;
