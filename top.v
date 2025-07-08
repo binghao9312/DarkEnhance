@@ -1,3 +1,4 @@
+//64 pixel
 module top (
     input clk,rst,
     output reg[7:0] pixel_R,
