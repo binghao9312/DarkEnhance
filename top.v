@@ -1,23 +1,14 @@
-module LLB (
-    input               clk,rst,
-    input               ENABLE,
-
-    input       [7:0]   In_pixel_R,
-    input       [7:0]   In_pixel_G,
-    input       [7:0]   In_pixel_B,
-
-    output reg  [7:0]   In_addr,
-    output reg  [7:0]   Out_addr,
-    output reg  [7:0]   Out_pixel_R,
-    output reg  [7:0]   Out_pixel_G,
-    output reg  [7:0]   Out_pixel_B,
-    output reg          busy,
-    output reg          done,
+//64 pixel
+module top (
+    input clk,rst,
+    output reg[7:0] pixel_R,
+    output reg[7:0] pixel_G,
+    output reg[7:0] pixel_B,
+    output reg done
 );
-
-
 //================ wire ========================
-wire    [7:0]   sub_R1, sub_G1, sub_B1;
+wire    [7:0] sub_R1, sub_G1, sub_B1;
+
 
 //================ reg  ========================
 reg     [7:0] index0,index1,index2,index3,index4,index5,index6,index7,index8;
@@ -47,11 +38,8 @@ reg     [14:0] R_shift_L2,G_shift_L2,B_shift_L2;
 reg     [14:0] R_shift_L3,G_shift_L3,B_shift_L3;
 reg     [14:0] R_shift_L4,G_shift_L4,B_shift_L4;
 
-
-
-
 //================ parameter ========================
-parameter [3:0] //process state    
+parameter [3:0] //statement    
                 IDLE            = 4'd0,
                 Masking         = 4'd1,
                 find_min        = 4'd2, 
@@ -63,32 +51,12 @@ parameter [3:0] //process state
                 //num
                 img_width_sub2  = 8'd6;
 
-
-//================ enable ========================
-reg             enable;
-
-always @(posedge clk or posedge rst) begin
-    if (rst) begin
-        enable <= 1'd0;
-    end 
-    else begin
-        enable <= ENABLE;
-    end
-end
-
-
 //================ State Machine ========================
 always @(posedge clk or posedge rst) begin
     if (rst) begin
-        now_state <= IDLE; // Initial state
-    end 
-    else begin
-        if(enable) begin
-            now_state <= next_state;
-        end
-        else begin
-            now_state <= now_state; // Maintain current state
-        end
+        now_state <= 4'd0; // Initial state
+    end else begin
+        now_state <= next_state;
     end
 end
 
@@ -105,7 +73,6 @@ always @(*) begin
         default:        next_state = IDLE; // Default case
     endcase
 end
-
 //================ x y shift ========================
 always @(posedge clk or posedge rst) begin
     if (rst) begin
@@ -114,63 +81,55 @@ always @(posedge clk or posedge rst) begin
         mask_end <= 1'b0;
     end 
     else begin
-        if(enable) begin
-            if(now_state == POS_RESET || now_state == POS_RESET2)begin
-                posX <= 7'b1;
-                posY <= 7'b1;
+        if(now_state == POS_RESET)begin
+            posX <= 7'b1;
+            posY <= 7'b1;
+        end
+        else if(now_state == POS_RESET2)begin
+            posX <= 7'b0;
+            posY <= 7'b0;
+        end    
+        else if(now_state == data_out)begin
+            if (posY == 7'd7 && posX == 7'd7) begin
+                posY     <= 7'b1;
+                posX     <= 7'b1;     
             end
-            else if(now_state == POS_RESET2)begin
+            else if (posX == 7'd7) begin
                 posX <= 7'b0;
-                posY <= 7'b0;
-            end    
-            else if(now_state == data_out)begin
-                if (posY == 7'd7 && posX == 7'd7) begin
-                    posY     <= 7'b1;
-                    posX     <= 7'b1;     
-                end
-                else if (posX == 7'd7) begin
-                    posX <= 7'b0;
-                    posY <= posY + 1'd1;
-                end
-                else begin
-                    posX <= posX + 1'b1;
-                end
-            end
-            else if(now_state == Masking || now_state == calculate)begin
-                if (posY == 7'd6 && posX == 7'd6) begin
-                    posY     <= 7'b1;
-                    posX     <= 7'b1;
-                    mask_end <= 1'b1;     
-                end
-                else if (posX == 7'd6) begin
-                    posX <= 7'b1;
-                    posY <= posY + 1'd1;
-                end
-                else begin
-                    posX <= posX + 1'b1;
-                end
-            end
-            
-            else if(now_state == find_min)begin
-                posX     <= posX;
-                posY     <= posY;
-                mask_end <= 1'b0;
+                posY <= posY + 1'd1;
             end
             else begin
-                posX     <= posX;
-                posY     <= posY;
-                mask_end <= 1'b0;
+                posX <= posX + 1'b1;
             end
-        end 
+        end
+        else if(now_state == Masking || now_state == calculate)begin
+            if (posY == 7'd6 && posX == 7'd6) begin
+                posY     <= 7'b1;
+                posX     <= 7'b1;
+                mask_end <= 1'b1;     
+            end
+            else if (posX == 7'd6) begin
+                posX <= 7'b1;
+                posY <= posY + 1'd1;
+            end
+            else begin
+                posX <= posX + 1'b1;
+            end
+        end
+        
+        else if(now_state == find_min)begin
+            posX     <= posX;
+            posY     <= posY;
+            mask_end <= 1'b0;
+        end
         else begin
             posX     <= posX;
             posY     <= posY;
-            mask_end <= mask_end;
+            mask_end <= 1'b0;
         end
-    end
+    end 
+    
 end
-
-
 //================ RAM ========================
 reg [7:0] R_ram[0:63];   //PIXEL NEED PARAMETER
 reg [7:0] G_ram[0:63]; 
@@ -192,7 +151,7 @@ always @(posedge clk or posedge rst) begin
         min_ready   <= 1'd0;
         min_counter <= 3'd1;
     end 
-    else if(enable) begin
+    else begin
         if(now_state == find_min) begin
             if(min_counter == 3'd1) begin
                 min_ready   <= 1'd1;
@@ -206,10 +165,6 @@ always @(posedge clk or posedge rst) begin
             min_ready   <= 1'd0;
             min_counter <= 3'd0;
         end
-    end
-    else begin
-        min_ready   <= min_ready;
-        min_counter <= min_counter;
     end
 end
 
@@ -227,6 +182,7 @@ always @(*) begin
         index1 = (posY == 1)? (posX    ) : (mul4  + posX - 8); //posX     - 8
         index2 = (posY == 1)? (posX + 1) : (mul4  + posX - 7); //posX + 1 - 8
     end
+    
     index3 = (mul4)  + posX - 1;
     index4 = (mul4)  + posX    ;
     index5 = (mul4)  + posX + 1;
@@ -316,9 +272,10 @@ always @(*) begin
     
     min1 = (min_r8 < min_g8) ? min_r8 : min_g8;
     min2 = (min_b8 < min1) ? min_b8 : min1;
+    
+    
+
 end
-
-
 //================ transmission rate calculation ================
 always @(*) begin  
     if(now_state == IDLE)begin
@@ -328,8 +285,9 @@ always @(*) begin
         div2    = 11'dz;    
     end
     //w = 0.75
+    j_value = j_reg[index4]; 
     if(now_state == calculate)begin
-        j_value = j_reg[index4]; 
+        
         
         case(j_reg[index4])    
             8'd0 , 8'd1 , 8'd2 , 8'd3           :t_ans = 25;
@@ -457,6 +415,8 @@ always @(*) begin
     B_shift_L3 = (B_AsubR << 3);
     B_shift_L4 = (B_AsubR << 4);
     
+    
+
     case(cal_reg[index4])
         8'd25, 8'd26, 8'd27, 8'd28, 8'd29 : begin
             R_pixel_reg1 = R_shift_L4; // *4
@@ -536,6 +496,8 @@ always @(*) begin
         end
 
     endcase
+
+
     
     pixel_index = (posY << 3) + posX; // calculate pixel index
     
@@ -549,19 +511,13 @@ always @(posedge clk or posedge rst) begin
         end
         j_counter = 11'd0;
     end 
-    else if(enable) begin 
+    else begin 
         if(now_state == find_min) begin
             j_reg[index4] <= min2;
         end
         else begin
             j_counter <= j_counter;
         end
-    end
-    else begin
-        for (x = 0; x < 64; x = x + 1) begin
-            j_reg[x] <= j_reg[x];
-        end
-        j_counter <= j_counter;
     end
 end
 //================ cal_reg_save data ======================
@@ -572,7 +528,7 @@ always @(posedge clk or posedge rst) begin
             cal_reg[x] <= 8'b0;
         end
     end 
-    else if(enable) begin
+    else begin
         if (now_state == calculate) begin
             if(posX == 7'd6 && posY == 7'd6) begin
                 cal_end <= 1'b1;
@@ -586,89 +542,40 @@ always @(posedge clk or posedge rst) begin
             cal_reg[0] <= cal_reg[0];
         end
     end
-    else begin
-        cal_end <= cal_end;
-        for (x = 0; x < 64; x = x + 1) begin
-            cal_reg[x] <= cal_reg[x];
-        end
-    end
 end
 
-//================ state flag ======================
+//================ outputing data ======================
 always @(posedge clk or posedge rst) begin
     if (rst) begin
         done <= 1'b0;
-        busy <= 1'b0;
     end 
-    else if(enable)begin
+    else begin
         if (now_state == data_out) begin
             if(posX == 9'd7 && posY == 9'd7)begin
                 done <= 1'b1;
-                busy <= 1'b0;
             end
             else begin
                 done <= 1'b0;
-                busy <= 1'b1;
                 //boundary direct give original pixel
-                // if( posX == 9'd0 || posY == 9'd0 ||
-                //     posX == 9'd7 || posY == 9'd7   )begin
-                //     pixel_R = R_ram[pixel_index];
-                //     pixel_G = G_ram[pixel_index];
-                //     pixel_B = B_ram[pixel_index];
-                // end
-                // else begin
-                //     pixel_R = R_pixel_reg1;
-                //     pixel_G = G_pixel_reg1;
-                //     pixel_B = B_pixel_reg1;
-                // end
+                if( posX == 9'd0 || posY == 9'd0 ||
+                    posX == 9'd7 || posY == 9'd7   )begin
+                    pixel_R = 255 - R_ram[pixel_index];
+                    pixel_G = 255 - G_ram[pixel_index];
+                    pixel_B = 255 - B_ram[pixel_index];
+                end
+                else begin
+                    pixel_R = 255 - R_pixel_reg1;
+                    pixel_G = 255 - G_pixel_reg1;
+                    pixel_B = 255 - B_pixel_reg1;
+                end
             end
         end
-        // else begin
-        //     done <= 1'b0;
-        //     busy <= 1'b1;
-        //     pixel_R <= 8'dz;
-        //     pixel_G <= 8'dz;
-        //     pixel_B <= 8'dz;
-        // end
-    end
-    else begin
-        done <= 1'b0;
-        busy <= 1'b0;
-        // pixel_R <= 8'dz;
-        // pixel_G <= 8'dz;
-        // pixel_B <= 8'dz;
-    end
-end
-
-//================ output data ======================
-always@(posedge clk or posedge rst) begin
-    if (rst) begin
-        Out_addr   <= 8'b0;
-        Out_pixel_R <= 8'bz;
-        Out_pixel_G <= 8'bz;
-        Out_pixel_B <= 8'bz;
-    end 
-    else if(enable)begin
-        if(now_state == data_out && posX != 9'd7 && posY != 9'd7) begin
-            Out_addr   <= pixel_index;
-            if( posX == 9'd0 || posY == 9'd0 ||
-                posX == 9'd7 || posY == 9'd7   )begin
-                Out_pixel_R = R_ram[pixel_index];
-                Out_pixel_G = G_ram[pixel_index];
-                Out_pixel_B = B_ram[pixel_index];
-            end
-            else begin
-                Out_pixel_R = R_pixel_reg1;
-                Out_pixel_G = G_pixel_reg1;
-                Out_pixel_B = B_pixel_reg1;
-            end
+        else begin
+            done <= 1'b0;
+            pixel_R <= 8'dz;
+            pixel_G <= 8'dz;
+            pixel_B <= 8'dz;
         end
-    end
-    else begin
-        Out_addr   <= 8'b0;
-        Out_pixel_R <= 8'bz;
-        Out_pixel_G <= 8'bz;
-        Out_pixel_B <= 8'bz;
     end
 end
 
