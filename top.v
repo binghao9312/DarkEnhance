@@ -1,29 +1,48 @@
-//64 pixel
+//upgrade to 512*512
 module top (
     input clk,rst,
+    input [7:0] pixel_in_R,
+    input [7:0] pixel_in_G,
+    input [7:0] pixel_in_B,
     output reg[7:0] pixel_R,
     output reg[7:0] pixel_G,
     output reg[7:0] pixel_B,
-    output reg done
+    output reg addr,done,RW_bar
 );
-//================ wire ========================
-wire    [7:0] sub_R1, sub_G1, sub_B1;
 
 
+//================ parameter ========================
+parameter [3:0] //statement    
+                IDLE            = 4'd0,
+                Load_data       = 4'd8,
+                Masking         = 4'd1,
+                find_min        = 4'd2, 
+                calculate       = 4'd3,
+                POS_RESET       = 4'd4,
+                POS_RESET2      = 4'd5,
+                data_out        = 4'd6,
+                delayOneCycle   = 4'd7,
+                //num
+                image_width     = 9'd512, // 512 - 4
+                image_width_sub2  = 9'd510;
+                image_width_sub1  = 9'd511; 
+                image_size      = 19'd262144; // 512 * 512 = 262144
+                image_size_sub1 = 19'd262143; // 512 * 512 - 1 = 262143
 //================ reg  ========================
 reg     [7:0] index0,index1,index2,index3,index4,index5,index6,index7,index8;
 reg           min_ready,mask_end,cal_end;
 reg     [2:0] min_counter;
-reg     [7:0] mask1[0:63];
-reg     [7:0] mask2[0:63];
-reg     [7:0] mask3[0:63];
-reg     [7:0] j_reg[0:63];  // dark channel
-reg     [7:0] cal_reg[0:63];
+reg     [7:0] mask1[0:8];
+reg     [7:0] mask2[0:8];
+reg     [7:0] mask3[0:8];
+reg     [7:0] j_reg[0:image_size_sub1];  // dark channel
+reg     [7:0] cal_reg[0:image_size_sub1];
 reg     [8:0] min_r1, min_r2, min_r3, min_r4, min_r5, min_r6, min_r7, min_r8;
 reg     [8:0] min_g1, min_g2, min_g3, min_g4, min_g5, min_g6, min_g7, min_g8;
 reg     [8:0] min_b1, min_b2, min_b3, min_b4, min_b5, min_b6, min_b7, min_b8;
 reg     [8:0] min1, min2, j_value;
-reg     [8:0] posX,posY,R_AsubR,G_AsubR,B_AsubR;
+reg     [20:0] posX,posY,
+reg     [10:0] R_AsubR,G_AsubR,B_AsubR;
 reg     [8:0] t_ans;
 reg     [10:0] div1,div2,mul1,check1_mul1,mul2,mul3,mul4;
 reg     [3:0] div_index;
@@ -38,18 +57,7 @@ reg     [14:0] R_shift_L2,G_shift_L2,B_shift_L2;
 reg     [14:0] R_shift_L3,G_shift_L3,B_shift_L3;
 reg     [14:0] R_shift_L4,G_shift_L4,B_shift_L4;
 
-//================ parameter ========================
-parameter [3:0] //statement    
-                IDLE            = 4'd0,
-                Masking         = 4'd1,
-                find_min        = 4'd2, 
-                calculate       = 4'd3,
-                POS_RESET       = 4'd4,
-                POS_RESET2      = 4'd5,
-                data_out        = 4'd6,
-                delayOneCycle   = 4'd7,
-                //num
-                img_width_sub2  = 8'd6;
+
 
 //================ State Machine ========================
 always @(posedge clk or posedge rst) begin
@@ -62,22 +70,23 @@ end
 
 always @(*) begin
     case (now_state)
-        IDLE:           next_state = Masking; 
+        IDLE:           next_state = Load_data; 
+        Load_data:      next_state = (posX == image_width_sub1 && posY == image_width_sub1)? Load_data : Masking; // Load data state
         Masking:        next_state = find_min; 
-        find_min:       next_state = (posX == img_width_sub2 && posY == img_width_sub2)? delayOneCycle : Masking;//(min_ready == 1'b1) ? find_min   : Masking; 
+        find_min:       next_state = (posX == image_width_sub2 && posY == image_width_sub2)? delayOneCycle : Masking;//(min_ready == 1'b1) ? find_min   : Masking; 
         delayOneCycle:  next_state = POS_RESET;
         POS_RESET:      next_state = calculate;
-        calculate:      next_state = (posX == img_width_sub2 && posY == img_width_sub2)? POS_RESET2 : calculate;
+        calculate:      next_state = (posX == image_width_sub2 && posY == image_width_sub2)? POS_RESET2 : calculate;
         POS_RESET2:     next_state = data_out; 
-        data_out:       next_state = (posX == img_width_sub2 + 1 && posY == img_width_sub2 + 1)?  IDLE: data_out;
+        data_out:       next_state = (posX == image_width_sub2 + 1 && posY == image_width_sub2 + 1)?  IDLE: data_out;
         default:        next_state = IDLE; // Default case
     endcase
 end
 //================ x y shift ========================
 always @(posedge clk or posedge rst) begin
     if (rst) begin
-        posX     <= 7'b1;
-        posY     <= 7'b1;
+        posX     <= 7'b0;
+        posY     <= 7'b0;
         mask_end <= 1'b0;
     end 
     else begin
@@ -89,8 +98,8 @@ always @(posedge clk or posedge rst) begin
             posX <= 7'b0;
             posY <= 7'b0;
         end    
-        else if(now_state == data_out)begin
-            if (posY == 7'd7 && posX == 7'd7) begin
+        else if(now_state == data_out || now_state == Load_data)begin
+            if (posY == image_width_sub1 && posX == image_width_sub1) begin
                 posY     <= 7'b1;
                 posX     <= 7'b1;     
             end
@@ -102,8 +111,9 @@ always @(posedge clk or posedge rst) begin
                 posX <= posX + 1'b1;
             end
         end
+        // have bound 
         else if(now_state == Masking || now_state == calculate)begin
-            if (posY == 7'd6 && posX == 7'd6) begin
+            if (posY == image_width_sub2 && posX == image_width_sub2) begin
                 posY     <= 7'b1;
                 posX     <= 7'b1;
                 mask_end <= 1'b1;     
@@ -131,18 +141,24 @@ always @(posedge clk or posedge rst) begin
     
 end
 //================ RAM ========================
-reg [7:0] R_ram[0:63];   //PIXEL NEED PARAMETER
-reg [7:0] G_ram[0:63]; 
-reg [7:0] B_ram[0:63]; 
+reg [7:0] R_ram[0:262144];   //PIXEL NEED PARAMETER
+reg [7:0] G_ram[0:262144]; 
+reg [7:0] B_ram[0:262144]; 
 integer x, y;
-initial begin
-    // Initialize RAM with some values
-    for (x = 0; x < 8; x = x + 1) begin
-        for (y = 0; y < 8; y = y + 1) begin
-            R_ram[y * 8 + x] = 8'd255 - (y * 8 + x); 
-            G_ram[y * 8 + x] = 8'd255 - (y * 8 + x);
-            B_ram[y * 8 + x] = 8'd255 - (y * 8 + x);
+always @(posedge clk or posedge rst) begin
+    if (rst) begin
+        for (x = 0; x < 512; x = x + 1) begin
+            for (y = 0; y < 512; y = y + 1) begin
+                R_ram[(y << 9) + x] <= 8'd0;
+                G_ram[(y << 9) + x] <= 8'd0;
+                B_ram[(y << 9) + x] <= 8'd0;
+            end
         end
+    end 
+    else if(now_state == Load_data) begin
+        R_ram[(y << 9) + posX] <= 255 - pixel_in_R;
+        G_ram[(y << 9) + posX] <= 255 - pixel_in_G;
+        B_ram[(y << 9) + posX] <= 255 - pixel_in_B;
     end
 end
 //================ find min delay========================
@@ -170,29 +186,29 @@ end
 
 //================ combination ========================
 always @(*) begin
-    mul4 = posY << 3; // calculate index
+    mul4 = posY << 9; // calculate index
     if(now_state == data_out)begin
-        index0 = (mul4  + posX - 9); //posX - 1 - 8
-        index1 = (mul4  + posX - 8); //posX     - 8
-        index2 = (mul4  + posX - 7); //posX + 1 - 8
+        index0 = (mul4  + posX - image_width + 1); //posX - 1 - 512
+        index1 = (mul4  + posX - image_width); //posX     - 512
+        index2 = (mul4  + posX - image_width + 1); //posX + 1 - 512
     
     end
     else begin
-        index0 = (posY == 1)? (posX - 1) : (mul4  + posX - 9); //posX - 1 - 8
-        index1 = (posY == 1)? (posX    ) : (mul4  + posX - 8); //posX     - 8
-        index2 = (posY == 1)? (posX + 1) : (mul4  + posX - 7); //posX + 1 - 8
+        index0 = (posY == 1)? (posX - 1) : (mul4  + posX - image_width - 1); //posX - 1 - 512
+        index1 = (posY == 1)? (posX    ) : (mul4  + posX - image_width); //posX     - 512
+        index2 = (posY == 1)? (posX + 1) : (mul4  + posX - image_width + 1); //posX + 1 - 512
     end
     
     index3 = (mul4)  + posX - 1;
     index4 = (mul4)  + posX    ;
     index5 = (mul4)  + posX + 1;
-    index6 = (mul4)  + posX + 7; //posX - 1 + 8
-    index7 = (mul4)  + posX + 8; //posX     + 8
-    index8 = (mul4)  + posX + 9; //posX + 1 + 8
+    index6 = (mul4)  + posX + image_width - 1; //posX - 1 + 512
+    index7 = (mul4)  + posX + image_width; //posX     + 512
+    index8 = (mul4)  + posX + image_width + 1; //posX + 1 + 512
 
     case (now_state)
         IDLE: begin
-            for (x = 0; x < 63; x = x + 1) begin
+            for (x = 0; x < 9; x = x + 1) begin
                 mask1[x] = 8'b0;
                 mask2[x] = 8'b0;
                 mask3[x] = 8'b0;
@@ -416,7 +432,6 @@ always @(*) begin
     B_shift_L4 = (B_AsubR << 4);
     
     
-
     case(cal_reg[index4])
         8'd25, 8'd26, 8'd27, 8'd28, 8'd29 : begin
             R_pixel_reg1 = R_shift_L4; // *4
@@ -499,14 +514,14 @@ always @(*) begin
 
 
     
-    pixel_index = (posY << 3) + posX; // calculate pixel index
+    pixel_index = (posY << 9) + posX; // calculate pixel index
     
 end
 
 //================ j_reg_save data ======================
 always @(posedge clk or posedge rst) begin
     if (rst) begin
-        for (x = 0; x < 64; x = x + 1) begin
+        for (x = 0; x < image_size; x = x + 1) begin
             j_reg[x] <= 8'b0;
         end
         j_counter = 11'd0;
@@ -524,13 +539,13 @@ end
 always @(posedge clk or posedge rst) begin
     if (rst || (now_state == IDLE) ) begin
         cal_end     <= 1'b0;   
-        for (x = 0; x < 64; x = x + 1) begin
+        for (x = 0; x < image_size; x = x + 1) begin
             cal_reg[x] <= 8'b0;
         end
     end 
     else begin
         if (now_state == calculate) begin
-            if(posX == 7'd6 && posY == 7'd6) begin
+            if(posX == image_width_sub2 && posY == image_width_sub2) begin
                 cal_end <= 1'b1;
             end
             else begin
@@ -551,14 +566,14 @@ always @(posedge clk or posedge rst) begin
     end 
     else begin
         if (now_state == data_out) begin
-            if(posX == 9'd7 && posY == 9'd7)begin
+            if(posX == image_width_sub1 && posY == image_width_sub1)begin
                 done <= 1'b1;
             end
             else begin
                 done <= 1'b0;
                 //boundary direct give original pixel
                 if( posX == 9'd0 || posY == 9'd0 ||
-                    posX == 9'd7 || posY == 9'd7   )begin
+                    posX == image_width_sub1 || posY == image_width_sub1)begin
                     pixel_R = 255 - R_ram[pixel_index];
                     pixel_G = 255 - G_ram[pixel_index];
                     pixel_B = 255 - B_ram[pixel_index];
