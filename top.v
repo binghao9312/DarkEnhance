@@ -7,7 +7,7 @@ module top (
     output reg[7:0] pixel_R,
     output reg[7:0] pixel_G,
     output reg[7:0] pixel_B,
-    output reg addr,done,RW_bar
+    output reg done
 );
 
 
