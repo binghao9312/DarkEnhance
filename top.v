@@ -70,7 +70,8 @@ end
 
 always @(*) begin
     case (now_state)
-        IDLE:           next_state = Masking; 
+        IDLE:           next_state = Load_data; 
+        Load_data:      next_state = (posX == image_width_sub1 && posY == image_width_sub1)? Load_data : Masking; // Load data state
         Masking:        next_state = find_min; 
         find_min:       next_state = (posX == image_width_sub2 && posY == image_width_sub2)? delayOneCycle : Masking;//(min_ready == 1'b1) ? find_min   : Masking; 
         delayOneCycle:  next_state = POS_RESET;
@@ -572,7 +573,7 @@ always @(posedge clk or posedge rst) begin
                 done <= 1'b0;
                 //boundary direct give original pixel
                 if( posX == 9'd0 || posY == 9'd0 ||
-                    posX == 9'd7 || posY == 9'd7   )begin
+                    posX == image_width_sub1 || posY == image_width_sub1)begin
                     pixel_R = 255 - R_ram[pixel_index];
                     pixel_G = 255 - G_ram[pixel_index];
                     pixel_B = 255 - B_ram[pixel_index];
