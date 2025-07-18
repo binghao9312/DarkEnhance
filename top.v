@@ -70,15 +70,14 @@ end
 
 always @(*) begin
     case (now_state)
-        IDLE:           next_state = Load_data; 
-        Load_data:      next_state = Masking; // Load data state
+        IDLE:           next_state = Masking; 
         Masking:        next_state = find_min; 
-        find_min:       next_state = (posX == img_width_sub2 && posY == img_width_sub2)? delayOneCycle : Masking;//(min_ready == 1'b1) ? find_min   : Masking; 
+        find_min:       next_state = (posX == image_width_sub2 && posY == image_width_sub2)? delayOneCycle : Masking;//(min_ready == 1'b1) ? find_min   : Masking; 
         delayOneCycle:  next_state = POS_RESET;
         POS_RESET:      next_state = calculate;
-        calculate:      next_state = (posX == img_width_sub2 && posY == img_width_sub2)? POS_RESET2 : calculate;
+        calculate:      next_state = (posX == image_width_sub2 && posY == image_width_sub2)? POS_RESET2 : calculate;
         POS_RESET2:     next_state = data_out; 
-        data_out:       next_state = (posX == img_width_sub2 + 1 && posY == img_width_sub2 + 1)?  IDLE: data_out;
+        data_out:       next_state = (posX == image_width_sub2 + 1 && posY == image_width_sub2 + 1)?  IDLE: data_out;
         default:        next_state = IDLE; // Default case
     endcase
 end
@@ -432,7 +431,6 @@ always @(*) begin
     B_shift_L4 = (B_AsubR << 4);
     
     
-
     case(cal_reg[index4])
         8'd25, 8'd26, 8'd27, 8'd28, 8'd29 : begin
             R_pixel_reg1 = R_shift_L4; // *4
@@ -515,14 +513,14 @@ always @(*) begin
 
 
     
-    pixel_index = (posY << 3) + posX; // calculate pixel index
+    pixel_index = (posY << 9) + posX; // calculate pixel index
     
 end
 
 //================ j_reg_save data ======================
 always @(posedge clk or posedge rst) begin
     if (rst) begin
-        for (x = 0; x < 64; x = x + 1) begin
+        for (x = 0; x < image_size; x = x + 1) begin
             j_reg[x] <= 8'b0;
         end
         j_counter = 11'd0;
@@ -540,13 +538,13 @@ end
 always @(posedge clk or posedge rst) begin
     if (rst || (now_state == IDLE) ) begin
         cal_end     <= 1'b0;   
-        for (x = 0; x < 64; x = x + 1) begin
+        for (x = 0; x < image_size; x = x + 1) begin
             cal_reg[x] <= 8'b0;
         end
     end 
     else begin
         if (now_state == calculate) begin
-            if(posX == 7'd6 && posY == 7'd6) begin
+            if(posX == image_width_sub2 && posY == image_width_sub2) begin
                 cal_end <= 1'b1;
             end
             else begin
@@ -567,14 +565,14 @@ always @(posedge clk or posedge rst) begin
     end 
     else begin
         if (now_state == data_out) begin
-            if(posX == 9'd7 && posY == 9'd7)begin
+            if(posX == image_width_sub1 && posY == image_width_sub1)begin
                 done <= 1'b1;
             end
             else begin
                 done <= 1'b0;
                 //boundary direct give original pixel
                 if( posX == 9'd0 || posY == 9'd0 ||
-                    posX == 9'd511 || posY == 9'd511   )begin
+                    posX == 9'd7 || posY == 9'd7   )begin
                     pixel_R = 255 - R_ram[pixel_index];
                     pixel_G = 255 - G_ram[pixel_index];
                     pixel_B = 255 - B_ram[pixel_index];
