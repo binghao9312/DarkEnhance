@@ -1,18 +1,37 @@
 from PIL import Image
+import os
 
-# 1. 輸入圖片路徑
-img_path = 'input.jpg'  # 請改成你的圖片檔案名稱
+img_path = 'input.jpg'
 output_hex = 'output.hex'
+print("程式開始執行")
+print("檢查圖片檔案是否存在...")
+if not os.path.exists(img_path):
+    print(f"找不到圖片檔案: {img_path}")
+    exit(1)
 
-# 2. 讀取圖片
-img = Image.open(img_path)
+try:
+    img = Image.open(img_path)
+except Exception as e:
+    print(f"讀取圖片失敗: {e}")
+    print("找不到圖片檔案: input.jpg，程式即將結束")
+    exit(1)
+
+crop_size = 512
 width, height = img.size
-print(f'圖片寬度: {width}, 高度: {height}')
+if width < crop_size or height < crop_size:
+    print(f"圖片尺寸太小，無法裁切成 {crop_size}x{crop_size}")
+    exit(1)
 
-# 3. 轉成 RGB
+left = (width - crop_size) // 2
+top = (height - crop_size) // 2
+right = left + crop_size
+bottom = top + crop_size
+img = img.crop((left, top, right, bottom))
+width, height = img.size
+print(f'裁切後圖片寬度: {width}, 高度: {height}')
+
 img = img.convert('RGB')
 
-# 4. 依序取出每個 pixel，轉成 hex 字串
 hex_lines = []
 for y in range(height):
     for x in range(width):
@@ -20,9 +39,11 @@ for y in range(height):
         hex_str = '{:02X}{:02X}{:02X}'.format(r, g, b)
         hex_lines.append(hex_str)
 
-# 5. 輸出 .hex 檔，每行一個 pixel
-with open(output_hex, 'w') as f:
-    for line in hex_lines:
-        f.write(line + '\n')
-
-print(f'已產生 {output_hex} 檔案，共 {len(hex_lines)} 行')
+print("準備寫入 output.hex ...")
+try:
+    with open(output_hex, 'w') as f:
+        for line in hex_lines:
+            f.write(line + '\n')
+    print(f'已產生 {output_hex} 檔案，共 {len(hex_lines)} 行')
+except Exception as e:
+    print(f"寫入檔案失敗: {e}")
