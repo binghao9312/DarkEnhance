@@ -7,7 +7,7 @@ module top (
     output reg[7:0] pixel_R,
     output reg[7:0] pixel_G,
     output reg[7:0] pixel_B,
-    output reg done
+    output reg done,RW_bar
 );
 
 
@@ -24,12 +24,12 @@ parameter [3:0] //statement
                 delayOneCycle   = 4'd7,
                 //num
                 image_width     = 9'd512, // 512 - 4
-                image_width_sub2  = 9'd510;
-                image_width_sub1  = 9'd511; 
-                image_size      = 19'd262144; // 512 * 512 = 262144
+                image_width_sub2  = 9'd510,
+                image_width_sub1  = 9'd511, 
+                image_size      = 19'd262144, // 512 * 512 = 262144
                 image_size_sub1 = 19'd262143; // 512 * 512 - 1 = 262143
 //================ reg  ========================
-reg     [7:0] index0,index1,index2,index3,index4,index5,index6,index7,index8;
+reg     [20:0] index0,index1,index2,index3,index4,index5,index6,index7,index8;
 reg           min_ready,mask_end,cal_end;
 reg     [2:0] min_counter;
 reg     [7:0] mask1[0:8];
@@ -41,7 +41,7 @@ reg     [8:0] min_r1, min_r2, min_r3, min_r4, min_r5, min_r6, min_r7, min_r8;
 reg     [8:0] min_g1, min_g2, min_g3, min_g4, min_g5, min_g6, min_g7, min_g8;
 reg     [8:0] min_b1, min_b2, min_b3, min_b4, min_b5, min_b6, min_b7, min_b8;
 reg     [8:0] min1, min2, j_value;
-reg     [20:0] posX,posY,
+reg     [20:0] posX,posY;
 reg     [10:0] R_AsubR,G_AsubR,B_AsubR;
 reg     [8:0] t_ans;
 reg     [10:0] div1,div2,mul1,check1_mul1,mul2,mul3,mul4;
@@ -71,7 +71,7 @@ end
 always @(*) begin
     case (now_state)
         IDLE:           next_state = Load_data; 
-        Load_data:      next_state = (posX == image_width_sub1 && posY == image_width_sub1)? Load_data : Masking; // Load data state
+        Load_data:      next_state = (posX == image_width_sub1 && posY == image_width_sub1)? Masking : Load_data; // Load data state
         Masking:        next_state = find_min; 
         find_min:       next_state = (posX == image_width_sub2 && posY == image_width_sub2)? delayOneCycle : Masking;//(min_ready == 1'b1) ? find_min   : Masking; 
         delayOneCycle:  next_state = POS_RESET;
@@ -82,6 +82,18 @@ always @(*) begin
         default:        next_state = IDLE; // Default case
     endcase
 end
+
+//=============== RW bar ============================
+always @(posedge clk or posedge rst)begin
+    if(rst)begin
+        RW_bar <= 1'd1;
+    end
+    else begin
+        RW_bar <= 1'd1;
+    end
+end
+
+
 //================ x y shift ========================
 always @(posedge clk or posedge rst) begin
     if (rst) begin
