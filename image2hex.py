@@ -3,8 +3,6 @@ import os
 
 img_path = 'input.jpg'
 output_hex = 'output.hex'
-print("程式開始執行")
-print("檢查圖片檔案是否存在...")
 if not os.path.exists(img_path):
     print(f"找不到圖片檔案: {img_path}")
     exit(1)

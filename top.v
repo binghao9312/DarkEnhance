@@ -115,7 +115,7 @@ always @(posedge clk or posedge rst) begin
                 posY     <= 7'b1;
                 posX     <= 7'b1;     
             end
-            else if (posX == 7'd7) begin
+            else if (posX == image_width_sub1) begin
                 posX <= 7'b0;
                 posY <= posY + 1'd1;
             end
@@ -130,7 +130,7 @@ always @(posedge clk or posedge rst) begin
                 posX     <= 7'b1;
                 mask_end <= 1'b1;     
             end
-            else if (posX == 7'd6) begin
+            else if (posX == image_width_sub2) begin
                 posX <= 7'b1;
                 posY <= posY + 1'd1;
             end

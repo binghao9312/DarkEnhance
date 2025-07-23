@@ -1,10 +1,10 @@
 `timescale 1ns/1ps
-//512*512
+//64 bit
 module testbench;
     // 定義訊號
     reg clk;
     reg rst;
-    wire RW_bar;
+    reg RW_bar;
     wire [7:0] pixel_R;
     wire [7:0] pixel_G;
     wire [7:0] pixel_B;
@@ -64,7 +64,7 @@ module testbench;
         .pixel_G(pixel_G),
         .pixel_B(pixel_B),
         .done(done),
-        .RW_bar(RW_bar)
+        .RW_bar(RW_bar);
     );
 
 endmodule
