@@ -29,7 +29,7 @@ parameter [3:0] //statement
                 image_size      = 19'd262144, // 512 * 512 = 262144
                 image_size_sub1 = 19'd262143; // 512 * 512 - 1 = 262143
 //================ reg  ========================
-reg     [9:0] index0,index1,index2,index3,index4,index5,index6,index7,index8;
+reg     [20:0] index0,index1,index2,index3,index4,index5,index6,index7,index8;
 reg           min_ready,mask_end,cal_end;
 reg     [2:0] min_counter;
 reg     [7:0] mask1[0:8];
@@ -202,13 +202,13 @@ always @(posedge clk or posedge rst) begin
 end
 
 //================ combination ========================
+
 always @(*) begin
     mul4 = posY << 9; // calculate index
     if(now_state == data_out)begin
         index0 = (mul4  + posX - 511); //posX - 1 - 512
         index1 = (mul4  + posX - 512); //posX     - 512
         index2 = (mul4  + posX - 513); //posX + 1 - 512
-    
     end
     else begin
         index0 = (posY == 1)? (posX - 1) : (mul4  + posX - 511); //posX - 1 - 512
