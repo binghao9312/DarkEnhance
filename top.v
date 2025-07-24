@@ -44,7 +44,7 @@ reg     [8:0] min1, min2, j_value;
 reg     [11:0] posX,posY;
 reg     [10:0] R_AsubR,G_AsubR,B_AsubR;
 reg     [8:0] t_ans;
-reg     [10:0] div1,div2,mul1,check1_mul1,mul2,mul3,mul4;
+reg     [20:0] div1,div2,mul1,check1_mul1,mul2,mul3,mul4;
 reg     [3:0] div_index;
 reg     [7:0] sub1;
 reg     [3:0] now_state, next_state;
@@ -73,12 +73,12 @@ always @(*) begin
         IDLE:           next_state = Load_data; 
         Load_data:      next_state = (posX == 9'd511 && posY == 9'd511)? Masking : Load_data; // Load data state
         Masking:        next_state = find_min; 
-        find_min:       next_state = (posX == 9'd512 && posY == 9'd512)? delayOneCycle : Masking;//(min_ready == 1'b1) ? find_min   : Masking; 
+        find_min:       next_state = (posX == 9'd510 && posY == 9'd510)? delayOneCycle : Masking;//(min_ready == 1'b1) ? find_min   : Masking; 
         delayOneCycle:  next_state = POS_RESET;
         POS_RESET:      next_state = calculate;
-        calculate:      next_state = (posX == 9'd512 && posY == 9'd512)? POS_RESET2 : calculate;
+        calculate:      next_state = (posX == 9'd510 && posY == 9'd510)? POS_RESET2 : calculate;
         POS_RESET2:     next_state = data_out; 
-        data_out:       next_state = (posX == 9'd512 + 1 && posY == 9'd512 + 1)?  IDLE: data_out;
+        data_out:       next_state = (posX == 9'd512 && posY == 9'd512)?  IDLE: data_out;
         default:        next_state = IDLE; // Default case
     endcase
 end
@@ -211,9 +211,9 @@ always @(*) begin
         index2 = (mul4  + posX - 513); //posX + 1 - 512
     end
     else begin
-        index0 = (posY == 1)? (posX - 1) : (mul4  + posX - 511); //posX - 1 - 512
+        index0 = (posY == 1)? (posX - 1) : (mul4  + posX - 513); //posX - 1 - 512
         index1 = (posY == 1)? (posX    ) : (mul4  + posX - 512); //posX     - 512
-        index2 = (posY == 1)? (posX + 1) : (mul4  + posX - 513); //posX + 1 - 512
+        index2 = (posY == 1)? (posX + 1) : (mul4  + posX - 511); //posX + 1 - 512
     end
     
     index3 = (mul4)  + posX - 1;
