@@ -29,7 +29,7 @@ parameter [3:0] //statement
                 image_size      = 19'd262144, // 512 * 512 = 262144
                 image_size_sub1 = 19'd262143; // 512 * 512 - 1 = 262143
 //================ reg  ========================
-reg     [20:0] index0,index1,index2,index3,index4,index5,index6,index7,index8;
+reg     [9:0] index0,index1,index2,index3,index4,index5,index6,index7,index8;
 reg           min_ready,mask_end,cal_end;
 reg     [2:0] min_counter;
 reg     [7:0] mask1[0:8];
@@ -41,7 +41,7 @@ reg     [8:0] min_r1, min_r2, min_r3, min_r4, min_r5, min_r6, min_r7, min_r8;
 reg     [8:0] min_g1, min_g2, min_g3, min_g4, min_g5, min_g6, min_g7, min_g8;
 reg     [8:0] min_b1, min_b2, min_b3, min_b4, min_b5, min_b6, min_b7, min_b8;
 reg     [8:0] min1, min2, j_value;
-reg     [20:0] posX,posY;
+reg     [11:0] posX,posY;
 reg     [10:0] R_AsubR,G_AsubR,B_AsubR;
 reg     [8:0] t_ans;
 reg     [10:0] div1,div2,mul1,check1_mul1,mul2,mul3,mul4;
@@ -97,26 +97,26 @@ end
 //================ x y shift ========================
 always @(posedge clk or posedge rst) begin
     if (rst) begin
-        posX     <= 7'b0;
-        posY     <= 7'b0;
+        posX     <= 12'b0;
+        posY     <= 12'b0;
         mask_end <= 1'b0;
     end 
     else begin
         if(now_state == POS_RESET)begin
-            posX <= 7'b1;
-            posY <= 7'b1;
+            posX <= 12'b1;
+            posY <= 12'b1;
         end
         else if(now_state == POS_RESET2)begin
-            posX <= 7'b0;
-            posY <= 7'b0;
+            posX <= 12'b0;
+            posY <= 12'b0;
         end    
         else if(now_state == data_out || now_state == Load_data)begin
             if (posY == image_width_sub1 && posX == image_width_sub1) begin
-                posY     <= 7'b1;
-                posX     <= 7'b1;     
+                posY     <= 12'b1;
+                posX     <= 12'b1;     
             end
             else if (posX == image_width_sub1) begin
-                posX <= 7'b0;
+                posX <= 12'b0;
                 posY <= posY + 1'd1;
             end
             else begin
@@ -126,12 +126,12 @@ always @(posedge clk or posedge rst) begin
         // have bound 
         else if(now_state == Masking || now_state == calculate)begin
             if (posY == image_width_sub2 && posX == image_width_sub2) begin
-                posY     <= 7'b1;
-                posX     <= 7'b1;
+                posY     <= 12'b1;
+                posX     <= 12'b1;
                 mask_end <= 1'b1;     
             end
             else if (posX == image_width_sub2) begin
-                posX <= 7'b1;
+                posX <= 12'b1;
                 posY <= posY + 1'd1;
             end
             else begin

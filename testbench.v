@@ -50,7 +50,9 @@ module testbench;
 
     // 送資料給 top
     always @(posedge clk) begin
-        {pixel_in_R, pixel_in_G, pixel_in_B} <= img_mem[img_idx];
+        pixel_in_R <= img_mem[img_idx][23:16];
+        pixel_in_G <= img_mem[img_idx][15:8];
+        pixel_in_B <= img_mem[img_idx][7:0];
         img_idx <= img_idx + 1;
     end
  
