@@ -21,4 +21,4 @@
 (slack為負時，表示clock比資料晚到，無法滿足Setup、Hold time)  
 
 
-##  Step4 在AMD PYNQ-Z2 上驗證硬體設計   
+##  Step6 在AMD PYNQ-Z2 上驗證硬體設計   
