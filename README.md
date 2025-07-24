@@ -3,7 +3,10 @@
 <img width="2442" height="915" alt="image" src="https://github.com/user-attachments/assets/6f2a7935-27c9-4ab6-90f2-31ad00e0baca" />  
 
 ## Step 1 軟體驗證    
-執行 test.py檢視暗部增強的演算法。
+執行 test.py檢視暗部增強的演算法。  
+  
+<img width="1468" height="585" alt="image" src="https://github.com/user-attachments/assets/65d5e6ab-3993-4cc9-b723-bf7cb3e11ffc" />
+
 
 ## Step2 影像前處理  
 執行 image2hex將影像切割成 512*512，  
