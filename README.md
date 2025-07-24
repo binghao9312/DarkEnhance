@@ -4,6 +4,7 @@
 
 ## Step 1 軟體驗證    
 執行 test.py檢視暗部增強的演算法。  
+  
 <img width="1468" height="585" alt="image" src="https://github.com/user-attachments/assets/65d5e6ab-3993-4cc9-b723-bf7cb3e11ffc" />
 
 
