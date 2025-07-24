@@ -71,14 +71,14 @@ end
 always @(*) begin
     case (now_state)
         IDLE:           next_state = Load_data; 
-        Load_data:      next_state = (posX == image_width_sub1 && posY == image_width_sub1)? Masking : Load_data; // Load data state
+        Load_data:      next_state = (posX == 9'd511 && posY == 9'd511)? Masking : Load_data; // Load data state
         Masking:        next_state = find_min; 
-        find_min:       next_state = (posX == image_width_sub2 && posY == image_width_sub2)? delayOneCycle : Masking;//(min_ready == 1'b1) ? find_min   : Masking; 
+        find_min:       next_state = (posX == 9'd512 && posY == 9'd512)? delayOneCycle : Masking;//(min_ready == 1'b1) ? find_min   : Masking; 
         delayOneCycle:  next_state = POS_RESET;
         POS_RESET:      next_state = calculate;
-        calculate:      next_state = (posX == image_width_sub2 && posY == image_width_sub2)? POS_RESET2 : calculate;
+        calculate:      next_state = (posX == 9'd512 && posY == 9'd512)? POS_RESET2 : calculate;
         POS_RESET2:     next_state = data_out; 
-        data_out:       next_state = (posX == image_width_sub2 + 1 && posY == image_width_sub2 + 1)?  IDLE: data_out;
+        data_out:       next_state = (posX == 9'd512 + 1 && posY == 9'd512 + 1)?  IDLE: data_out;
         default:        next_state = IDLE; // Default case
     endcase
 end
@@ -113,11 +113,11 @@ always @(posedge clk or posedge rst) begin
         end    
 
         else if(now_state == data_out || now_state == Load_data)begin
-            if (posY == image_width_sub1 && posX == image_width_sub1) begin
+            if (posY == 511 && posX == 511) begin
                 posY     <= 12'b1;
                 posX     <= 12'b1;     
             end
-            else if (posX == image_width_sub1) begin
+            else if (posX == 511) begin
                 posX <= 12'b0;
                 posY <= posY + 1'd1;
             end
@@ -129,12 +129,12 @@ always @(posedge clk or posedge rst) begin
 
         // have bound 
         else if(now_state == Masking || now_state == calculate)begin
-            if (posY == image_width_sub2 && posX == image_width_sub2) begin
+            if (posY == 510 && posX == 510) begin
                 posY     <= 12'b1;
                 posX     <= 12'b1;
                 mask_end <= 1'b1;     
             end
-            else if (posX == image_width_sub2) begin
+            else if (posX == 510) begin
                 posX <= 12'b1;
                 posY <= posY + 1'd1;
             end
@@ -205,23 +205,23 @@ end
 always @(*) begin
     mul4 = posY << 9; // calculate index
     if(now_state == data_out)begin
-        index0 = (mul4  + posX - image_width + 1); //posX - 1 - 512
-        index1 = (mul4  + posX - image_width); //posX     - 512
-        index2 = (mul4  + posX - image_width + 1); //posX + 1 - 512
+        index0 = (mul4  + posX - 511); //posX - 1 - 512
+        index1 = (mul4  + posX - 512); //posX     - 512
+        index2 = (mul4  + posX - 513); //posX + 1 - 512
     
     end
     else begin
-        index0 = (posY == 1)? (posX - 1) : (mul4  + posX - image_width - 1); //posX - 1 - 512
-        index1 = (posY == 1)? (posX    ) : (mul4  + posX - image_width); //posX     - 512
-        index2 = (posY == 1)? (posX + 1) : (mul4  + posX - image_width + 1); //posX + 1 - 512
+        index0 = (posY == 1)? (posX - 1) : (mul4  + posX - 511); //posX - 1 - 512
+        index1 = (posY == 1)? (posX    ) : (mul4  + posX - 512); //posX     - 512
+        index2 = (posY == 1)? (posX + 1) : (mul4  + posX - 513); //posX + 1 - 512
     end
     
     index3 = (mul4)  + posX - 1;
     index4 = (mul4)  + posX    ;
     index5 = (mul4)  + posX + 1;
-    index6 = (mul4)  + posX + image_width - 1; //posX - 1 + 512
-    index7 = (mul4)  + posX + image_width; //posX     + 512
-    index8 = (mul4)  + posX + image_width + 1; //posX + 1 + 512
+    index6 = (mul4)  + posX + 511; //posX - 1 + 512
+    index7 = (mul4)  + posX + 512; //posX     + 512
+    index8 = (mul4)  + posX + 513; //posX + 1 + 512
 
     case (now_state)
         IDLE: begin
