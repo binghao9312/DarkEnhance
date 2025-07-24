@@ -12,3 +12,4 @@
 驗證波型輸出是否達成效果
 
 ##  Step4 在AMD PYNQ-Z2 上驗證硬體設計   
+<img width="2442" height="915" alt="image" src="https://github.com/user-attachments/assets/6f2a7935-27c9-4ab6-90f2-31ad00e0baca" />
