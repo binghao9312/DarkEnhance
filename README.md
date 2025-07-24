@@ -8,7 +8,7 @@
 並將裁切完成的影像轉換成Hex檔
 
 **Step3 Modelsim 硬體驗證(當前階段)**  
-在Modelsim 中讓Testbench讀取hex
+在Modelsim 中讓Testbench讀取hex，  
 驗證波型輸出是否達成效果
 
-**Step4 在AMD PYNQ上驗證硬體設計** 
+**Step4 在AMD PYNQ-Z2 上驗證硬體設計** 
