@@ -13,35 +13,34 @@ module top (
 
 //================ parameter ========================
 parameter [3:0] //statement    
-                IDLE            = 4'd0,
-                Load_data       = 4'd8,
-                Masking         = 4'd1,
-                find_min        = 4'd2, 
-                calculate       = 4'd3,
-                POS_RESET       = 4'd4,
-                POS_RESET2      = 4'd5,
-                data_out        = 4'd6,
-                delayOneCycle   = 4'd7,
+                IDLE                = 4'd0,
+                Load_data           = 4'd1,
+                wait_for_masking    = 4'd2, 
+                calculate           = 4'd3,
+                POS_RESET           = 4'd4,
+                POS_RESET2          = 4'd5,
+                data_out            = 4'd6,
+                delayOneCycle       = 4'd7;
                 //num
-                image_width     = 9'd512, // 512 - 4
-                image_width_sub2  = 9'd510,
-                image_width_sub1  = 9'd511, 
-                image_size      = 19'd262144, // 512 * 512 = 262144
-                image_size_sub1 = 19'd262143; // 512 * 512 - 1 = 262143
+                //image_width       = 9'd512, // 512 - 4
+                //image_width_sub2  = 9'd510,
+                //image_width_sub1  = 9'd511, 
+                //image_size        = 19'd262144, // 512 * 512 = 262144
+                //image_size_sub1   = 19'd262143; // 512 * 512 - 1 = 262143
 //================ reg  ========================
+reg     mask_start;
 reg     [20:0] index0,index1,index2,index3,index4,index5,index6,index7,index8;
-reg           min_ready,mask_end,cal_end;
 reg     [2:0] min_counter;
 reg     [7:0] mask1[0:8];
 reg     [7:0] mask2[0:8];
 reg     [7:0] mask3[0:8];
-reg     [7:0] j_reg[0:image_size_sub1];  // dark channel
-reg     [7:0] cal_reg[0:image_size_sub1];
+reg     [7:0] j_reg[0:262143];  // dark channel
+reg     [7:0] cal_reg[0:262143];
 reg     [8:0] min_r1, min_r2, min_r3, min_r4, min_r5, min_r6, min_r7, min_r8;
 reg     [8:0] min_g1, min_g2, min_g3, min_g4, min_g5, min_g6, min_g7, min_g8;
 reg     [8:0] min_b1, min_b2, min_b3, min_b4, min_b5, min_b6, min_b7, min_b8;
 reg     [8:0] min1, min2, j_value;
-reg     [11:0] posX,posY;
+reg     [11:0] posX,posY,maskX,maskY,load_cnt,mask_cnt;
 reg     [10:0] R_AsubR,G_AsubR,B_AsubR;
 reg     [8:0] t_ans;
 reg     [20:0] div1,div2,mul1,check1_mul1,mul2,mul3,mul4;
@@ -71,10 +70,7 @@ end
 always @(*) begin
     case (now_state)
         IDLE:           next_state = Load_data; 
-        Load_data:      next_state = (posX == 9'd511 && posY == 9'd511)? Masking : Load_data; // Load data state
-        Masking:        next_state = find_min; 
-        find_min:       next_state = (posX == 9'd510 && posY == 9'd510)? delayOneCycle : Masking;//(min_ready == 1'b1) ? find_min   : Masking; 
-        delayOneCycle:  next_state = POS_RESET;
+        Load_data:      next_state = (posX == 9'd511 && posY == 9'd511)? calculate : Load_data;
         POS_RESET:      next_state = calculate;
         calculate:      next_state = (posX == 9'd510 && posY == 9'd510)? POS_RESET2 : calculate;
         POS_RESET2:     next_state = data_out; 
@@ -125,30 +121,8 @@ always @(posedge clk or posedge rst) begin
                 posX <= posX + 1'b1;
             end
         end
-
-
-        // have bound 
-        else if(now_state == Masking || now_state == calculate)begin
-            if (posY == 510 && posX == 510) begin
-                posY     <= 12'b1;
-                posX     <= 12'b1;
-                mask_end <= 1'b1;     
-            end
-            else if (posX == 510) begin
-                posX <= 12'b1;
-                posY <= posY + 1'd1;
-            end
-            else begin
-                posX <= posX + 1'b1;
-            end
-        end
-
         
-        else if(now_state == find_min)begin
-            posX     <= posX;
-            posY     <= posY;
-            mask_end <= 1'b0;
-        end
+        
         else begin
             posX     <= posX;
             posY     <= posY;
@@ -178,104 +152,123 @@ always @(posedge clk or posedge rst) begin
         B_ram[(y << 9) + posX] <= 255 - pixel_in_B;
     end
 end
-//================ find min delay========================
-always @(posedge clk or posedge rst) begin
-    if (rst) begin
-        min_ready   <= 1'd0;
-        min_counter <= 3'd1;
-    end 
+//=================== masking =========================
+always @(posedge clk or posedge rst)begin
+    if(rst)begin
+        load_cnt    <= 21'd0;
+        mask_start  <= 1'd0;
+    end
     else begin
-        if(now_state == find_min) begin
-            if(min_counter == 3'd1) begin
-                min_ready   <= 1'd1;
-                min_counter <= 3'd0;
+        if(now_state == Load_data)begin
+            load_cnt <= load_cnt + 1;
+            if(load_cnt == 1536)begin
+                mask_start  <= 1'd1;
+                load_cnt    <= 21'd0;
             end
             else begin
-                min_counter <= min_counter + 1'd1;
+                if(mask_cnt == 12'd510)begin
+                    mask_start <= 1'd0;
+                end
+                else begin
+                    mask_start <= mask_start;
+                end
             end
         end
         else begin
-            min_ready   <= 1'd0;
-            min_counter <= 3'd0;
+            mask_start <= mask_start;
+        end
+    end
+end
+
+always @(posedge clk or posedge rst)begin
+    if(rst)begin
+        maskX   <= 12'd1;
+        maskY   <= 12'd1;
+    end
+    else begin
+        if(mask_start)begin
+            mask_cnt <= mask_cnt + 1;
+            else if(maskY == 12'd510 && maskX == 12'510)begin
+                maskX <= 12'd1;
+                maskY <= 12'd1;
+            end
+            else if(maskX == 12'd510)begin
+                maskY <= maskY + 1;
+            end
+            else begin
+                maskX <= maskX + 1;
+            end
+        end
+        else begin
+            maskX <= maskX;
+            maskY <= maskY;
         end
     end
 end
 
 //================ combination ========================
-
 always @(*) begin
     mul4 = posY << 9; // calculate index
-    if(now_state == data_out)begin
-        index0 = (mul4  + posX - 511); //posX - 1 - 512
-        index1 = (mul4  + posX - 512); //posX     - 512
-        index2 = (mul4  + posX - 513); //posX + 1 - 512
+    if(now_state == IDLE)begin
+        index0   = 8'b0;
+        index1   = 8'b0;
+        index2   = 8'b0;
+        index3   = 8'b0;
+        index4   = 8'b0;
+        index5   = 8'b0;
+        index6   = 8'b0;
+        index7   = 8'b0;
+        index8   = 8'b0;
+    end
+    else if(now_state == data_out)begin
+        index0 = (mul4  + maskX - 511); //posX - 1 - 512
+        index1 = (mul4  + maskX - 512); //posX     - 512
+        index2 = (mul4  + maskX - 513); //posX + 1 - 512
     end
     else begin
-        index0 = (posY == 1)? (posX - 1) : (mul4  + posX - 513); //posX - 1 - 512
-        index1 = (posY == 1)? (posX    ) : (mul4  + posX - 512); //posX     - 512
-        index2 = (posY == 1)? (posX + 1) : (mul4  + posX - 511); //posX + 1 - 512
+        index0 = (posY == 1)? (maskX - 1) : (mul4  + maskX - 513); //posX - 1 - 512
+        index1 = (posY == 1)? (maskX    ) : (mul4  + maskX - 512); //posX     - 512
+        index2 = (posY == 1)? (maskX + 1) : (mul4  + maskX - 511); //posX + 1 - 512
+    end
+    index3 = (mul4)  + maskX - 1;
+    index4 = (mul4)  + maskX    ;
+    index5 = (mul4)  + maskX + 1;
+    index6 = (mul4)  + maskX + 511; //posX - 1 + 512
+    index7 = (mul4)  + maskX + 512; //posX     + 512
+    index8 = (mul4)  + maskX + 513; //posX + 1 + 512
+end
+
+always @(*)begin
+    if(now_state == Load_data)begin
+        mask1[0] =  R_ram[index0];
+        mask1[1] =  R_ram[index1];
+        mask1[2] =  R_ram[index2];
+        mask1[3] =  R_ram[index3];
+        mask1[4] =  R_ram[index4];
+        mask1[5] =  R_ram[index5];
+        mask1[6] =  R_ram[index6];
+        mask1[7] =  R_ram[index7];
+        mask1[8] =  R_ram[index8];
+        mask2[0] =  G_ram[index0];
+        mask2[1] =  G_ram[index1];
+        mask2[2] =  G_ram[index2];
+        mask2[3] =  G_ram[index3];
+        mask2[4] =  G_ram[index4];
+        mask2[5] =  G_ram[index5];
+        mask2[6] =  G_ram[index6];
+        mask2[7] =  G_ram[index7];
+        mask2[8] =  G_ram[index8];
+        mask3[0] =  B_ram[index0];
+        mask3[1] =  B_ram[index1];
+        mask3[2] =  B_ram[index2];
+        mask3[3] =  B_ram[index3];
+        mask3[4] =  B_ram[index4];
+        mask3[5] =  B_ram[index5];
+        mask3[6] =  B_ram[index6];
+        mask3[7] =  B_ram[index7];
+        mask3[8] =  B_ram[index8];
     end
     
-    index3 = (mul4)  + posX - 1;
-    index4 = (mul4)  + posX    ;
-    index5 = (mul4)  + posX + 1;
-    index6 = (mul4)  + posX + 511; //posX - 1 + 512
-    index7 = (mul4)  + posX + 512; //posX     + 512
-    index8 = (mul4)  + posX + 513; //posX + 1 + 512
-
-    case (now_state)
-        IDLE: begin
-            for (x = 0; x < 9; x = x + 1) begin
-                mask1[x] = 8'b0;
-                mask2[x] = 8'b0;
-                mask3[x] = 8'b0;
-            end
-            index0   = 8'b0;
-            index1   = 8'b0;
-            index2   = 8'b0;
-            index3   = 8'b0;
-            index4   = 8'b0;
-            index5   = 8'b0;
-            index6   = 8'b0;
-            index7   = 8'b0;
-            index8   = 8'b0;
-        end
-        Masking: begin
-            mask1[0] =  R_ram[index0];
-            mask1[1] =  R_ram[index1];
-            mask1[2] =  R_ram[index2];
-            mask1[3] =  R_ram[index3];
-            mask1[4] =  R_ram[index4];
-            mask1[5] =  R_ram[index5];
-            mask1[6] =  R_ram[index6];
-            mask1[7] =  R_ram[index7];
-            mask1[8] =  R_ram[index8];
-
-            mask2[0] =  G_ram[index0];
-            mask2[1] =  G_ram[index1];
-            mask2[2] =  G_ram[index2];
-            mask2[3] =  G_ram[index3];
-            mask2[4] =  G_ram[index4];
-            mask2[5] =  G_ram[index5];
-            mask2[6] =  G_ram[index6];
-            mask2[7] =  G_ram[index7];
-            mask2[8] =  G_ram[index8];
-
-            mask3[0] =  B_ram[index0];
-            mask3[1] =  B_ram[index1];
-            mask3[2] =  B_ram[index2];
-            mask3[3] =  B_ram[index3];
-            mask3[4] =  B_ram[index4];
-            mask3[5] =  B_ram[index5];
-            mask3[6] =  B_ram[index6];
-            mask3[7] =  B_ram[index7];
-            mask3[8] =  B_ram[index8];
-        end
-        default: begin
-            mask3[0] = mask3[0];
-        end
-    endcase
-
     min_r1 = (mask1[0] < mask1[1]) ? {1'b0, mask1[0]} : {1'b0, mask1[1]};
     min_r2 = (mask1[2] < mask1[3]) ? {1'b0, mask1[2]} : {1'b0, mask1[3]};
     min_r3 = (mask1[4] < mask1[5]) ? {1'b0, mask1[4]} : {1'b0, mask1[5]};
