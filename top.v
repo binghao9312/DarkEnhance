@@ -106,11 +106,13 @@ always @(posedge clk or posedge rst) begin
             posX <= 12'b1;
             posY <= 12'b1;
         end
+
         else if(now_state == POS_RESET2)begin
             posX <= 12'b0;
             posY <= 12'b0;
         end    
-        else if(now_state == data_out || now_state == Load_data)begin
+
+        else if(now_state == data_out)begin
             if (posY == image_width_sub1 && posX == image_width_sub1) begin
                 posY     <= 12'b1;
                 posX     <= 12'b1;     
@@ -123,6 +125,21 @@ always @(posedge clk or posedge rst) begin
                 posX <= posX + 1'b1;
             end
         end
+
+        else if(now_state == Load_data)begin
+            if (posY == 9'd511 && posX == 9'd511) begin
+                posY     <= 12'b1;
+                posX     <= 12'b1;     
+            end
+            else if (posX ==  9'd511) begin
+                posX <= 12'b0;
+                posY <= posY + 1'd1;
+            end
+            else begin
+                posX <= posX + 1'b1;
+            end
+        end
+
         // have bound 
         else if(now_state == Masking || now_state == calculate)begin
             if (posY == image_width_sub2 && posX == image_width_sub2) begin
@@ -138,6 +155,7 @@ always @(posedge clk or posedge rst) begin
                 posX <= posX + 1'b1;
             end
         end
+
         
         else if(now_state == find_min)begin
             posX     <= posX;
