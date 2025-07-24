@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
+from PIL import Image  
 ww = 0
 hh = 0
 
@@ -56,11 +56,14 @@ for y in range(8):
 
 enhanced_np = enhance_low_light_image(image_np)
 
-# 輸出前後矩陣
-print("原始矩陣 (灰階):")
-print(image_np[:, :, 0])
-print("\n增強後矩陣 (灰階):")
-print(enhanced_np[:, :, 0])
+image = Image.open("input.jpg").convert("RGB")
+image_np = np.array(image)
+
+enhanced_np = enhance_low_light_image(image_np)
+
+# 儲存原圖與增強後的圖像
+Image.fromarray(image_np).save("original_output.jpg")
+Image.fromarray(enhanced_np).save("enhanced_output.jpg")
 
 # 顯示前後對照
 plt.figure(figsize=(8, 4))
@@ -76,4 +79,4 @@ plt.axis('off')
 plt.tight_layout()
 plt.show()
 
-print("Exit")
+print("結果已儲存為 original_output.jpg 與 enhanced_output.jpg")
