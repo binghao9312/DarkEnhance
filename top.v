@@ -28,7 +28,7 @@ parameter [3:0] //statement
                 //image_size        = 19'd262144, // 512 * 512 = 262144
                 //image_size_sub1   = 19'd262143; // 512 * 512 - 1 = 262143
 //================ reg  ========================
-reg     mask_start;
+reg     mask_start,cal_end;
 reg     [20:0] index0,index1,index2,index3,index4,index5,index6,index7,index8;
 reg     [2:0] min_counter;
 reg     [7:0] mask1[0:8];
@@ -72,7 +72,7 @@ always @(*) begin
         IDLE:           next_state = Load_data; 
         Load_data:      next_state = (posX == 9'd511 && posY == 9'd511)? calculate : Load_data;
         POS_RESET:      next_state = calculate;
-        calculate:      next_state = (posX == 9'd510 && posY == 9'd510)? POS_RESET2 : calculate;
+        calculate:      next_state = (cal_end)? POS_RESET2 : calculate;
         POS_RESET2:     next_state = data_out; 
         data_out:       next_state = (posX == 9'd512 && posY == 9'd512)?  IDLE: data_out;
         default:        next_state = IDLE; // Default case
@@ -95,7 +95,6 @@ always @(posedge clk or posedge rst) begin
     if (rst) begin
         posX     <= 12'b0;
         posY     <= 12'b0;
-        mask_end <= 1'b0;
     end 
     else begin
         if(now_state == POS_RESET)begin
@@ -126,13 +125,12 @@ always @(posedge clk or posedge rst) begin
         else begin
             posX     <= posX;
             posY     <= posY;
-            mask_end <= 1'b0;
         end
     end 
     
 end
 //================ RAM ========================
-reg [7:0] R_ram[0:262144];   //PIXEL NEED PARAMETER
+reg [7:0] R_ram[0:262144];   
 reg [7:0] G_ram[0:262144]; 
 reg [7:0] B_ram[0:262144]; 
 integer x, y;
@@ -155,15 +153,15 @@ end
 //=================== masking =========================
 always @(posedge clk or posedge rst)begin
     if(rst)begin
-        load_cnt    <= 21'd0;
+        load_cnt    <= 12'd0;
         mask_start  <= 1'd0;
     end
     else begin
         if(now_state == Load_data)begin
             load_cnt <= load_cnt + 1;
-            if(load_cnt == 1536)begin
+            if(posY > 3 && load_cnt == 511 || load_cnt ==  1535)begin   //AFTER 3 EVERY ROW FIND MIN
                 mask_start  <= 1'd1;
-                load_cnt    <= 21'd0;
+                load_cnt    <= 12'd0;
             end
             else begin
                 if(mask_cnt == 12'd510)begin
@@ -188,12 +186,13 @@ always @(posedge clk or posedge rst)begin
     else begin
         if(mask_start)begin
             mask_cnt <= mask_cnt + 1;
-            else if(maskY == 12'd510 && maskX == 12'510)begin
+            if(maskY == 12'd510 && maskX == 12'd510)begin
                 maskX <= 12'd1;
                 maskY <= 12'd1;
             end
             else if(maskX == 12'd510)begin
                 maskY <= maskY + 1;
+                maskX <= 12'd1;
             end
             else begin
                 maskX <= maskX + 1;
@@ -208,7 +207,7 @@ end
 
 //================ combination ========================
 always @(*) begin
-    mul4 = posY << 9; // calculate index
+    mul4 = maskY << 9; // calculate index
     if(now_state == IDLE)begin
         index0   = 8'b0;
         index1   = 8'b0;
@@ -221,9 +220,9 @@ always @(*) begin
         index8   = 8'b0;
     end
     else if(now_state == data_out)begin
-        index0 = (mul4  + maskX - 511); //posX - 1 - 512
+        index0 = (mul4  + maskX - 513); //posX - 1 - 512
         index1 = (mul4  + maskX - 512); //posX     - 512
-        index2 = (mul4  + maskX - 513); //posX + 1 - 512
+        index2 = (mul4  + maskX - 511); //posX + 1 - 512
     end
     else begin
         index0 = (posY == 1)? (maskX - 1) : (mul4  + maskX - 513); //posX - 1 - 512
@@ -239,7 +238,7 @@ always @(*) begin
 end
 
 always @(*)begin
-    if(now_state == Load_data)begin
+    if(now_state == Load_data && mask_start)begin
         mask1[0] =  R_ram[index0];
         mask1[1] =  R_ram[index1];
         mask1[2] =  R_ram[index2];
@@ -267,39 +266,67 @@ always @(*)begin
         mask3[6] =  B_ram[index6];
         mask3[7] =  B_ram[index7];
         mask3[8] =  B_ram[index8];
+    
+    
+        min_r1 = (mask1[0] < mask1[1]) ? {1'b0, mask1[0]} : {1'b0, mask1[1]};
+        min_r2 = (mask1[2] < mask1[3]) ? {1'b0, mask1[2]} : {1'b0, mask1[3]};
+        min_r3 = (mask1[4] < mask1[5]) ? {1'b0, mask1[4]} : {1'b0, mask1[5]};
+        min_r4 = (mask1[6] < mask1[7]) ? {1'b0, mask1[6]} : {1'b0, mask1[7]};
+        min_r5 = (min_r1 < min_r2) ? min_r1 : min_r2;
+        min_r6 = (min_r3 < min_r4) ? min_r3 : min_r4;
+        min_r7 = (min_r5 < min_r6) ? min_r5 : min_r6;
+        min_r8 = (min_r7 < {1'b0, mask1[8]}) ? min_r7 : {1'b0, mask1[8]};
+
+        min_g1 = (mask2[0] < mask2[1]) ? {1'b0, mask2[0]} : {1'b0, mask2[1]};
+        min_g2 = (mask2[2] < mask2[3]) ? {1'b0, mask2[2]} : {1'b0, mask2[3]};
+        min_g3 = (mask2[4] < mask2[5]) ? {1'b0, mask2[4]} : {1'b0, mask2[5]};
+        min_g4 = (mask2[6] < mask2[7]) ? {1'b0, mask2[6]} : {1'b0, mask2[7]};
+        min_g5 = (min_g1 < min_g2) ? min_g1 : min_g2;
+        min_g6 = (min_g3 < min_g4) ? min_g3 : min_g4;
+        min_g7 = (min_g5 < min_g6) ? min_g5 : min_g6;
+        min_g8 = (min_g7 < {1'b0, mask2[8]}) ? min_g7 : {1'b0, mask2[8]};
+
+        min_b1 = (mask3[0] < mask3[1]) ? {1'b0, mask3[0]} : {1'b0, mask3[1]};
+        min_b2 = (mask3[2] < mask3[3]) ? {1'b0, mask3[2]} : {1'b0, mask3[3]};
+        min_b3 = (mask3[4] < mask3[5]) ? {1'b0, mask3[4]} : {1'b0, mask3[5]};
+        min_b4 = (mask3[6] < mask3[7]) ? {1'b0, mask3[6]} : {1'b0, mask3[7]};
+        min_b5 = (min_b1 < min_b2) ? min_b1 : min_b2;
+        min_b6 = (min_b3 < min_b4) ? min_b3 : min_b4;
+        min_b7 = (min_b5 < min_b6) ? min_b5 : min_b6;
+        min_b8 = (min_b7 < {1'b0, mask3[8]}) ? min_b7 : {1'b0, mask3[8]};
+
+        min1 = (min_r8 < min_g8) ? min_r8 : min_g8;
+        min2 = (min_b8 < min1) ? min_b8 : min1;
     end
-    
-    min_r1 = (mask1[0] < mask1[1]) ? {1'b0, mask1[0]} : {1'b0, mask1[1]};
-    min_r2 = (mask1[2] < mask1[3]) ? {1'b0, mask1[2]} : {1'b0, mask1[3]};
-    min_r3 = (mask1[4] < mask1[5]) ? {1'b0, mask1[4]} : {1'b0, mask1[5]};
-    min_r4 = (mask1[6] < mask1[7]) ? {1'b0, mask1[6]} : {1'b0, mask1[7]};
-    min_r5 = (min_r1 < min_r2) ? min_r1 : min_r2;
-    min_r6 = (min_r3 < min_r4) ? min_r3 : min_r4;
-    min_r7 = (min_r5 < min_r6) ? min_r5 : min_r6;
-    min_r8 = (min_r7 < {1'b0, mask1[8]}) ? min_r7 : {1'b0, mask1[8]};
-    
-    min_g1 = (mask2[0] < mask2[1]) ? {1'b0, mask2[0]} : {1'b0, mask2[1]};
-    min_g2 = (mask2[2] < mask2[3]) ? {1'b0, mask2[2]} : {1'b0, mask2[3]};
-    min_g3 = (mask2[4] < mask2[5]) ? {1'b0, mask2[4]} : {1'b0, mask2[5]};
-    min_g4 = (mask2[6] < mask2[7]) ? {1'b0, mask2[6]} : {1'b0, mask2[7]};
-    min_g5 = (min_g1 < min_g2) ? min_g1 : min_g2;
-    min_g6 = (min_g3 < min_g4) ? min_g3 : min_g4;
-    min_g7 = (min_g5 < min_g6) ? min_g5 : min_g6;
-    min_g8 = (min_g7 < {1'b0, mask2[8]}) ? min_g7 : {1'b0, mask2[8]};
-    
-    min_b1 = (mask3[0] < mask3[1]) ? {1'b0, mask3[0]} : {1'b0, mask3[1]};
-    min_b2 = (mask3[2] < mask3[3]) ? {1'b0, mask3[2]} : {1'b0, mask3[3]};
-    min_b3 = (mask3[4] < mask3[5]) ? {1'b0, mask3[4]} : {1'b0, mask3[5]};
-    min_b4 = (mask3[6] < mask3[7]) ? {1'b0, mask3[6]} : {1'b0, mask3[7]};
-    min_b5 = (min_b1 < min_b2) ? min_b1 : min_b2;
-    min_b6 = (min_b3 < min_b4) ? min_b3 : min_b4;
-    min_b7 = (min_b5 < min_b6) ? min_b5 : min_b6;
-    min_b8 = (min_b7 < {1'b0, mask3[8]}) ? min_b7 : {1'b0, mask3[8]};
-    
-    min1 = (min_r8 < min_g8) ? min_r8 : min_g8;
-    min2 = (min_b8 < min1) ? min_b8 : min1;
-    
-    
+    else begin
+        mask1[0] = 12'd0;
+        mask1[1] = 12'd0;
+        mask1[2] = 12'd0;
+        mask1[3] = 12'd0;
+        mask1[4] = 12'd0;
+        mask1[5] = 12'd0;
+        mask1[6] = 12'd0;
+        mask1[7] = 12'd0;
+        mask1[8] = 12'd0;
+        mask2[0] = 12'd0;
+        mask2[1] = 12'd0;
+        mask2[2] = 12'd0;
+        mask2[3] = 12'd0;
+        mask2[4] = 12'd0;
+        mask2[5] = 12'd0;
+        mask2[6] = 12'd0;
+        mask2[7] = 12'd0;
+        mask2[8] = 12'd0;
+        mask3[0] = 12'd0;
+        mask3[1] = 12'd0;
+        mask3[2] = 12'd0;
+        mask3[3] = 12'd0;
+        mask3[4] = 12'd0;
+        mask3[5] = 12'd0;
+        mask3[6] = 12'd0;
+        mask3[7] = 12'd0;
+        mask3[8] = 12'd0;
+    end
 
 end
 //================ transmission rate calculation ================
@@ -313,7 +340,6 @@ always @(*) begin
     //w = 0.75
     j_value = j_reg[index4]; 
     if(now_state == calculate)begin
-        
         
         case(j_reg[index4])    
             8'd0 , 8'd1 , 8'd2 , 8'd3           :t_ans = 25;
@@ -416,9 +442,9 @@ always @(*) begin
     end
     
     else begin    
-        R_pixel_reg = 8'd255 - R_ram[posY * 8 + posX];
-        G_pixel_reg = 8'd255 - G_ram[posY * 8 + posX];
-        B_pixel_reg = 8'd255 - B_ram[posY * 8 + posX];
+        R_pixel_reg = 8'd255 - R_ram[posY << 9 + posX];
+        G_pixel_reg = 8'd255 - G_ram[posY << 9 + posX];
+        B_pixel_reg = 8'd255 - B_ram[posY << 9 + posX];
     end
     
     check1_mul1 = cal_reg[index4]; 
@@ -531,13 +557,13 @@ end
 //================ j_reg_save data ======================
 always @(posedge clk or posedge rst) begin
     if (rst) begin
-        for (x = 0; x < image_size; x = x + 1) begin
+        for (x = 0; x < 19'd262143; x = x + 1) begin
             j_reg[x] <= 8'b0;
         end
         j_counter = 11'd0;
     end 
     else begin 
-        if(now_state == find_min) begin
+        if(now_state == Load_data) begin
             j_reg[index4] <= min2;
         end
         else begin
@@ -549,13 +575,16 @@ end
 always @(posedge clk or posedge rst) begin
     if (rst || (now_state == IDLE) ) begin
         cal_end     <= 1'b0;   
-        for (x = 0; x < image_size; x = x + 1) begin
+        for (x = 0; x < 19'd262144; x = x + 1) begin
             cal_reg[x] <= 8'b0;
         end
     end 
     else begin
-        if (now_state == calculate) begin
-            if(posX == image_width_sub2 && posY == image_width_sub2) begin
+        if (now_state == POS_RESET2) begin
+            cal_end <= 1'b0;
+        end
+        else if (now_state == calculate) begin
+            if(posX == 9'd510 && posY == 9'd510) begin
                 cal_end <= 1'b1;
             end
             else begin
@@ -576,14 +605,14 @@ always @(posedge clk or posedge rst) begin
     end 
     else begin
         if (now_state == data_out) begin
-            if(posX == image_width_sub1 && posY == image_width_sub1)begin
+            if(posX == 9'd511 && posY == 9'd511)begin
                 done <= 1'b1;
             end
             else begin
                 done <= 1'b0;
                 //boundary direct give original pixel
                 if( posX == 9'd0 || posY == 9'd0 ||
-                    posX == image_width_sub1 || posY == image_width_sub1)begin
+                    posX == 9'd511 || posY == 9'd511)begin
                     pixel_R = 255 - R_ram[pixel_index];
                     pixel_G = 255 - G_ram[pixel_index];
                     pixel_B = 255 - B_ram[pixel_index];
