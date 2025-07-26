@@ -44,16 +44,16 @@ always @(posedge clk) begin
     pixel_in_R = img_mem[img_idx][23:16];
     pixel_in_G = img_mem[img_idx][15:8];
     pixel_in_B = img_mem[img_idx][7:0];
-    $display("Feed #%0d  R: %d, G: %d, B: %d", img_idx, pixel_in_R, pixel_in_G, pixel_in_B);
+    //$display("Feed #%0d  R: %d, G: %d, B: %d", img_idx, pixel_in_R, pixel_in_G, pixel_in_B);
     img_idx = img_idx + 1;
 end
 
 // Output monitoring (once done is high)
-always @(posedge clk) begin
-    if(done) begin
-        $display("pixel_R: %h, pixel_G: %h, pixel_B: %h", pixel_R, pixel_G, pixel_B);
-    end
-end
+//always @(posedge clk) begin
+    //if(done) begin
+        //$display("pixel_R: %h, pixel_G: %h, pixel_B: %h", pixel_R, pixel_G, pixel_B);
+    //end
+//end
 
 top DUT (
     .clk(clk),
