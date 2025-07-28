@@ -278,7 +278,7 @@ always @(*) begin
         //index1 = (mul4  + maskX - 512); //posX     - 512
         //index2 = (mul4  + maskX - 511); //posX + 1 - 512
     end
-    else if(now_state == data_out)begin
+    else if(now_state == Load_data)begin
         index0  = reg_cnt - 1;
         index1  = reg_cnt;
         index2  = reg_cnt + 1;
@@ -296,9 +296,9 @@ always @(*) begin
     //index8 = (mul4)  + maskX + 513; //posX + 1 + 512
 end
 
-assign R_value = R_row_register[0];
-assign G_value = G_row_register[0];
-assign B_value = B_row_register[0];
+assign R_value = R_row_register[reg_cnt];
+assign G_value = G_row_register[reg_cnt];
+assign B_value = B_row_register[reg_cnt];
 
 
 always @(*)begin
