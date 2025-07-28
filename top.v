@@ -158,11 +158,16 @@ always @(posedge clk or posedge rst)begin
         reg_cnt <= 12'd0;
     end
     else begin
-        if(reg_cnt == 9'd511)begin
+        if(reg_cnt >= 9'd511)begin
             reg_cnt <= 12'd0;
         end
         else begin
-            reg_cnt <= reg_cnt + 1;
+            if(mask_start)begin
+                reg_cnt <= reg_cnt + 1;
+            end
+            else begin
+                reg_cnt <= reg_cnt;
+            end
         end
     end
 end
@@ -284,7 +289,7 @@ always @(*) begin
         //index1 = (mul4  + maskX - 512); //posX     - 512
         //index2 = (mul4  + maskX - 511); //posX + 1 - 512
     end
-    else if(now_state == Load_data)begin
+    else if(now_state == Load_data && mask_start)begin
         index0  = reg_cnt - 1;
         index1  = reg_cnt;
         index2  = reg_cnt + 1;
