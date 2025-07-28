@@ -1,4 +1,5 @@
 //upgrade to 512*512
+// add mask_cnt move in masking block 7/28 13:40 (line 235)
 module top (
     input clk,rst,
     input [7:0] pixel_in_R,
@@ -231,33 +232,37 @@ always @(posedge clk or posedge rst) begin
     end
 end
 //=================== masking =========================
+
 always @(posedge clk or posedge rst)begin
     if(rst)begin
         load_cnt    <= 12'd0;
         mask_start  <= 1'd0;
-    end
+        mask_cnt    <= 12'd0;
+    end 
+    //如果load到第3行開始masking 操控mask_cnt  fix -> 如果load到第3行就開始masking
+    // 最後一排512cycle 未處理
+    // mask_cnt 操控pixel 未處理
     else begin
         if(now_state == Load_data)begin
             load_cnt <= load_cnt + 1;
-            if(posY > 3 && load_cnt == 511 || load_cnt ==  1535)begin   //AFTER 3 EVERY ROW FIND MIN
-                mask_start  <= 1'd1;
-                load_cnt    <= 12'd0;
+            if (mask_cnt == 12'd510)begin
+                mask_start <= 1'd0;
+                mask_cnt <= 12'd0;
+            end
+            else if (posY >= 3 || load_cnt >=  1535)begin
+                mask_start <= 1'd1;
+                if (mask_start) begin
+                    mask_cnt <= mask_cnt + 1;
+                end
             end
             else begin
-                if(mask_cnt == 12'd510)begin
-                    mask_start <= 1'd0;
-                end
-                else begin
-                    mask_start <= mask_start;
-                end
+                mask_start <= 1'd0;
+                mask_cnt <= 12'd0;
+                load_cnt <= load_cnt;
             end
-        end
-        else begin
-            mask_start <= mask_start;
         end
     end
 end
-
 
 //================ combination ========================
 always @(*) begin
