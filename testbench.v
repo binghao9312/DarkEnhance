@@ -33,20 +33,17 @@ initial begin
     rst = 1;
     #20;
     rst = 0;
+    pixel_in_R = img_mem[img_idx][23:16];
+    pixel_in_G = img_mem[img_idx][15:8];
+    pixel_in_B = img_mem[img_idx][7:0];
+    //$display("Feed #%0d  R: %d, G: %d, B: %d", img_idx, pixel_in_R, pixel_in_G, pixel_in_B);
+    img_idx = img_idx + 1;
     wait(done);
     $display("Simulation finished.");
     #100; // Finish after short delay
     $finish;
 end
 
-// Feeding data to the top module
-always @(posedge clk) begin
-    pixel_in_R = img_mem[img_idx][23:16];
-    pixel_in_G = img_mem[img_idx][15:8];
-    pixel_in_B = img_mem[img_idx][7:0];
-    //$display("Feed #%0d  R: %d, G: %d, B: %d", img_idx, pixel_in_R, pixel_in_G, pixel_in_B);
-    img_idx = img_idx + 1;
-end
 
 // Output monitoring (once done is high)
 //always @(posedge clk) begin
