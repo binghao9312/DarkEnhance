@@ -22,11 +22,20 @@
 //
 //               佛祖保佑         永無BUG
 
+//================ version descript =====================
+//||  after modelsim simulation, it indicated that,
+//||  Data will ready when posY = 6.          
+//||  here is simulation data
+//||  [posX posY] | [Rm0  Gm0  Bm0] | [hex column] | [time]    
+//||    2     6   |  15  11  10     |   1539       | 30770155 PS
+//||    3     6   |  18  14  13     |   1540       | 30775000 PS
+//||    5     6   |  17  13  10     |   1542       | 30795000 PS
+//====================================================
 
-// upgrade to 512*512
-//在posY = 5時
+//upgrade to 512*512
+//在posY = 6時
 //M0才備妥資料 前面都是0
-//M0~M8是觀測MASK的資料
+//m0~m8是觀測MASK的資料
 
 
 module top (
@@ -63,7 +72,9 @@ wire  [7:0] R_value,G_value,B_value;
 
 
 //================ FOR observe =================
-wire     [7:0] m0,m1,m2,m3,m4,m5,m6,m7,m8;   
+wire     [7:0] Rm0,Rm1,Rm2,Rm3,Rm4,Rm5,Rm6,Rm7,Rm8;
+wire     [7:0] Gm0,Gm1,Gm2,Gm3,Gm4,Gm5,Gm6,Gm7,Gm8;
+wire     [7:0] Bm0,Bm1,Bm2,Bm3,Bm4,Bm5,Bm6,Bm7,Bm8;   
 
 //================ reg  ========================
 reg     mask_start,cal_end;
@@ -209,14 +220,14 @@ always @(posedge clk or posedge rst)begin
         G_row_register[load_cnt] <=  pixel_in_G;
         B_row_register[load_cnt] <=  pixel_in_B;
         //每512個pixel 會將R G B的mask register往前移動一排
-        // R0  0 1 2 ....  511
+        // R0  [0 1 2 ....  511]       
         // ^  ^  ^  ^  ^  ^  ^
-        // R1  0 1 2 ....  511 
+        // R1  [0 1 2 ....  511]     
         // ^  ^  ^  ^  ^  ^  ^
-        // R2  0 1 2 ....  511 
+        // R2  [0 1 2 ....  511] 
         // ^  ^  ^  ^  ^  ^  ^
-        // Row 0 1 2 ....  511
-
+        // Row [0 1 2 ....  511]
+            
         // ROW [index] <= Pixel in
 
         if(mask_cnt == 12'd510)begin
@@ -358,38 +369,36 @@ assign B_value = B_row_register[mask_cnt];
 
 
 always @(*)begin
-    if(now_state == Load_data)begin
-        if(mask_start)begin
-            mask1[0] =  R0_mask_register[index0];
-            mask1[1] =  R0_mask_register[index1];
-            mask1[2] =  R0_mask_register[index2];
-            mask1[3] =  R1_mask_register[index0];
-            mask1[4] =  R1_mask_register[index1];
-            mask1[5] =  R1_mask_register[index2];
-            mask1[6] =  R2_mask_register[index0];
-            mask1[7] =  R2_mask_register[index1];
-            mask1[8] =  R2_mask_register[index2];
+        mask1[0] =  R0_mask_register[index0];
+        mask1[1] =  R0_mask_register[index1];
+        mask1[2] =  R0_mask_register[index2];
+        mask1[3] =  R1_mask_register[index0];
+        mask1[4] =  R1_mask_register[index1];
+        mask1[5] =  R1_mask_register[index2];
+        mask1[6] =  R2_mask_register[index0];
+        mask1[7] =  R2_mask_register[index1];
+        mask1[8] =  R2_mask_register[index2];
 
-            mask2[0] =  G0_mask_register[index0];
-            mask2[1] =  G0_mask_register[index1];
-            mask2[2] =  G0_mask_register[index2];
-            mask2[3] =  G1_mask_register[index0];
-            mask2[4] =  G1_mask_register[index1];
-            mask2[5] =  G1_mask_register[index2];
-            mask2[6] =  G2_mask_register[index0];
-            mask2[7] =  G2_mask_register[index1];
-            mask2[8] =  G2_mask_register[index2];
+        mask2[0] =  G0_mask_register[index0];
+        mask2[1] =  G0_mask_register[index1];
+        mask2[2] =  G0_mask_register[index2];
+        mask2[3] =  G1_mask_register[index0];
+        mask2[4] =  G1_mask_register[index1];
+        mask2[5] =  G1_mask_register[index2];
+        mask2[6] =  G2_mask_register[index0];
+        mask2[7] =  G2_mask_register[index1];
+        mask2[8] =  G2_mask_register[index2];
 
-            mask3[0] =  B0_mask_register[index0];
-            mask3[1] =  B0_mask_register[index1];
-            mask3[2] =  B0_mask_register[index2];
-            mask3[3] =  B1_mask_register[index0];
-            mask3[4] =  B1_mask_register[index1];
-            mask3[5] =  B1_mask_register[index2];
-            mask3[6] =  B2_mask_register[index0];
-            mask3[7] =  B2_mask_register[index1];
-            mask3[8] =  B2_mask_register[index2];
-        end
+        mask3[0] =  B0_mask_register[index0];
+        mask3[1] =  B0_mask_register[index1];
+        mask3[2] =  B0_mask_register[index2];
+        mask3[3] =  B1_mask_register[index0];
+        mask3[4] =  B1_mask_register[index1];
+        mask3[5] =  B1_mask_register[index2];
+        mask3[6] =  B2_mask_register[index0];
+        mask3[7] =  B2_mask_register[index1];
+        mask3[8] =  B2_mask_register[index2];
+       
     
         min_r1 = (mask1[0] < mask1[1]) ? {1'b0, mask1[0]} : {1'b0, mask1[1]};
         min_r2 = (mask1[2] < mask1[3]) ? {1'b0, mask1[2]} : {1'b0, mask1[3]};
@@ -420,48 +429,38 @@ always @(*)begin
 
         min1 = (min_r8 < min_g8) ? min_r8 : min_g8;
         min2 = (min_b8 < min1) ? min_b8 : min1;
-    end
-    else begin
-        mask1[0] = 12'd0;
-        mask1[1] = 12'd0;
-        mask1[2] = 12'd0;
-        mask1[3] = 12'd0;
-        mask1[4] = 12'd0;
-        mask1[5] = 12'd0;
-        mask1[6] = 12'd0;
-        mask1[7] = 12'd0;
-        mask1[8] = 12'd0;
-        mask2[0] = 12'd0;
-        mask2[1] = 12'd0;
-        mask2[2] = 12'd0;
-        mask2[3] = 12'd0;
-        mask2[4] = 12'd0;
-        mask2[5] = 12'd0;
-        mask2[6] = 12'd0;
-        mask2[7] = 12'd0;
-        mask2[8] = 12'd0;
-        mask3[0] = 12'd0;
-        mask3[1] = 12'd0;
-        mask3[2] = 12'd0;
-        mask3[3] = 12'd0;
-        mask3[4] = 12'd0;
-        mask3[5] = 12'd0;
-        mask3[6] = 12'd0;
-        mask3[7] = 12'd0;
-        mask3[8] = 12'd0;
-    end
-
+    
 end
 //======== observe ===========
-assign m0 = mask1[0];
-assign m1 = mask1[1];
-assign m2 = mask1[2];
-assign m3 = mask1[3];
-assign m4 = mask1[4];
-assign m5 = mask1[5];
-assign m6 = mask1[6];
-assign m7 = mask1[7];
-assign m8 = mask1[8];
+assign Rm0 = mask1[0];
+assign Rm1 = mask1[1];
+assign Rm2 = mask1[2];
+assign Rm3 = mask1[3];
+assign Rm4 = mask1[4];
+assign Rm5 = mask1[5];
+assign Rm6 = mask1[6];
+assign Rm7 = mask1[7];
+assign Rm8 = mask1[8];
+
+assign Gm0 = mask2[0];
+assign Gm1 = mask2[1];
+assign Gm2 = mask2[2];
+assign Gm3 = mask2[3];
+assign Gm4 = mask2[4];
+assign Gm5 = mask2[5];
+assign Gm6 = mask2[6];
+assign Gm7 = mask2[7];
+assign Gm8 = mask2[8];
+
+assign Bm0 = mask3[0];
+assign Bm1 = mask3[1];
+assign Bm2 = mask3[2];
+assign Bm3 = mask3[3];
+assign Bm4 = mask3[4];
+assign Bm5 = mask3[5];
+assign Bm6 = mask3[6];
+assign Bm7 = mask3[7];
+assign Bm8 = mask3[8];
 
 
 //================ transmission rate calculation ================
