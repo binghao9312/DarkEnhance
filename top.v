@@ -22,17 +22,28 @@
 //
 //               佛祖保佑         永無BUG
 
-//================ version descript =====================
-//||  after modelsim simulation, it indicated that,
-//||  Data will ready when posY = 6.          
-//||  here is simulation data
-//||  [posX posY] | [Rm0  Gm0  Bm0] | [hex column] | [time]    
-//||    2     6   |  15  11  10     |   1539       | 30770155 PS
-//||    3     6   |  18  14  13     |   1540       | 30775000 PS
-//||    5     6   |  17  13  10     |   1542       | 30795000 PS
-//====================================================
+//
 
-//upgrade to 512*512
+//===================== 0731_2 version descript =======================
+//||                                                                 ||
+//|| upload j_reg index & load_data next state wait for masking end  ||
+//||                                                                 ||
+//=====================================================================
+
+//
+//===================== 0731 version descript ======================
+//||  after modelsim simulation, it indicated that,                 ||
+//||  Data will ready when posY = 6.                                ||  
+//||  here is simulation data                                       ||  
+//||  [posX posY] | [Rm0  Gm0  Bm0] | [hex column] |   [time]       ||
+//||    2     6   |  15  11  10     |   1539       |   30770155 PS  ||  
+//||    3     6   |  18  14  13     |   1540       |   30775000 PS  ||  
+//||    5     6   |  17  13  10     |   1542       |   30795000 PS  ||  
+//||   508   511  |  05  03  06     |   259069     | 2621425000 PS  ||  
+//||   509   511  |  04  02  05     |   259070     | 2621425000 PS  ||  
+//==================================================================
+
+
 //在posY = 6時
 //M0才備妥資料 前面都是0
 //m0~m8是觀測MASK的資料
@@ -68,17 +79,18 @@ parameter [3:0] //statement
                 //image_size_sub1   = 19'd262143; // 512 * 512 - 1 = 262143
 
 //================ WIRE ========================
-wire  [7:0] R_value,G_value,B_value;
-
+wire    [7:0] R_value,G_value,B_value;
+wire    [20:0]j_reg_index;
 
 //================ FOR observe =================
-wire     [7:0] Rm0,Rm1,Rm2,Rm3,Rm4,Rm5,Rm6,Rm7,Rm8;
-wire     [7:0] Gm0,Gm1,Gm2,Gm3,Gm4,Gm5,Gm6,Gm7,Gm8;
-wire     [7:0] Bm0,Bm1,Bm2,Bm3,Bm4,Bm5,Bm6,Bm7,Bm8;   
+wire    [7:0] Rm0,Rm1,Rm2,Rm3,Rm4,Rm5,Rm6,Rm7,Rm8;
+wire    [7:0] Gm0,Gm1,Gm2,Gm3,Gm4,Gm5,Gm6,Gm7,Gm8;
+wire    [7:0] Bm0,Bm1,Bm2,Bm3,Bm4,Bm5,Bm6,Bm7,Bm8;   
 
 //================ reg  ========================
-reg     mask_start,cal_end;
-reg     [20:0] index0,index1,index2,index3,index4,index5,index6,index7,index8;
+reg     mask_start,all_mask_end,cal_end;
+reg     [20:0] index0,index1,index2;
+
 reg     [8:0] R0_mask_register[0:511];
 reg     [8:0] G0_mask_register[0:511];
 reg     [8:0] B0_mask_register[0:511];
@@ -113,7 +125,6 @@ reg     [3:0] now_state, next_state;
 reg     [8:0] R_pixel_reg, G_pixel_reg, B_pixel_reg;
 reg     [8:0] R_pixel_reg1, G_pixel_reg1, B_pixel_reg1;
 reg     [9:0] pixel_index;
-reg     [10:0] j_counter;
 reg     [14:0] R_shift_L1,G_shift_L1,B_shift_L1;
 reg     [14:0] R_shift_L2,G_shift_L2,B_shift_L2;
 reg     [14:0] R_shift_L3,G_shift_L3,B_shift_L3;
@@ -131,13 +142,14 @@ end
 
 always @(*) begin
     case (now_state)
-        IDLE:           next_state = Load_data; 
-        Load_data:      next_state = (posX == 9'd511 && posY == 9'd511)? calculate : Load_data;
-        POS_RESET:      next_state = calculate;
-        calculate:      next_state = (cal_end)? POS_RESET2 : calculate;
-        POS_RESET2:     next_state = data_out; 
-        data_out:       next_state = (posX == 9'd512 && posY == 9'd512)?  IDLE: data_out;
-        default:        next_state = IDLE; // Default case
+        IDLE:               next_state = Load_data; 
+        Load_data:          next_state = (posX == 9'd511 && posY == 9'd511)? wait_for_masking : Load_data;
+        wait_for_masking:   next_state = (all_mask_end) ? POS_RESET : wait_for_masking; 
+        POS_RESET:          next_state = calculate;
+        calculate:          next_state = (cal_end)? POS_RESET2 : calculate;
+        POS_RESET2:         next_state = data_out; 
+        data_out:           next_state = (posX == 9'd512 && posY == 9'd512)?  IDLE: data_out;
+        default:            next_state = IDLE; // Default case
     endcase
 end
 
@@ -164,12 +176,23 @@ always @(posedge clk or posedge rst) begin
             posY <= 12'b1;
         end
 
-        else if(now_state == POS_RESET2)begin
-            posX <= 12'b0;
-            posY <= 12'b0;
-        end    
+        //Data delay 6 row so posY need plus 6
+        else if(now_state == Load_data || now_state == wait_for_masking)begin
+            if (posY == 517 && posX == 511) begin
+                posY     <= 12'b1;
+                posX     <= 12'b1;     
+            end
+            else if (posX == 511) begin
+                posX <= 12'b0;
+                posY <= posY + 1'd1;
+            end
+            else begin
+                posX <= posX + 1'b1;
+            end
+        end
 
-        else if(now_state == data_out || now_state == Load_data)begin
+
+        else if(now_state == data_out)begin
             if (posY == 511 && posX == 511) begin
                 posY     <= 12'b1;
                 posX     <= 12'b1;     
@@ -242,13 +265,13 @@ always @(posedge clk or posedge rst)begin
                 B1_mask_register[k] <= B2_mask_register[k];
                 B0_mask_register[k] <= B1_mask_register[k];
             end
-        
         end
         else begin
-            //reg_cnt <= reg_cnt + 1;
+            R2_mask_register[0] <= R2_mask_register[0];
         end
     end
 end
+
 //================ RAM ========================
 reg [7:0] R_ram[0:262144];   
 reg [7:0] G_ram[0:262144]; 
@@ -271,6 +294,26 @@ always @(posedge clk or posedge rst) begin
     end
 end
 //=================== masking =========================
+always @(posedge clk or posedge rst)begin
+    if(rst)begin
+        all_mask_end <= 1'd0;
+    end
+    else begin
+        if(now_state == wait_for_masking)begin
+            if(posY == 517 && posX == 511)begin
+                all_mask_end <= 1'd1;
+            end
+            else begin
+                all_mask_end <= 1'd0;
+            end
+        end
+        else begin
+            all_mask_end <= 1'd0;
+        end
+    end
+end
+
+
 always @(posedge clk or posedge rst)begin
     if(rst)begin
         load_cnt    <= 12'd0;
@@ -330,22 +373,13 @@ always @(*) begin
         index0   = 8'b0;
         index1   = 8'b0;
         index2   = 8'b0;
-        index3   = 8'b0;
-        index4   = 8'b0;
-        index5   = 8'b0;
-        index6   = 8'b0;
-        index7   = 8'b0;
-        index8   = 8'b0;
     end
     else if(now_state == data_out)begin
         index0  = 0;
         index1  = 0;
         index2  = 0;
-        //index0 = (mul4  + maskX - 513); //posX - 1 - 512
-        //index1 = (mul4  + maskX - 512); //posX     - 512
-        //index2 = (mul4  + maskX - 511); //posX + 1 - 512
     end
-    else if(now_state == Load_data && mask_start)begin
+    else if((now_state == Load_data || now_state == wait_for_masking) && mask_start)begin
         index0  = mask_cnt - 1;
         index1  = mask_cnt;
         index2  = mask_cnt + 1;
@@ -355,12 +389,6 @@ always @(*) begin
         index1  = 0;
         index2  = 0;
     end
-    //index3 = (mul4)  + maskX - 1;
-    //index4 = (mul4)  + maskX    ;
-    //index5 = (mul4)  + maskX + 1;
-    //index6 = (mul4)  + maskX + 511; //posX - 1 + 512
-    //index7 = (mul4)  + maskX + 512; //posX     + 512
-    //index8 = (mul4)  + maskX + 513; //posX + 1 + 512
 end
 
 assign R_value = R_row_register[mask_cnt];
@@ -462,6 +490,7 @@ assign Bm6 = mask3[6];
 assign Bm7 = mask3[7];
 assign Bm8 = mask3[8];
 
+assign j_reg_index = (posY >= 6) ? (((posY - 6) << 9) + posX) : 0;
 
 //================ transmission rate calculation ================
 always @(*) begin  
@@ -472,10 +501,10 @@ always @(*) begin
         div2    = 11'dz;    
     end
     //w = 0.75
-    j_value = j_reg[index4]; 
+    j_value = j_reg[0]; 
     if(now_state == calculate)begin
         
-        case(j_reg[index4])    
+        case(j_reg[0])    
             8'd0 , 8'd1 , 8'd2 , 8'd3           :t_ans = 25;
             8'd4 , 8'd5 , 8'd6                  :t_ans = 26;
             8'd7 , 8'd8 , 8'd9 , 8'd10          :t_ans = 27;
@@ -581,7 +610,7 @@ always @(*) begin
         B_pixel_reg = 8'd255 - B_ram[posY << 9 + posX];
     end
     
-    check1_mul1 = cal_reg[index4]; 
+    check1_mul1 = cal_reg[0]; 
     //A - R
     R_AsubR = 255 - R_ram[posY * 8 + posX];
     G_AsubR = 255 - G_ram[posY * 8 + posX];
@@ -602,7 +631,7 @@ always @(*) begin
     B_shift_L4 = (B_AsubR << 4);
     
     
-    case(cal_reg[index4])
+    case(cal_reg[0])
         8'd25, 8'd26, 8'd27, 8'd28, 8'd29 : begin
             R_pixel_reg1 = R_shift_L4; // *4
             G_pixel_reg1 = G_shift_L4; // *4
@@ -681,30 +710,38 @@ always @(*) begin
         end
 
     endcase
-
-
-    
     pixel_index = (posY << 9) + posX; // calculate pixel index
-    
 end
 
 //================ j_reg_save data ======================
+
 always @(posedge clk or posedge rst) begin
     if (rst) begin
         for (x = 0; x < 19'd262143; x = x + 1) begin
             j_reg[x] <= 8'b0;
         end
-        j_counter = 11'd0;
     end 
     else begin 
-        if(now_state == Load_data) begin
-            j_reg[index4] <= min2;
+        if((now_state == Load_data || now_state == wait_for_masking) && posY >= 6) begin
+            if(posX == 0 && posX == 511)begin
+                j_reg[0] <= j_reg[0];
+            end
+            else begin
+                if(posY > 6)begin
+                    j_reg[(posY - 6) << 9 + posX] <= min2;
+                end
+                else begin
+                    j_reg[0] <= j_reg[0];
+                end
+                
+            end
         end
         else begin
-            j_counter <= j_counter;
+           j_reg[0] <= j_reg[0];
         end
     end
 end
+
 //================ cal_reg_save data ======================
 always @(posedge clk or posedge rst) begin
     if (rst || (now_state == IDLE) ) begin
@@ -724,7 +761,7 @@ always @(posedge clk or posedge rst) begin
             else begin
                 cal_end <= cal_end;
             end
-            cal_reg[index4] <= t_ans;
+            cal_reg[0] <= t_ans;
         end
         else begin
             cal_reg[0] <= cal_reg[0];
