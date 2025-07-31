@@ -57,6 +57,7 @@ parameter [3:0] //statement
                 //image_width_sub1  = 9'd511, 
                 //image_size        = 19'd262144, // 512 * 512 = 262144
                 //image_size_sub1   = 19'd262143; // 512 * 512 - 1 = 262143
+
 //================ WIRE ========================
 wire  [7:0] R_value,G_value,B_value;
 
@@ -279,29 +280,30 @@ always @(posedge clk or posedge rst)begin
 end
 always @(posedge clk or posedge rst)begin
     if(rst)begin
+        mask_cnt <= 1'd1;
+    end
+    else begin
+        if (mask_start) begin
+            mask_cnt <= mask_cnt + 1;
+        end
+        else begin
+            mask_cnt <= 12'd1;
+        end
+    end
+end
+
+always @(posedge clk or posedge rst)begin
+    if(rst)begin
         mask_start  <= 1'd0;
-        mask_cnt    <= 12'd0;
     end 
-    //如果load到第3行開始masking 操控mask_cnt  fix -> 如果load到第3行就開始masking
-    // 最後一排512cycle 未處理
+    
     else begin
         if(now_state == Load_data)begin
-            if (mask_cnt == 12'd510)begin
-                mask_start <= 1'd0;
-                mask_cnt <= 1; //mask中心初始為1,1
-            end
-            else if (posY > 2)begin
-                mask_start <= 1'd1;
-                if (mask_start) begin
-                    mask_cnt <= mask_cnt + 1;
-                end
-                else begin
-                    mask_cnt <= mask_cnt;
-                end
+            if (posY > 2 && posX >= 0 && posX <= 509)begin
+                    mask_start <= 1'd1;
             end
             else begin
                 mask_start <= 1'd0;
-                mask_cnt <= 1;
             end
         end
         else begin
@@ -333,9 +335,9 @@ always @(*) begin
         //index2 = (mul4  + maskX - 511); //posX + 1 - 512
     end
     else if(now_state == Load_data && mask_start)begin
-        index0  = mask_cnt;
-        index1  = mask_cnt + 1;
-        index2  = mask_cnt + 2;
+        index0  = mask_cnt - 1;
+        index1  = mask_cnt;
+        index2  = mask_cnt + 1;
     end
     else begin
         index0  = 0;
