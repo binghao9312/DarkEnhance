@@ -1,7 +1,34 @@
+//                       _oo0oo_
+//                      o8888888o
+//                      88" . "88
+//                      (| -_- |)
+//                      0\  =  /0
+//                    ___/`---'\___
+//                  .' \\|     |// '.
+//                 / \\|||  :  |||// \
+//                / _||||| -:- |||||- \
+//               |   | \\\  -  /// |   |
+//               | \_|  ''\---/''  |_/ |
+//               \  .-\__  '-'  ___/-. /
+//             ___'. .'  /--.--\  `. .'___
+//          ."" '<  `.___\_<|>_/___.' >' "".
+//         | | :  `- \`.;`\ _ /`;.`/ - ` : | |
+//         \  \ `_.   \_ __\ /__ _/   .-` /  /
+//     =====`-.____`.___ \_____/___.-`___.-'=====
+//                       `=---='
+//
+//
+//     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//               佛祖保佑         永無BUG
+
+
 // upgrade to 512*512
-// add mask_cnt move in masking block 7/28 13:40 (line 235)
-// solving mask have value when posY after 3 
-// mask_cnt control pixel 312 block mask position renew
+//在posY = 5時
+//M0才備妥資料 前面都是0
+//M0~M8是觀測MASK的資料
+
+
 module top (
     input clk,rst,
     input [7:0] pixel_in_R,
@@ -35,7 +62,7 @@ wire  [7:0] R_value,G_value,B_value;
 
 
 //================ FOR observe =================
-reg     [7:0] m0,m1,m2,m3,m4,m5,m6,m7,m8;   
+wire     [7:0] m0,m1,m2,m3,m4,m5,m6,m7,m8;   
 
 //================ reg  ========================
 reg     mask_start,cal_end;
@@ -64,7 +91,7 @@ reg     [8:0] min_r1, min_r2, min_r3, min_r4, min_r5, min_r6, min_r7, min_r8;
 reg     [8:0] min_g1, min_g2, min_g3, min_g4, min_g5, min_g6, min_g7, min_g8;
 reg     [8:0] min_b1, min_b2, min_b3, min_b4, min_b5, min_b6, min_b7, min_b8;
 reg     [8:0] min1, min2, j_value;
-reg     [11:0] posX,posY,load_cnt,mask_cnt,reg_cnt;
+reg     [11:0] posX,posY,load_cnt,mask_cnt;
 reg     [10:0] R_AsubR,G_AsubR,B_AsubR;
 reg     [8:0] t_ans;
 reg     [20:0] div1,div2,mul1,check1_mul1,mul2,mul3,mul4;
@@ -153,24 +180,7 @@ always @(posedge clk or posedge rst) begin
     
 end
 //================ register ==================
-always @(posedge clk or posedge rst)begin
-    if(rst)begin
-        reg_cnt <= 12'd0;
-    end
-    else begin
-        if(reg_cnt >= 9'd511)begin
-            reg_cnt <= 12'd0;
-        end
-        else begin
-            if(mask_start)begin
-                reg_cnt <= reg_cnt + 1;
-            end
-            else begin
-                reg_cnt <= reg_cnt;
-            end
-        end
-    end
-end
+
 integer k;
 always @(posedge clk or posedge rst)begin
     if(rst)begin
@@ -194,23 +204,33 @@ always @(posedge clk or posedge rst)begin
         
     end
     else begin
-        R_row_register[reg_cnt] <=  pixel_in_R;
-        G_row_register[reg_cnt] <=  pixel_in_G;
-        B_row_register[reg_cnt] <=  pixel_in_B;
+        R_row_register[load_cnt] <=  pixel_in_R;
+        G_row_register[load_cnt] <=  pixel_in_G;
+        B_row_register[load_cnt] <=  pixel_in_B;
         //每512個pixel 會將R G B的mask register往前移動一排
-        if(reg_cnt == 12'd511)begin
+        // R0  0 1 2 ....  511
+        // ^  ^  ^  ^  ^  ^  ^
+        // R1  0 1 2 ....  511 
+        // ^  ^  ^  ^  ^  ^  ^
+        // R2  0 1 2 ....  511 
+        // ^  ^  ^  ^  ^  ^  ^
+        // Row 0 1 2 ....  511
+
+        // ROW [index] <= Pixel in
+
+        if(mask_cnt == 12'd510)begin
             for (k = 0; k < 512; k = k + 1) begin
-                R0_mask_register[k] <= R_row_register[k];
-                R1_mask_register[k] <= R0_mask_register[k];
-                R2_mask_register[k] <= R1_mask_register[k];
-                G0_mask_register[k] <= G_row_register[k];
-                G1_mask_register[k] <= G0_mask_register[k];
-                G2_mask_register[k] <= G1_mask_register[k];
-                B0_mask_register[k] <= B_row_register[k];
-                B1_mask_register[k] <= B0_mask_register[k];
-                B2_mask_register[k] <= B1_mask_register[k];
+                R2_mask_register[k] <= R_row_register[k];
+                R1_mask_register[k] <= R2_mask_register[k];
+                R0_mask_register[k] <= R1_mask_register[k];
+                G2_mask_register[k] <= G_row_register[k];
+                G1_mask_register[k] <= G2_mask_register[k];
+                G0_mask_register[k] <= G1_mask_register[k];
+                B2_mask_register[k] <= B_row_register[k];
+                B1_mask_register[k] <= B2_mask_register[k];
+                B0_mask_register[k] <= B1_mask_register[k];
             end
-            //reg_cnt <= 12'd0;
+        
         end
         else begin
             //reg_cnt <= reg_cnt + 1;
@@ -239,10 +259,26 @@ always @(posedge clk or posedge rst) begin
     end
 end
 //=================== masking =========================
-
 always @(posedge clk or posedge rst)begin
     if(rst)begin
         load_cnt    <= 12'd0;
+    end
+    else begin
+        if(now_state == Load_data)begin
+            if(load_cnt == 511)begin
+               load_cnt <= 12'd0; 
+            end
+            else begin
+                load_cnt <= load_cnt + 1;
+            end
+        end
+        else begin
+            load_cnt <= load_cnt;
+        end
+    end
+end
+always @(posedge clk or posedge rst)begin
+    if(rst)begin
         mask_start  <= 1'd0;
         mask_cnt    <= 12'd0;
     end 
@@ -250,12 +286,11 @@ always @(posedge clk or posedge rst)begin
     // 最後一排512cycle 未處理
     else begin
         if(now_state == Load_data)begin
-            load_cnt <= load_cnt + 1;
             if (mask_cnt == 12'd510)begin
                 mask_start <= 1'd0;
                 mask_cnt <= 1; //mask中心初始為1,1
             end
-            else if (posY > 2 || load_cnt >=  1535)begin
+            else if (posY > 2)begin
                 mask_start <= 1'd1;
                 if (mask_start) begin
                     mask_cnt <= mask_cnt + 1;
@@ -267,8 +302,10 @@ always @(posedge clk or posedge rst)begin
             else begin
                 mask_start <= 1'd0;
                 mask_cnt <= 1;
-                load_cnt <= load_cnt;
             end
+        end
+        else begin
+            mask_start <= 1'd0;
         end
     end
 end
@@ -296,14 +333,14 @@ always @(*) begin
         //index2 = (mul4  + maskX - 511); //posX + 1 - 512
     end
     else if(now_state == Load_data && mask_start)begin
-        index0  = reg_cnt;
-        index1  = reg_cnt + 1;
-        index2  = reg_cnt + 2;
+        index0  = mask_cnt;
+        index1  = mask_cnt + 1;
+        index2  = mask_cnt + 2;
     end
     else begin
-        ///index0 = (posY == 1)? (maskX - 1) : (mul4  + maskX - 513); //posX - 1 - 512
-        ///index1 = (posY == 1)? (maskX    ) : (mul4  + maskX - 512); //posX     - 512
-        ///index2 = (posY == 1)? (maskX + 1) : (mul4  + maskX - 511); //posX + 1 - 512
+        index0  = 0;
+        index1  = 0;
+        index2  = 0;
     end
     //index3 = (mul4)  + maskX - 1;
     //index4 = (mul4)  + maskX    ;
@@ -313,9 +350,9 @@ always @(*) begin
     //index8 = (mul4)  + maskX + 513; //posX + 1 + 512
 end
 
-assign R_value = R_row_register[reg_cnt];
-assign G_value = G_row_register[reg_cnt];
-assign B_value = B_row_register[reg_cnt];
+assign R_value = R_row_register[mask_cnt];
+assign G_value = G_row_register[mask_cnt];
+assign B_value = B_row_register[mask_cnt];
 
 
 always @(*)begin
@@ -324,32 +361,32 @@ always @(*)begin
             mask1[0] =  R0_mask_register[index0];
             mask1[1] =  R0_mask_register[index1];
             mask1[2] =  R0_mask_register[index2];
-            mask1[3] =  R0_mask_register[index0];
-            mask1[4] =  R0_mask_register[index1];
-            mask1[5] =  R0_mask_register[index2];
-            mask1[6] =  R1_mask_register[index0];
-            mask1[7] =  R1_mask_register[index1];
-            mask1[8] =  R1_mask_register[index2];
+            mask1[3] =  R1_mask_register[index0];
+            mask1[4] =  R1_mask_register[index1];
+            mask1[5] =  R1_mask_register[index2];
+            mask1[6] =  R2_mask_register[index0];
+            mask1[7] =  R2_mask_register[index1];
+            mask1[8] =  R2_mask_register[index2];
 
             mask2[0] =  G0_mask_register[index0];
             mask2[1] =  G0_mask_register[index1];
             mask2[2] =  G0_mask_register[index2];
-            mask2[3] =  G0_mask_register[index0];
-            mask2[4] =  G0_mask_register[index1];
-            mask2[5] =  G0_mask_register[index2];
-            mask2[6] =  G1_mask_register[index0];
-            mask2[7] =  G1_mask_register[index1];
-            mask2[8] =  G1_mask_register[index2];
+            mask2[3] =  G1_mask_register[index0];
+            mask2[4] =  G1_mask_register[index1];
+            mask2[5] =  G1_mask_register[index2];
+            mask2[6] =  G2_mask_register[index0];
+            mask2[7] =  G2_mask_register[index1];
+            mask2[8] =  G2_mask_register[index2];
 
             mask3[0] =  B0_mask_register[index0];
             mask3[1] =  B0_mask_register[index1];
             mask3[2] =  B0_mask_register[index2];
-            mask3[3] =  B0_mask_register[index0];
-            mask3[4] =  B0_mask_register[index1];
-            mask3[5] =  B0_mask_register[index2];
-            mask3[6] =  B1_mask_register[index0];
-            mask3[7] =  B1_mask_register[index1];
-            mask3[8] =  B1_mask_register[index2];
+            mask3[3] =  B1_mask_register[index0];
+            mask3[4] =  B1_mask_register[index1];
+            mask3[5] =  B1_mask_register[index2];
+            mask3[6] =  B2_mask_register[index0];
+            mask3[7] =  B2_mask_register[index1];
+            mask3[8] =  B2_mask_register[index2];
         end
     
         min_r1 = (mask1[0] < mask1[1]) ? {1'b0, mask1[0]} : {1'b0, mask1[1]};
@@ -414,30 +451,15 @@ always @(*)begin
 
 end
 //======== observe ===========
-always @(posedge clk or posedge rst)begin
-    if(rst)begin
-        m0 <= 0;
-        m1 <= 0;
-        m2 <= 0;
-        m3 <= 0;
-        m4 <= 0;
-        m5 <= 0;
-        m6 <= 0;
-        m7 <= 0;
-        m8 <= 0;
-    end
-    else begin
-        m0 <= mask1[0];
-        m1 <= mask1[1];
-        m2 <= mask1[2];
-        m3 <= mask1[3];
-        m4 <= mask1[4];
-        m5 <= mask1[5];
-        m6 <= mask1[6];
-        m7 <= mask1[7];
-        m8 <= mask1[8];
-    end
-end
+assign m0 = mask1[0];
+assign m1 = mask1[1];
+assign m2 = mask1[2];
+assign m3 = mask1[3];
+assign m4 = mask1[4];
+assign m5 = mask1[5];
+assign m6 = mask1[6];
+assign m7 = mask1[7];
+assign m8 = mask1[8];
 
 
 //================ transmission rate calculation ================
