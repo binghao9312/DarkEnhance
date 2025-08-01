@@ -24,10 +24,10 @@
 
 //
 
-//===================== 0801 version descript =======================
+//===================== 0801 version descript =========================
 //||                                                                 ||
 //||        fixed mask register data ready when posY is 3            ||
-//||                                                                 ||
+//||   #284 (load_cnt - 1) => fixed m0 first value is 0              ||
 //=====================================================================
 
 //
@@ -50,11 +50,6 @@
 //||  [posX posY] | [Rm8  Gm8  Bm8] | [hex column (addr +1)] |  ||
 //||   511   514  |  04  02  05     |   262144               |  ||
 //=================================================================
-
-
-//在posY = 6時
-//M0才備妥資料 前面都是0
-//m0~m8是觀測MASK的資料
 
 
 module top (
@@ -256,9 +251,9 @@ always @(posedge clk or posedge rst)begin
         // ROW [index] <= Pixel in
         
         if(now_state == Load_data)begin
-            R_row_register[load_cnt] <=  pixel_in_R;
-            G_row_register[load_cnt] <=  pixel_in_G;
-            B_row_register[load_cnt] <=  pixel_in_B;
+            R_row_register[load_cnt-1] <=  pixel_in_R;
+            G_row_register[load_cnt-1] <=  pixel_in_G;
+            B_row_register[load_cnt-1] <=  pixel_in_B;
         end
         else begin
             R_row_register[load_cnt] <= 0;
@@ -286,19 +281,19 @@ always @(posedge clk or posedge rst)begin
     else begin
         if(now_state == Load_data)begin
             if(posY == 0)begin
-                R0_mask_register[load_cnt] <= pixel_in_R;
-                G0_mask_register[load_cnt] <= pixel_in_G;
-                B0_mask_register[load_cnt] <= pixel_in_B;
+                R0_mask_register[load_cnt-1] <= pixel_in_R; // fix m0 first value is 0
+                G0_mask_register[load_cnt-1] <= pixel_in_G;
+                B0_mask_register[load_cnt-1] <= pixel_in_B;
             end
             else if(posY == 1)begin
-                R1_mask_register[load_cnt] <= pixel_in_R;
-                G1_mask_register[load_cnt] <= pixel_in_G;
-                B1_mask_register[load_cnt] <= pixel_in_B;
+                R1_mask_register[load_cnt-1] <= pixel_in_R;
+                G1_mask_register[load_cnt-1] <= pixel_in_G;
+                B1_mask_register[load_cnt-1] <= pixel_in_B;
             end
             else if(posY == 2)begin
-                R2_mask_register[load_cnt] <= pixel_in_R;
-                G2_mask_register[load_cnt] <= pixel_in_G;
-                B2_mask_register[load_cnt] <= pixel_in_B;
+                R2_mask_register[load_cnt-1] <= pixel_in_R;
+                G2_mask_register[load_cnt-1] <= pixel_in_G;
+                B2_mask_register[load_cnt-1] <= pixel_in_B;
             end
             else begin
                 if(mask_cnt == 12'd510)begin
@@ -351,7 +346,7 @@ always @(posedge clk or posedge rst)begin
     end
     else begin
         if(now_state == wait_for_masking)begin
-            if(posY == 517 && posX == 511)begin
+            if(posY == 514 && posX == 511)begin  
                 all_mask_end <= 1'd1;
             end
             else begin
@@ -540,7 +535,7 @@ assign Bm6 = mask3[6];
 assign Bm7 = mask3[7];
 assign Bm8 = mask3[8];
 
-assign j_reg_index = (posY >= 6) ? (((posY - 6) << 9) + posX) : 0;
+assign j_reg_index = (posY >= 3) ? (((posY - 3) << 9) + posX) : 0;
 
 //================ transmission rate calculation ================
 always @(*) begin  
