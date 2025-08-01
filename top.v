@@ -31,17 +31,18 @@
 //=====================================================================
 
 //
-//===================== 0731 version descript ======================
-//||  after modelsim simulation, it indicated that,                 ||
-//||  Data will ready when posY = 6.                                ||  
-//||  here is simulation data                                       ||  
-//||  [posX posY] | [Rm0  Gm0  Bm0] | [hex column] |   [time]       ||
-//||    2     6   |  15  11  10     |   1539       |   30770155 PS  ||  
-//||    3     6   |  18  14  13     |   1540       |   30775000 PS  ||  
-//||    5     6   |  17  13  10     |   1542       |   30795000 PS  ||  
-//||   508   511  |  05  03  06     |   259069     | 2621425000 PS  ||  
-//||   509   511  |  04  02  05     |   259070     | 2621425000 PS  ||  
-//==================================================================
+//===================== 0731 version descript =============================
+//||  after modelsim simulation, it indicated that,                      ||
+//||  Data will ready when posY = 6.                                     ||  
+//||  here is simulation data                                            ||  
+//||  [posX posY] | [Rm0  Gm0  Bm0] | [hex column (-1)] |   [time]       ||
+//||    2     6   |  15  11  10     |   1539            |   30770155 PS  ||  
+//||    3     6   |  18  14  13     |   1540            |   30775000 PS  ||  
+//||    5     6   |  17  13  10     |   1542            |   30795000 PS  ||  
+//||   508   511  |  05  03  06     |   259069          | 2621425000 PS  ||  
+//||   509   511  |  04  02  05     |   259070          | 2621425000 PS  ||  
+//||   402   517  |  25  1f  1f     |                   |  PS  || 
+//=========================================================================
 
 
 //在posY = 6時
@@ -118,7 +119,7 @@ reg     [8:0] min1, min2, j_value;
 reg     [11:0] posX,posY,load_cnt,mask_cnt;
 reg     [10:0] R_AsubR,G_AsubR,B_AsubR;
 reg     [8:0] t_ans;
-reg     [20:0] div1,div2,mul1,check1_mul1,mul2,mul3,mul4;
+reg     [20:0] div1,div2,mul1,check1_mul1,mul2,mul3;
 reg     [3:0] div_index;
 reg     [7:0] sub1;
 reg     [3:0] now_state, next_state;
@@ -319,7 +320,7 @@ always @(posedge clk or posedge rst)begin
         load_cnt    <= 12'd0;
     end
     else begin
-        if(now_state == Load_data)begin
+        if(now_state == Load_data || now_state == wait_for_masking)begin
             if(load_cnt == 511)begin
                load_cnt <= 12'd0; 
             end
@@ -352,7 +353,7 @@ always @(posedge clk or posedge rst)begin
     end 
     
     else begin
-        if(now_state == Load_data)begin
+        if(now_state == Load_data || now_state == wait_for_masking)begin
             if (posY > 2 && posX >= 0 && posX <= 509)begin
                     mask_start <= 1'd1;
             end
@@ -368,7 +369,6 @@ end
 
 //================ combination ========================
 always @(*) begin
-    //mul4 = maskY << 9; // calculate index
     if(now_state == IDLE)begin
         index0   = 8'b0;
         index1   = 8'b0;
