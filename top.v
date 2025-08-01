@@ -24,25 +24,32 @@
 
 //
 
-//===================== 0731_2 version descript =======================
+//===================== 0801 version descript =======================
 //||                                                                 ||
-//|| upload j_reg index & load_data next state wait for masking end  ||
+//||        fixed mask register data ready when posY is 3            ||
 //||                                                                 ||
 //=====================================================================
 
 //
-//===================== 0731 version descript =============================
-//||  after modelsim simulation, it indicated that,                      ||
-//||  Data will ready when posY = 6.                                     ||  
-//||  here is simulation data                                            ||  
-//||  [posX posY] | [Rm0  Gm0  Bm0] | [hex column (-1)] |   [time]       ||
-//||    2     6   |  15  11  10     |   1539            |   30770155 PS  ||  
-//||    3     6   |  18  14  13     |   1540            |   30775000 PS  ||  
-//||    5     6   |  17  13  10     |   1542            |   30795000 PS  ||  
-//||   508   511  |  05  03  06     |   259069          | 2621425000 PS  ||  
-//||   509   511  |  04  02  05     |   259070          | 2621425000 PS  ||  
-//||   402   517  |  25  1f  1f     |                   |  PS  || 
-//=========================================================================
+//===================== 0731 version descript ====================
+//||  after modelsim simulation, it indicated that,             ||
+//||  Data will ready when posY = 6.                            ||  
+//||  here is simulation data                                   ||
+//||  addr = posY * 512 + posX                                  ||
+//||  posY = posY - 3                                           ||
+//||  m0 (posX,posY) = (509,509)                                ||
+//||  [posX posY] | [Rm0  Gm0  Bm0] | [hex column (addr +1)] |  ||
+//||    2     6   |  15  11  10     |   1539                 |  ||  
+//||    3     6   |  18  14  13     |   1540                 |  ||  
+//||    5     6   |  17  13  10     |   1542                 |  ||  
+//||   508   511  |  05  03  06     |   259069               |  ||  
+//||   509   511  |  04  02  05     |   259070               |  ||  
+//||    80   512  |  04  02  05     |   260688               |  ||
+//||    52   513  |  07  05  08     |   261173               |  ||
+//||============================================================||
+//||  [posX posY] | [Rm8  Gm8  Bm8] | [hex column (addr +1)] |  ||
+//||   511   514  |  04  02  05     |   262144               |  ||
+//=================================================================
 
 
 //在posY = 6時
@@ -160,7 +167,16 @@ always @(posedge clk or posedge rst)begin
         RW_bar <= 1'd1;
     end
     else begin
-        RW_bar <= 1'd1;
+        if(now_state == IDLE)begin
+            RW_bar <= 1'd0;
+        end
+        else if(now_state == Load_data && posX == 0 && posY == 512)begin
+            RW_bar <= 1'd1;
+        end
+        else begin
+            RW_bar <= RW_bar;
+        end
+        
     end
 end
 
@@ -220,7 +236,41 @@ end
 integer k;
 always @(posedge clk or posedge rst)begin
     if(rst)begin
-        //前3排masking 
+        for (k = 0; k < 512; k = k + 1) begin
+            R_row_register[k] <= 9'd0;  
+            G_row_register[k] <= 9'd0;
+            B_row_register[k] <= 9'd0;
+        end 
+        
+    end
+    else begin
+        //每512個pixel 會將R G B的mask register往前移動一排
+        // R0  [0 1 2 ....  511]       
+        // ^  ^  ^  ^  ^  ^  ^
+        // R1  [0 1 2 ....  511]     
+        // ^  ^  ^  ^  ^  ^  ^
+        // R2  [0 1 2 ....  511] 
+        // ^  ^  ^  ^  ^  ^  ^
+        // Row [0 1 2 ....  511]
+            
+        // ROW [index] <= Pixel in
+        
+        if(now_state == Load_data)begin
+            R_row_register[load_cnt] <=  pixel_in_R;
+            G_row_register[load_cnt] <=  pixel_in_G;
+            B_row_register[load_cnt] <=  pixel_in_B;
+        end
+        else begin
+            R_row_register[load_cnt] <= 0;
+            G_row_register[load_cnt] <= 0;
+            B_row_register[load_cnt] <= 0;
+        end
+    end
+end
+
+
+always @(posedge clk or posedge rst)begin
+    if(rst)begin
         for (k = 0; k < 512; k = k + 1) begin
             R0_mask_register[k] <= 9'd0;  
             R1_mask_register[k] <= 9'd0; 
@@ -232,43 +282,43 @@ always @(posedge clk or posedge rst)begin
             B1_mask_register[k] <= 9'd0;
             B2_mask_register[k] <= 9'd0;
         end
-        for (k = 0; k < 1526; k = k + 1) begin
-            R_row_register[k] <= 9'd0;  
-            G_row_register[k] <= 9'd0;
-            B_row_register[k] <= 9'd0;
-        end 
-        
     end
     else begin
-        R_row_register[load_cnt] <=  pixel_in_R;
-        G_row_register[load_cnt] <=  pixel_in_G;
-        B_row_register[load_cnt] <=  pixel_in_B;
-        //每512個pixel 會將R G B的mask register往前移動一排
-        // R0  [0 1 2 ....  511]       
-        // ^  ^  ^  ^  ^  ^  ^
-        // R1  [0 1 2 ....  511]     
-        // ^  ^  ^  ^  ^  ^  ^
-        // R2  [0 1 2 ....  511] 
-        // ^  ^  ^  ^  ^  ^  ^
-        // Row [0 1 2 ....  511]
-            
-        // ROW [index] <= Pixel in
-
-        if(mask_cnt == 12'd510)begin
-            for (k = 0; k < 512; k = k + 1) begin
-                R2_mask_register[k] <= R_row_register[k];
-                R1_mask_register[k] <= R2_mask_register[k];
-                R0_mask_register[k] <= R1_mask_register[k];
-                G2_mask_register[k] <= G_row_register[k];
-                G1_mask_register[k] <= G2_mask_register[k];
-                G0_mask_register[k] <= G1_mask_register[k];
-                B2_mask_register[k] <= B_row_register[k];
-                B1_mask_register[k] <= B2_mask_register[k];
-                B0_mask_register[k] <= B1_mask_register[k];
+        if(now_state == Load_data)begin
+            if(posY == 0)begin
+                R0_mask_register[load_cnt] <= pixel_in_R;
+                G0_mask_register[load_cnt] <= pixel_in_G;
+                B0_mask_register[load_cnt] <= pixel_in_B;
+            end
+            else if(posY == 1)begin
+                R1_mask_register[load_cnt] <= pixel_in_R;
+                G1_mask_register[load_cnt] <= pixel_in_G;
+                B1_mask_register[load_cnt] <= pixel_in_B;
+            end
+            else if(posY == 2)begin
+                R2_mask_register[load_cnt] <= pixel_in_R;
+                G2_mask_register[load_cnt] <= pixel_in_G;
+                B2_mask_register[load_cnt] <= pixel_in_B;
+            end
+            else begin
+                if(mask_cnt == 12'd510)begin
+                    for (k = 0; k < 512; k = k + 1) begin
+                        R2_mask_register[k] <= R_row_register[k];
+                        R1_mask_register[k] <= R2_mask_register[k];
+                        R0_mask_register[k] <= R1_mask_register[k];
+                        G2_mask_register[k] <= G_row_register[k];
+                        G1_mask_register[k] <= G2_mask_register[k];
+                        G0_mask_register[k] <= G1_mask_register[k];
+                        B2_mask_register[k] <= B_row_register[k];
+                        B1_mask_register[k] <= B2_mask_register[k];
+                        B0_mask_register[k] <= B1_mask_register[k];
+                    end
+                end
             end
         end
+        
         else begin
-            R2_mask_register[0] <= R2_mask_register[0];
+            R2_mask_register[0] <= R_row_register[0];
         end
     end
 end
