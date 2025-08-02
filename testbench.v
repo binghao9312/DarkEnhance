@@ -5,7 +5,7 @@ module testbench;
 reg clk;
 reg rst;
 
-wire RW_bar;
+wire RW_bar,input_pause;
 wire [7:0] pixel_R, pixel_G, pixel_B;
 
 reg [23:0] img_mem [0:262143]; // 512x512
@@ -20,6 +20,8 @@ initial begin
     clk = 0;
     forever #5 clk = ~clk;
 end
+
+
 
 // ===== Image memory pre-load
 initial begin
@@ -42,21 +44,27 @@ initial begin
     $finish;
 end
 
-// =====clock驅動像素傳送
-always @(posedge clk or rst) begin
+always @(negedge clk or rst) begin
     if (rst) begin
         img_idx      <= 0;
         pixel_in_R   <= 8'd0;
         pixel_in_G   <= 8'd0;
         pixel_in_B   <= 8'd0;
     end 
-    else if (!done) begin
+    else if (!RW_bar) begin
         pixel_in_R   <= img_mem[img_idx][23:16];
         pixel_in_G   <= img_mem[img_idx][15:8];
         pixel_in_B   <= img_mem[img_idx][7:0];
-        img_idx      <= img_idx + 1;
+        if(!input_pause)begin
+            img_idx <= img_idx + 1;
+        end
+        else begin
+            img_idx <= img_idx;
+        end
     end
 end
+
+
 
 // ===== Module Instantiation
 top DUT (
@@ -69,7 +77,8 @@ top DUT (
     .pixel_G(pixel_G),
     .pixel_B(pixel_B),
     .done(done),
-    .RW_bar(RW_bar)
+    .RW_bar(RW_bar),
+    .input_pause(input_pause)
 );
 
 endmodule

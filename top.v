@@ -25,31 +25,10 @@
 //
 
 //===================== 0801 version descript =========================
-//||                                                                 ||
 //||        fixed mask register data ready when posY is 3            ||
-//||   #284 (load_cnt - 1) => fixed m0 first value is 0              ||
+//||   #293 pixel_in_R Should be 255 - pixel_in_R                    ||
 //=====================================================================
 
-//
-//===================== 0731 version descript ====================
-//||  after modelsim simulation, it indicated that,             ||
-//||  Data will ready when posY = 6.                            ||  
-//||  here is simulation data                                   ||
-//||  addr = posY * 512 + posX                                  ||
-//||  posY = posY - 3                                           ||
-//||  m0 (posX,posY) = (509,509)                                ||
-//||  [posX posY] | [Rm0  Gm0  Bm0] | [hex column (addr +1)] |  ||
-//||    2     6   |  15  11  10     |   1539                 |  ||  
-//||    3     6   |  18  14  13     |   1540                 |  ||  
-//||    5     6   |  17  13  10     |   1542                 |  ||  
-//||   508   511  |  05  03  06     |   259069               |  ||  
-//||   509   511  |  04  02  05     |   259070               |  ||  
-//||    80   512  |  04  02  05     |   260688               |  ||
-//||    52   513  |  07  05  08     |   261173               |  ||
-//||============================================================||
-//||  [posX posY] | [Rm8  Gm8  Bm8] | [hex column (addr +1)] |  ||
-//||   511   514  |  04  02  05     |   262144               |  ||
-//=================================================================
 
 
 module top (
@@ -60,7 +39,7 @@ module top (
     output reg[7:0] pixel_R,
     output reg[7:0] pixel_G,
     output reg[7:0] pixel_B,
-    output reg done,RW_bar
+    output reg done,RW_bar,input_pause
 );
 
 
@@ -82,7 +61,7 @@ parameter [3:0] //statement
                 //image_size_sub1   = 19'd262143; // 512 * 512 - 1 = 262143
 
 //================ WIRE ========================
-wire    [7:0] R_value,G_value,B_value;
+wire    [7:0] R_value,G_value,B_value,ZZ_value;
 wire    [20:0]j_reg_index;
 
 //================ FOR observe =================
@@ -92,7 +71,7 @@ wire    [7:0] Bm0,Bm1,Bm2,Bm3,Bm4,Bm5,Bm6,Bm7,Bm8;
 
 //================ reg  ========================
 reg     mask_start,all_mask_end,cal_end;
-reg     [20:0] index0,index1,index2;
+reg     [20:0] index0,index1,index2,index3,index4,index5,index6,index7,index8;
 
 reg     [8:0] R0_mask_register[0:511];
 reg     [8:0] G0_mask_register[0:511];
@@ -132,7 +111,7 @@ reg     [14:0] R_shift_L1,G_shift_L1,B_shift_L1;
 reg     [14:0] R_shift_L2,G_shift_L2,B_shift_L2;
 reg     [14:0] R_shift_L3,G_shift_L3,B_shift_L3;
 reg     [14:0] R_shift_L4,G_shift_L4,B_shift_L4;
-
+reg     [1:0]  pause_cnt;
 
 //================ State Machine ========================
 always @(posedge clk or posedge rst) begin
@@ -155,6 +134,42 @@ always @(*) begin
         default:            next_state = IDLE; // Default case
     endcase
 end
+//============== input pause =========================
+always @(posedge clk or posedge rst)begin
+    if(rst)begin
+        input_pause <= 1'd0;
+    end
+    else begin
+        if(now_state == Load_data)begin
+            if(pause_cnt > 0)begin
+                input_pause <= 1'd0;
+            end
+            else if(posX == 510)begin
+                input_pause <= 1'd1;
+            end
+            else begin
+                input_pause <= input_pause;
+            end
+        end
+        else begin
+            input_pause <= 1'd0;
+        end
+    end
+end
+
+always @(posedge clk or rst)begin
+    if(rst)begin
+        pause_cnt <= 2'd0;
+    end
+    else begin
+        if(!input_pause)begin
+            pause_cnt <= 2'd0;
+        end
+        else begin
+            pause_cnt <= pause_cnt + 1;
+        end
+    end
+end
 
 //=============== RW bar ============================
 always @(posedge clk or posedge rst)begin
@@ -163,10 +178,15 @@ always @(posedge clk or posedge rst)begin
     end
     else begin
         if(now_state == IDLE)begin
-            RW_bar <= 1'd0;
-        end
-        else if(now_state == Load_data && posX == 0 && posY == 512)begin
             RW_bar <= 1'd1;
+        end
+        else if(now_state == Load_data)begin
+            if(posX == 0 && posY == 512)begin
+                RW_bar <= 1'd1;
+            end
+            else begin
+                RW_bar <= 1'd0;
+            end
         end
         else begin
             RW_bar <= RW_bar;
@@ -199,7 +219,12 @@ always @(posedge clk or posedge rst) begin
                 posY <= posY + 1'd1;
             end
             else begin
-                posX <= posX + 1'b1;
+                if(!RW_bar)begin
+                    posX <= posX + 1'b1;
+                end     
+                else begin
+                    posX <= posX;
+                end
             end
         end
 
@@ -250,10 +275,10 @@ always @(posedge clk or posedge rst)begin
             
         // ROW [index] <= Pixel in
         
-        if(now_state == Load_data)begin
-            R_row_register[load_cnt-1] <=  pixel_in_R;
-            G_row_register[load_cnt-1] <=  pixel_in_G;
-            B_row_register[load_cnt-1] <=  pixel_in_B;
+        if(now_state == Load_data || now_state == IDLE)begin
+            R_row_register[load_cnt] <=  pixel_in_R;
+            G_row_register[load_cnt] <=  pixel_in_G;
+            B_row_register[load_cnt] <=  pixel_in_B;
         end
         else begin
             R_row_register[load_cnt] <= 0;
@@ -279,24 +304,31 @@ always @(posedge clk or posedge rst)begin
         end
     end
     else begin
-        if(now_state == Load_data)begin
-            if(posY == 0)begin
-                R0_mask_register[load_cnt-1] <= pixel_in_R; // fix m0 first value is 0
-                G0_mask_register[load_cnt-1] <= pixel_in_G;
-                B0_mask_register[load_cnt-1] <= pixel_in_B;
+        if(now_state == Load_data || now_state == IDLE)begin
+            // pixel_in_R Should be 255 - pixel_in_R
+            if(posY == 1 && posX == 0)begin
+                for (k = 0; k < 512; k = k + 1) begin
+                    R0_mask_register[k] <= R_row_register[k];
+                    G0_mask_register[k] <= G_row_register[k];
+                    B0_mask_register[k] <= B_row_register[k];
+                end
             end
-            else if(posY == 1)begin
-                R1_mask_register[load_cnt-1] <= pixel_in_R;
-                G1_mask_register[load_cnt-1] <= pixel_in_G;
-                B1_mask_register[load_cnt-1] <= pixel_in_B;
+            else if(posY == 2 && posX == 0)begin
+                for (k = 0; k < 512; k = k + 1) begin
+                    R1_mask_register[k] <= R_row_register[k];
+                    G1_mask_register[k] <= G_row_register[k];
+                    B1_mask_register[k] <= B_row_register[k];
+                end
             end
-            else if(posY == 2)begin
-                R2_mask_register[load_cnt-1] <= pixel_in_R;
-                G2_mask_register[load_cnt-1] <= pixel_in_G;
-                B2_mask_register[load_cnt-1] <= pixel_in_B;
+            else if(posY == 3 && posX == 0)begin
+                for (k = 0; k < 512; k = k + 1) begin
+                    R2_mask_register[k] <= R_row_register[k];
+                    G2_mask_register[k] <= G_row_register[k];
+                    B2_mask_register[k] <= B_row_register[k];
+                end
             end
             else begin
-                if(mask_cnt == 12'd510)begin
+                if(mask_cnt == 12'd511)begin                
                     for (k = 0; k < 512; k = k + 1) begin
                         R2_mask_register[k] <= R_row_register[k];
                         R1_mask_register[k] <= R2_mask_register[k];
@@ -334,9 +366,9 @@ always @(posedge clk or posedge rst) begin
         end
     end 
     else if(now_state == Load_data) begin
-        R_ram[(y << 9) + posX] <= 255 - pixel_in_R;
-        G_ram[(y << 9) + posX] <= 255 - pixel_in_G;
-        B_ram[(y << 9) + posX] <= 255 - pixel_in_B;
+        R_ram[(posY << 9) + posX] <= pixel_in_R;
+        G_ram[(posY << 9) + posX] <= pixel_in_G;
+        B_ram[(posY << 9) + posX] <= pixel_in_B;
     end
 end
 //=================== masking =========================
@@ -370,7 +402,12 @@ always @(posedge clk or posedge rst)begin
                load_cnt <= 12'd0; 
             end
             else begin
-                load_cnt <= load_cnt + 1;
+                if(!RW_bar)begin
+                    load_cnt <= load_cnt + 1;
+                end
+                else begin
+                    load_cnt <= load_cnt;
+                end
             end
         end
         else begin
@@ -418,6 +455,12 @@ always @(*) begin
         index0   = 8'b0;
         index1   = 8'b0;
         index2   = 8'b0;
+        index3   = 8'b0;
+        index4   = 8'b0;
+        index5   = 8'b0;
+        index6   = 8'b0;
+        index7   = 8'b0;
+        index8   = 8'b0;
     end
     else if(now_state == data_out)begin
         index0  = 0;
@@ -425,9 +468,9 @@ always @(*) begin
         index2  = 0;
     end
     else if((now_state == Load_data || now_state == wait_for_masking) && mask_start)begin
-        index0  = mask_cnt - 1;
-        index1  = mask_cnt;
-        index2  = mask_cnt + 1;
+        index0 = load_cnt - 1;
+        index1 = load_cnt;
+        index2 = load_cnt + 1;
     end
     else begin
         index0  = 0;
@@ -435,13 +478,14 @@ always @(*) begin
         index2  = 0;
     end
 end
-
-assign R_value = R_row_register[mask_cnt];
-assign G_value = G_row_register[mask_cnt];
-assign B_value = B_row_register[mask_cnt];
+assign ZZ_value = R_row_register[0];
+assign R_value = R_row_register[load_cnt];
+assign G_value = G_row_register[load_cnt];
+assign B_value = B_row_register[load_cnt];
 
 
 always @(*)begin
+        
         mask1[0] =  R0_mask_register[index0];
         mask1[1] =  R0_mask_register[index1];
         mask1[2] =  R0_mask_register[index2];
@@ -451,7 +495,7 @@ always @(*)begin
         mask1[6] =  R2_mask_register[index0];
         mask1[7] =  R2_mask_register[index1];
         mask1[8] =  R2_mask_register[index2];
-
+//
         mask2[0] =  G0_mask_register[index0];
         mask2[1] =  G0_mask_register[index1];
         mask2[2] =  G0_mask_register[index2];
@@ -461,7 +505,7 @@ always @(*)begin
         mask2[6] =  G2_mask_register[index0];
         mask2[7] =  G2_mask_register[index1];
         mask2[8] =  G2_mask_register[index2];
-
+//
         mask3[0] =  B0_mask_register[index0];
         mask3[1] =  B0_mask_register[index1];
         mask3[2] =  B0_mask_register[index2];
@@ -535,7 +579,7 @@ assign Bm6 = mask3[6];
 assign Bm7 = mask3[7];
 assign Bm8 = mask3[8];
 
-assign j_reg_index = (posY >= 3) ? (((posY - 3) << 9) + posX) : 0;
+assign j_reg_index = (posY >= 3) ? (((posY - 3) << 9) + posX - 1) : 0;
 
 //================ transmission rate calculation ================
 always @(*) begin  
