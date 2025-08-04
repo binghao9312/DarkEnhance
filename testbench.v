@@ -5,11 +5,11 @@ module testbench;
 reg clk;
 reg rst;
 
-wire RW_bar,input_pause;
+wire R0W1,input_pause;
 wire [7:0] pixel_R, pixel_G, pixel_B;
-
-reg [23:0] img_mem [0:262143]; // 512x512
-reg [17:0] img_idx;
+reg  [7:0]R_buffer,G_buffer,B_buffer;
+reg  [23:0] img_mem [0:262143]; // 512x512
+reg  [17:0] img_idx;
 
 wire [7:0] pixel_in_R, pixel_in_G, pixel_in_B;
 
@@ -41,12 +41,11 @@ initial begin
     $finish;
 end
 
-always @(negedge clk or rst) begin
+always @(posedge clk or rst) begin
     if (rst) begin
         img_idx      <= 0;
     end 
-    else if (!RW_bar) begin
-        
+    else if (!R0W1) begin
         if(!input_pause)begin
             img_idx <= img_idx + 1;
         end
@@ -56,9 +55,31 @@ always @(negedge clk or rst) begin
     end
 end
 
-assign pixel_in_R  = (!input_pause)? img_mem[img_idx][23:16] : 8'dz;
-assign pixel_in_G  = (!input_pause)? img_mem[img_idx][15: 8] : 8'dz;
-assign pixel_in_B  = (!input_pause)? img_mem[img_idx][ 7: 0] : 8'dz;
+always @(posedge clk or posedge rst)begin
+    if(rst)begin
+        R_buffer <= 8'd0;
+        G_buffer <= 8'd0;
+        B_buffer <= 8'd0;
+    end
+    else begin
+        if(!input_pause)begin
+            R_buffer <= img_mem[img_idx][23:16];
+            G_buffer <= img_mem[img_idx][15: 8];
+            B_buffer <= img_mem[img_idx][ 7: 0];
+        end
+        else begin
+            R_buffer <= R_buffer; 
+            G_buffer <= G_buffer; 
+            B_buffer <= B_buffer; 
+        end
+    end
+
+end
+
+
+assign pixel_in_R  =  R_buffer;
+assign pixel_in_G  =  G_buffer;
+assign pixel_in_B  =  B_buffer;
 // ===== Module Instantiation
 top DUT (
     .clk(clk),
@@ -70,7 +91,7 @@ top DUT (
     .pixel_G(pixel_G),
     .pixel_B(pixel_B),
     .done(done),
-    .RW_bar(RW_bar),
+    .R0W1(R0W1),
     .input_pause(input_pause)
 );
 
