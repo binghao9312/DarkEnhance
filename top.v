@@ -68,7 +68,7 @@ parameter [3:0] //statement
 
 //================ WIRE ========================
 wire    [7:0] R_value,G_value,B_value,ZZ_value;
-wire    [20:0]j_reg_index;
+
 wire    push_to_next_row,mask_start;
 
 //================ FOR observe =================
@@ -79,7 +79,7 @@ wire    [7:0] Bm0,Bm1,Bm2,Bm3,Bm4,Bm5,Bm6,Bm7,Bm8;
 //================ reg  ========================
 reg     all_mask_end,cal_end;
 reg     [20:0] index0,index1,index2,index3,index4,index5,index6,index7,index8;
-
+reg     [20:0]j_reg_index;
 reg     [8:0] R0_mask_register[0:511];
 reg     [8:0] G0_mask_register[0:511];
 reg     [8:0] B0_mask_register[0:511];
@@ -252,7 +252,7 @@ always @(posedge clk or posedge rst) begin
     
 end
 //================ register ==================
-assign push_to_next_row = (now_state == Load_data && posX == 512 && posY > 2)? 1'd1 : 1'd0;
+assign push_to_next_row = (now_state == Load_data && posX == 512)? 1'd1 : 1'd0;
 
 
 integer k;
@@ -317,42 +317,33 @@ always @(posedge clk or posedge rst)begin
     else begin
         if(now_state == Load_data || now_state == IDLE)begin
             // pixel_in_R Should be 255 - pixel_in_R
-            if(posY == 1 && posX == 0)begin
-                for (k = 0; k < 512; k = k + 1) begin
-                    R0_mask_register[k] <= R_row_register[k];
-                    G0_mask_register[k] <= G_row_register[k];
-                    B0_mask_register[k] <= B_row_register[k];
-                end
-            end
-            else if(posY == 2 && posX == 0)begin
-                for (k = 0; k < 512; k = k + 1) begin
-                    R1_mask_register[k] <= R_row_register[k];
-                    G1_mask_register[k] <= G_row_register[k];
-                    B1_mask_register[k] <= B_row_register[k];
-                end
-            end
-            else if(posY == 3 && posX == 0)begin
+            if(push_to_next_row)begin                
                 for (k = 0; k < 512; k = k + 1) begin
                     R2_mask_register[k] <= R_row_register[k];
+                    R1_mask_register[k] <= R2_mask_register[k];
+                    R0_mask_register[k] <= R1_mask_register[k];
                     G2_mask_register[k] <= G_row_register[k];
+                    G1_mask_register[k] <= G2_mask_register[k];
+                    G0_mask_register[k] <= G1_mask_register[k];
                     B2_mask_register[k] <= B_row_register[k];
+                    B1_mask_register[k] <= B2_mask_register[k];
+                    B0_mask_register[k] <= B1_mask_register[k];
                 end
             end
             else begin
-                if(push_to_next_row)begin                
-                    for (k = 0; k < 512; k = k + 1) begin
-                        R2_mask_register[k] <= R_row_register[k];
-                        R1_mask_register[k] <= R2_mask_register[k];
-                        R0_mask_register[k] <= R1_mask_register[k];
-                        G2_mask_register[k] <= G_row_register[k];
-                        G1_mask_register[k] <= G2_mask_register[k];
-                        G0_mask_register[k] <= G1_mask_register[k];
-                        B2_mask_register[k] <= B_row_register[k];
-                        B1_mask_register[k] <= B2_mask_register[k];
-                        B0_mask_register[k] <= B1_mask_register[k];
-                    end
+                for (k = 0; k < 512; k = k + 1) begin
+                    R2_mask_register[k] <= R2_mask_register[k];
+                    R1_mask_register[k] <= R1_mask_register[k];
+                    R0_mask_register[k] <= R0_mask_register[k];
+                    G2_mask_register[k] <= G2_mask_register[k];
+                    G1_mask_register[k] <= G1_mask_register[k];
+                    G0_mask_register[k] <= G0_mask_register[k];
+                    B2_mask_register[k] <= B2_mask_register[k];
+                    B1_mask_register[k] <= B1_mask_register[k];
+                    B0_mask_register[k] <= B0_mask_register[k];
                 end
             end
+            
         end
         
         else begin
@@ -428,8 +419,7 @@ always @(posedge clk or posedge rst)begin
 end
 
 
-assign mask_start = ((now_state == Load_data || now_state == wait_for_masking)
-        && posX > 0 && posX < 511 && posY > 2 ) ? 1'd1 : 1'd0;
+assign mask_start = ((now_state == Load_data || now_state == wait_for_masking) && posX > 0 && posX < 511 && posY > 2 ) ? 1'd1 : 1'd0;
 
 
 //================ combination ========================
@@ -462,7 +452,7 @@ always @(*) begin
     end
 end
 
-assign ZZ_value = R_row_register[0];
+assign ZZ_value = R1_mask_register[0];
 assign R_value = R_row_register[load_cnt];
 assign G_value = G_row_register[load_cnt];
 assign B_value = B_row_register[load_cnt];
@@ -563,7 +553,7 @@ assign Bm6 = mask3[6];
 assign Bm7 = mask3[7];
 assign Bm8 = mask3[8];
 
-assign j_reg_index = (posY >= 3) ? (((posY - 3) << 9) + posX - 1) : 0;
+
 
 //================ transmission rate calculation ================
 always @(*) begin  
@@ -787,6 +777,23 @@ always @(*) begin
 end
 
 //================ j_reg_save data ======================
+
+always @(posedge clk or posedge rst)begin
+    if(rst)begin
+        j_reg_index <= 21'd1;
+    end
+    else begin
+        if(input_pause || !mask_start)begin
+            j_reg_index <= j_reg_index;
+        end 
+        else begin
+            j_reg_index <= j_reg_index + 1;
+        end
+    end
+     
+
+end
+
 
 always @(posedge clk or posedge rst) begin
     if (rst) begin

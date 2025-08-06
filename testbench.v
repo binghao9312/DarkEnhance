@@ -7,7 +7,7 @@ reg rst;
 
 wire R0W1,input_pause;
 wire [7:0] pixel_R, pixel_G, pixel_B;
-reg  [7:0]R_buffer,G_buffer,B_buffer;
+
 reg  [23:0] img_mem [0:262143]; // 512x512
 reg  [17:0] img_idx;
 
@@ -55,31 +55,11 @@ always @(posedge clk or rst) begin
     end
 end
 
-always @(posedge clk or posedge rst)begin
-    if(rst)begin
-        R_buffer <= 8'd0;
-        G_buffer <= 8'd0;
-        B_buffer <= 8'd0;
-    end
-    else begin
-        if(!input_pause)begin
-            R_buffer <= img_mem[img_idx][23:16];
-            G_buffer <= img_mem[img_idx][15: 8];
-            B_buffer <= img_mem[img_idx][ 7: 0];
-        end
-        else begin
-            R_buffer <= R_buffer; 
-            G_buffer <= G_buffer; 
-            B_buffer <= B_buffer; 
-        end
-    end
-
-end
 
 
-assign pixel_in_R  =  R_buffer;
-assign pixel_in_G  =  G_buffer;
-assign pixel_in_B  =  B_buffer;
+assign pixel_in_R  =  img_mem[img_idx][23:16];
+assign pixel_in_G  =  img_mem[img_idx][15: 8];
+assign pixel_in_B  =  img_mem[img_idx][ 7: 0];
 // ===== Module Instantiation
 top DUT (
     .clk(clk),
