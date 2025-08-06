@@ -24,15 +24,9 @@
 
 //
 
-//===================== 0804 version descript =========================
-//||   RW_BAR => R0W1
-//||                                   R    G   B                    ||
-//||   (posX, posY) = ( 4, 1 ) => m0   18   12  14     HEX FILE      ||
-//||                           => m0   1D   17  17     WAVEFORM      ||
-//||                                                                 ||
-//||   (posX, posY) = ( 4, 2 ) => m0   18   14  15     HEX FILE      ||
-//||                           => m0   18   12  14     WAVEFORM      ||
-//||   = data delay 1 cycle                                          ||                  
+//===================== 0806 version descript =========================
+//||   #805 j_reg[j_reg_index] <= min2 may will delay 1 clk          ||
+//||        sol: init changed to 0                                   ||            
 //=====================================================================
 
 
@@ -208,9 +202,8 @@ always @(posedge clk or posedge rst) begin
             posY <= 12'b1;
         end
 
-        //Data delay 6 row so posY need plus 6
         else if(now_state == Load_data || now_state == wait_for_masking)begin
-            if (posY == 517 && posX == 511) begin
+            if (posY == 514 && posX == 511) begin
                 posY     <= 12'b1;
                 posX     <= 12'b1;     
             end
@@ -228,8 +221,7 @@ always @(posedge clk or posedge rst) begin
             end
         end
 
-
-        else if(now_state == data_out)begin
+        else if(now_state == data_out || now_state == calculate)begin
             if (posY == 511 && posX == 511) begin
                 posY     <= 12'b1;
                 posX     <= 12'b1;     
@@ -564,9 +556,10 @@ always @(*) begin
         div2    = 11'dz;    
     end
     //w = 0.75
-    j_value = j_reg[0]; 
-    if(now_state == calculate)begin
-        
+    
+
+    else if(now_state == calculate)begin
+        j_value = j_reg[j_reg_index]; 
         case(j_reg[0])    
             8'd0 , 8'd1 , 8'd2 , 8'd3           :t_ans = 25;
             8'd4 , 8'd5 , 8'd6                  :t_ans = 26;
@@ -643,8 +636,8 @@ always @(*) begin
             8'd245 , 8'd246 , 8'd247 , 8'd248   :t_ans = 97;
             8'd249 , 8'd250 , 8'd251            :t_ans = 98;
             8'd252 , 8'd253 , 8'd254            :t_ans = 99;
-            8'd255:t_ans = 100;
-        default :t_ans = 100;
+            8'd255                              :t_ans = 100;
+            default                             :t_ans = 100;
         endcase
         
     end
@@ -780,18 +773,16 @@ end
 
 always @(posedge clk or posedge rst)begin
     if(rst)begin
-        j_reg_index <= 21'd1;
+        j_reg_index <= 21'd0;
     end
     else begin
-        if(input_pause || !mask_start)begin
+        if((now_state == Load_data || now_state == wait_for_masking) && posY > 2)begin
             j_reg_index <= j_reg_index;
         end 
         else begin
             j_reg_index <= j_reg_index + 1;
         end
     end
-     
-
 end
 
 
@@ -802,19 +793,8 @@ always @(posedge clk or posedge rst) begin
         end
     end 
     else begin 
-        if((now_state == Load_data || now_state == wait_for_masking) && posY >= 6) begin
-            if(posX == 0 && posX == 511)begin
-                j_reg[0] <= j_reg[0];
-            end
-            else begin
-                if(posY > 6)begin
-                    j_reg[(posY - 6) << 9 + posX] <= min2;
-                end
-                else begin
-                    j_reg[0] <= j_reg[0];
-                end
-                
-            end
+        if(now_state == Load_data || now_state == wait_for_masking) begin
+            j_reg[j_reg_index] <= min2; 
         end
         else begin
            j_reg[0] <= j_reg[0];
