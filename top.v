@@ -776,11 +776,11 @@ always @(posedge clk or posedge rst)begin
         j_reg_index <= 21'd0;
     end
     else begin
-        if((now_state == Load_data || now_state == wait_for_masking) && posY > 2)begin
-            j_reg_index <= j_reg_index;
+        if((now_state == Load_data || now_state == wait_for_masking) && posY > 2 && posX != 512)begin
+            j_reg_index <= j_reg_index + 1;
         end 
         else begin
-            j_reg_index <= j_reg_index + 1;
+            j_reg_index <= j_reg_index;
         end
     end
 end
