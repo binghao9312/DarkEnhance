@@ -5,7 +5,7 @@ module testbench;
 reg clk;
 reg rst;
 
-wire R0W1,input_pause;
+wire R0W1,input_pause,ready;
 wire [7:0] pixel_R, pixel_G, pixel_B;
 
 reg  [23:0] img_mem [0:262143]; // 512x512
@@ -47,7 +47,12 @@ always @(posedge clk or rst) begin
     end 
     else if (!R0W1) begin
         if(!input_pause)begin
-            img_idx <= img_idx + 1;
+            if(img_idx > 262132)begin
+                img_idx <= img_idx;
+            end
+            else begin
+                img_idx <= img_idx + 1;
+            end
         end
         else begin
             img_idx <= img_idx;
@@ -60,6 +65,21 @@ end
 assign pixel_in_R  =  img_mem[img_idx][23:16];
 assign pixel_in_G  =  img_mem[img_idx][15: 8];
 assign pixel_in_B  =  img_mem[img_idx][ 7: 0];
+
+
+integer rgb_file;
+initial begin
+    rgb_file = $fopen("verilog_output.txt", "w");
+    if (!rgb_file)begin
+        $fatal("Can't open output file");
+    end
+end
+
+ always @(posedge clk) begin
+    if (ready) begin
+      $fwrite(rgb_file, "%h\n", {pixel_R,pixel_G,pixel_B});
+    end
+  end
 // ===== Module Instantiation
 top DUT (
     .clk(clk),
@@ -72,7 +92,8 @@ top DUT (
     .pixel_B(pixel_B),
     .done(done),
     .R0W1(R0W1),
-    .input_pause(input_pause)
+    .input_pause(input_pause),
+    .ready(ready)
 );
 
 endmodule

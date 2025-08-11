@@ -1,4 +1,3 @@
-#pass
 import numpy as np
 
 A = 255
@@ -11,20 +10,16 @@ def calc_t(gray):
     return t
 
 print("gray_range, t_x100")
-last = int(calc_t(0)*100)
-start = 0
-for gray in range(1, 256):
+first = True
+gray = 3 #mid
+while(gray < 256):
     t = calc_t(gray)
-    a = int(t*100)
-    if a != last:
-        
-        for i in range(start,gray,1): 
-            print(f"8'd{i}",end=" ")
-            if(i < gray-1):print(", ",end="")
+    a = int(t * 100)
+    if(gray > 3): first = False
+    sentence = f"if(j_value > {gray - 3} || j_value <= {gray + 2})begin  t_ans <= {a}; end"
 
-        print(f":t_ans = {last};")
-        start = gray
-        last = a
+    if(not first):
+        sentence = "else " + sentence
 
-print(f"8'd255:t_ans = {last};")
-
+    gray += 5
+    print(sentence)
