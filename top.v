@@ -21,8 +21,8 @@
 //     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //===================== 0806 version descript =========================
-//|| #805 j_reg[j_reg_index] <= min2 may will delay 1 clk          ||
-//||        sol: init changed to 0                                   ||            
+//||                                         ||
+//||                                         ||            
 //=====================================================================
 
 
@@ -127,7 +127,7 @@ always @(*) begin
     endcase
 end
 //============== ready ===============================
-assign ready = (now_state == data_out)? 1'd1 : 1'd0;
+assign ready = (now_state == POS_RESET2)? 1'd1 : 1'd0;
 
 //============== input pause =========================
 always @(posedge clk or posedge rst)begin
@@ -357,9 +357,9 @@ always @(posedge clk or posedge rst) begin
         end
     end 
     else if(now_state == Load_data) begin
-        R_ram[(posY << 9) + posX] <= pixel_in_R;
-        G_ram[(posY << 9) + posX] <= pixel_in_G;
-        B_ram[(posY << 9) + posX] <= pixel_in_B;
+        R_ram[pixel_index] <= pixel_in_R;
+        G_ram[pixel_index] <= pixel_in_G;
+        B_ram[pixel_index] <= pixel_in_B;
     end
 end
 //=================== masking =========================
