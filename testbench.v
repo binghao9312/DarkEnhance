@@ -62,14 +62,14 @@ end
 
 
 
-assign pixel_in_R  =  img_mem[img_idx][23:16];
-assign pixel_in_G  =  img_mem[img_idx][15: 8];
-assign pixel_in_B  =  img_mem[img_idx][ 7: 0];
+assign pixel_in_R  =  (done)? 8'dz : img_mem[img_idx][23:16];
+assign pixel_in_G  =  (done)? 8'dz : img_mem[img_idx][15: 8];
+assign pixel_in_B  =  (done)? 8'dz : img_mem[img_idx][ 7: 0];
 
 
 integer rgb_file;
 initial begin
-    rgb_file = $fopen("verilog_output.txt", "w");
+    rgb_file = $fopen("verilog_output.hex", "w");
     if (!rgb_file)begin
         $fatal("Can't open output file");
     end

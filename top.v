@@ -19,10 +19,6 @@
 //
 //
 //     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//
-//               ä½ç¥ä¿ä½         æ°¸ç¡BUG
-
-//
 
 //===================== 0806 version descript =========================
 //|| #805 j_reg[j_reg_index] <= min2 may will delay 1 clk          ||
@@ -54,16 +50,9 @@ parameter [3:0] //statement
                 POS_RESET2          = 4'd5,
                 data_out            = 4'd6,
                 delayOneCycle       = 4'd7;
-                //num
-                //image_width       = 9'd512, // 512 - 4
-                //image_width_sub2  = 9'd510,
-                //image_width_sub1  = 9'd511, 
-                //image_size        = 19'd262144, // 512 * 512 = 262144
-                //image_size_sub1   = 19'd262143; // 512 * 512 - 1 = 262143
-
+                
 //================ WIRE ========================
 wire    [7:0] R_value,G_value,B_value,ZZ_value;
-
 wire    push_to_next_row,mask_start;
 
 //================ FOR observe =================
@@ -812,7 +801,7 @@ always @(posedge clk or posedge rst) begin
     end 
     else begin
         if (now_state == data_out) begin
-            if(posX == 9'd511 && posY == 9'd511)begin
+            if(posX == 9'd510 && posY == 9'd511)begin
                 done <= 1'b1;
             end
             else begin
