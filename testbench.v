@@ -74,12 +74,19 @@ initial begin
         $fatal("Can't open output file");
     end
 end
+// ==== fsdb ====
+initial begin
+    $fsdbDumpfile("wave.fsdb");
+    $fsdbDumpvars("+mda");
+end
 
- always @(posedge clk) begin
+always @(posedge clk) begin
     if (ready) begin
-      $fwrite(rgb_file, "%h\n", {pixel_R,pixel_G,pixel_B});
+        $fwrite(rgb_file, "%h\n", {pixel_R,pixel_G,pixel_B});
     end
-  end
+end
+
+
 // ===== Module Instantiation
 top DUT (
     .clk(clk),
