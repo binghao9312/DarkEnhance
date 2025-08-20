@@ -20,9 +20,10 @@
 //
 //     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-//===================== 0806 version descript =========================
-//||                                         ||
-//||                                         ||            
+//===================== 0818 version descript =========================
+//||     all process can work, but output still wrong                ||
+//||     when pos in boundary, output data should be original data   ||
+//||     but it ain't                                                ||            
 //=====================================================================
 
 
@@ -53,7 +54,7 @@ parameter [3:0] //statement
                 
 //================ WIRE ========================
 wire    [7:0] R_value,G_value,B_value,ZZ_value;
-wire    push_to_next_row,mask_start;
+wire    push_to_next_row,mask_start,isBoundary;
 
 //================ FOR observe =================
 wire    [7:0] Rm0,Rm1,Rm2,Rm3,Rm4,Rm5,Rm6,Rm7,Rm8;
@@ -97,7 +98,7 @@ reg     [7:0] sub1;
 reg     [3:0] now_state, next_state;
 reg     [8:0] R_pixel_reg, G_pixel_reg, B_pixel_reg;
 reg     [8:0] R_pixel_reg1, G_pixel_reg1, B_pixel_reg1;
-reg     [9:0] pixel_index;
+reg     [11:0] pixel_index;
 reg     [14:0] R_shift_L1,G_shift_L1,B_shift_L1;
 reg     [14:0] R_shift_L2,G_shift_L2,B_shift_L2;
 reg     [14:0] R_shift_L3,G_shift_L3,B_shift_L3;
@@ -119,15 +120,16 @@ always @(*) begin
         IDLE:               next_state = Load_data; 
         Load_data:          next_state = (posX == 9'd512 && posY == 9'd511)? wait_for_masking : Load_data;
         wait_for_masking:   next_state = (all_mask_end) ? POS_RESET : wait_for_masking; 
-        POS_RESET:          next_state = calculate;
+        POS_RESET:          next_state = data_out; // ori calculate
         calculate:          next_state = (cal_end)? POS_RESET2 : calculate;
         POS_RESET2:         next_state = data_out; 
-        data_out:           next_state = (done)?  IDLE: data_out;
+        data_out:           next_state = (done)?  delayOneCycle: data_out;
+        delayOneCycle:      next_state = IDLE;
         default:            next_state = IDLE; // Default case
     endcase
 end
 //============== ready ===============================
-assign ready = (now_state == POS_RESET2)? 1'd1 : 1'd0;
+assign ready = (now_state == data_out || now_state == delayOneCycle)? 1'd1 : 1'd0;
 
 //============== input pause =========================
 always @(posedge clk or posedge rst)begin
@@ -218,8 +220,22 @@ always @(posedge clk or posedge rst) begin
                 end
             end
         end
+        
+        else if(now_state == data_out)begin
+            if (posY == 511 && posX == 511) begin
+                posY     <= 12'b1;
+                posX     <= 12'b1;     
+            end
+            else if (posX == 511) begin
+                posX <= 12'b0;
+                posY <= posY + 1'd1;
+            end
+            else begin
+                posX <= posX + 1'b1;
+            end
+        end
 
-        else if(now_state == data_out || now_state == calculate)begin
+        else if(now_state == calculate)begin
             if (posY == 511 && posX == 511) begin
                 posY     <= 12'b1;
                 posX     <= 12'b1;     
@@ -255,7 +271,6 @@ always @(posedge clk or posedge rst)begin
         
     end
     else begin
-        //æ¯512åpixel æå°R G Bçmask registerå¾åç§»åä¸æ
         // R0  [0 1 2 ....  511]       
         // ^  ^  ^  ^  ^  ^  ^
         // R1  [0 1 2 ....  511]     
@@ -356,7 +371,7 @@ always @(posedge clk or posedge rst) begin
             end
         end
     end 
-    else if(now_state == Load_data) begin
+    else if(now_state == Load_data && posX < 10'd512) begin
         R_ram[pixel_index] <= pixel_in_R;
         G_ram[pixel_index] <= pixel_in_G;
         B_ram[pixel_index] <= pixel_in_B;
@@ -794,6 +809,8 @@ always @(posedge clk or posedge rst) begin
     end
 end
 
+assign isBoundary = (posX <= 10'd512)? 1'd1 : 1'd0;
+// ori => assign isBoundary = (posX == 9'd0 || posY == 9'd0 ||posX == 9'd511 || posY == 9'd511)? 1'd1 : 1'd0;
 //================ outputing data ======================
 always @(posedge clk or posedge rst) begin
     if (rst) begin
@@ -801,14 +818,13 @@ always @(posedge clk or posedge rst) begin
     end 
     else begin
         if (now_state == data_out) begin
-            if(posX == 9'd510 && posY == 9'd511)begin
+            if(posX == 9'd511 && posY == 9'd511)begin
                 done <= 1'b1;
             end
             else begin
                 done <= 1'b0;
                 //boundary direct give original pixel
-                if( posX == 9'd0 || posY == 9'd0 ||
-                    posX == 9'd511 || posY == 9'd511)begin
+                if(isBoundary)begin
                     pixel_R = R_ram[pixel_index];
                     pixel_G = G_ram[pixel_index];
                     pixel_B = B_ram[pixel_index];
