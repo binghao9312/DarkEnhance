@@ -55,6 +55,7 @@ parameter [3:0] //statement
 //================ WIRE ========================
 wire    [7:0] R_value,G_value,B_value,ZZ_value;
 wire    push_to_next_row,mask_start,isBoundary;
+wire    Ram_R0W1,Ram_enable;
 
 //================ FOR observe =================
 wire    [7:0] Rm0,Rm1,Rm2,Rm3,Rm4,Rm5,Rm6,Rm7,Rm8;
@@ -93,6 +94,7 @@ reg     [11:0] posX,posY,load_cnt;
 reg     [14:0] R_AsubR,G_AsubR,B_AsubR;
 reg     [8:0] t_ans;
 reg     [20:0] div1,div2,mul1,check1_mul1,mul2,mul3;
+reg     [8:0] R_ram_output,G_ram_output,B_ram_output
 reg     [3:0] div_index;
 reg     [7:0] sub1;
 reg     [3:0] now_state, next_state;
@@ -343,26 +345,26 @@ always @(posedge clk or posedge rst)begin
 end
 
 //================ RAM ========================
-reg [7:0] R_ram[0:262144];   
-reg [7:0] G_ram[0:262144]; 
-reg [7:0] B_ram[0:262144]; 
+ram R_ram(clk,rst,Ram_enable,Ram_R0W1,pixel_index,pixel_in_R,R_ram_output);
+ram G_ram(clk,rst,Ram_enable,Ram_R0W1,pixel_index,pixel_in_R,G_ram_output);
+ram B_ram(clk,rst,Ram_enable,Ram_R0W1,pixel_index,pixel_in_R,B_ram_output);
 integer x, y;
-always @(posedge clk or posedge rst) begin
-    if (rst) begin
-        for (x = 0; x < 512; x = x + 1) begin
-            for (y = 0; y < 512; y = y + 1) begin
-                R_ram[(y << 9) + x] <= 8'd0;
-                G_ram[(y << 9) + x] <= 8'd0;
-                B_ram[(y << 9) + x] <= 8'd0;
-            end
-        end
-    end 
-    else if(now_state == Load_data) begin
-        R_ram[pixel_index] <= pixel_in_R;
-        G_ram[pixel_index] <= pixel_in_G;
-        B_ram[pixel_index] <= pixel_in_B;
+
+always @(*)begin
+    if(now_state == Load_data)begin
+        Ram_enable = 1'd1;
+        Ram_R0W1   = 1'd0;
+    end
+    else if(now_state == data_out)begin
+        Ram_enable = 1'd1;
+        Ram_R0W1   = 1'd1;
+    end
+    else begin
+        Ram_enable = 1'd0;
+        Ram_R0W1   = 1'd1;
     end
 end
+
 //=================== masking =========================
 always @(posedge clk or posedge rst)begin
     if(rst)begin
@@ -811,9 +813,9 @@ always @(posedge clk or posedge rst) begin
                 done <= 1'b0;
                 //boundary direct give original pixel
                 if(isBoundary)begin
-                    pixel_R = R_ram[pixel_index];
-                    pixel_G = G_ram[pixel_index];
-                    pixel_B = B_ram[pixel_index];
+                    pixel_R = R_ram_output;
+                    pixel_G = R_ram_output;
+                    pixel_B = R_ram_output;
                 end
                 else begin
                     pixel_R = 255 - R_pixel_reg1;
