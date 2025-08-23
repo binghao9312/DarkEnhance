@@ -1,9 +1,9 @@
 module ram(
     input                clk,rst,enable,
     input                R0W1,
-    input       [18:0]   addr;
+    input       [18:0]   addr,
     input       [7:0]    data_in,
-    output      [8:0]    data_out
+    output      [7:0]    data_out
 );
 
 reg [7:0] ram[0:262143];

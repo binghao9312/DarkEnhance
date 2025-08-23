@@ -7,12 +7,9 @@ reg rst;
 
 wire R0W1,input_pause,ready;
 wire [7:0] pixel_R, pixel_G, pixel_B;
-
 reg  [23:0] img_mem [0:262143]; // 512x512
 reg  [17:0] img_idx;
-
 wire [7:0] pixel_in_R, pixel_in_G, pixel_in_B;
-
 wire done;
 
 // ===== Clock generator: 10ns period
@@ -23,13 +20,11 @@ end
 
 
 
-// ===== Image memory pre-load
 initial begin
     $readmemh("output.hex", img_mem);
     $display("img_mem[0]=%h, img_mem[1]=%h", img_mem[0], img_mem[1]);
 end
 
-// =====_RESET、img_idx、像素初始化與模擬流程控制
 initial begin
     img_idx = 18'd0;
     rst = 1;
@@ -65,7 +60,7 @@ end
 assign pixel_in_R  =  (done)? 8'dz : img_mem[img_idx][23:16];
 assign pixel_in_G  =  (done)? 8'dz : img_mem[img_idx][15: 8];
 assign pixel_in_B  =  (done)? 8'dz : img_mem[img_idx][ 7: 0];
-
+reg once;
 
 integer rgb_file;
 initial begin
@@ -74,10 +69,18 @@ initial begin
         $fatal("Can't open output file");
     end
 end
-// ==== fsdb ====
-initial begin
-    $fsdbDumpfile("wave.fsdb");
-    $fsdbDumpvars("+mda");
+always @(posedge clk or posedge rst)begin
+    if(rst)begin
+        once <= 1'd0;
+    end
+    else begin
+        if (ready) begin
+            once <= 1'd1;
+        end
+        else begin
+            once <= 1'd0;
+        end
+    end 
 end
 
 always @(posedge clk) begin
@@ -85,6 +88,13 @@ always @(posedge clk) begin
         $fwrite(rgb_file, "%h\n", {pixel_R,pixel_G,pixel_B});
     end
 end
+
+//verdi
+//initial begin
+//    $fsdbDumpfile("wave.fsdb");
+//    $fsdbDumpvars;
+//    $fsdbDumpMDA;
+//end
 
 
 // ===== Module Instantiation

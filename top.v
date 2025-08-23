@@ -20,10 +20,9 @@
 //
 //     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-//===================== 0818 version descript =========================
-//||     all process can work, but output still wrong                ||
-//||     when pos in boundary, output data should be original data   ||
-//||     but it ain't                                                ||            
+//===================== 0823 version descript =========================
+//||     all process can work, boundary output is right              ||
+//||     but only before pos 26134, might be overflow                ||            
 //=====================================================================
 
 
@@ -55,7 +54,8 @@ parameter [3:0] //statement
 //================ WIRE ========================
 wire    [7:0] R_value,G_value,B_value,ZZ_value;
 wire    push_to_next_row,mask_start,isBoundary;
-wire    Ram_R0W1,Ram_enable;
+wire    [7:0] R_ram_output,G_ram_output,B_ram_output;
+
 
 //================ FOR observe =================
 wire    [7:0] Rm0,Rm1,Rm2,Rm3,Rm4,Rm5,Rm6,Rm7,Rm8;
@@ -63,6 +63,7 @@ wire    [7:0] Gm0,Gm1,Gm2,Gm3,Gm4,Gm5,Gm6,Gm7,Gm8;
 wire    [7:0] Bm0,Bm1,Bm2,Bm3,Bm4,Bm5,Bm6,Bm7,Bm8;   
 
 //================ reg  ========================
+reg     Ram_R0W1,Ram_enable;
 reg     all_mask_end,cal_end;
 reg     [20:0] index0,index1,index2,index3,index4,index5,index6,index7,index8;
 reg     [20:0]j_reg_index;
@@ -94,13 +95,13 @@ reg     [11:0] posX,posY,load_cnt;
 reg     [14:0] R_AsubR,G_AsubR,B_AsubR;
 reg     [8:0] t_ans;
 reg     [20:0] div1,div2,mul1,check1_mul1,mul2,mul3;
-reg     [8:0] R_ram_output,G_ram_output,B_ram_output
+
 reg     [3:0] div_index;
 reg     [7:0] sub1;
 reg     [3:0] now_state, next_state;
 reg     [8:0] R_pixel_reg, G_pixel_reg, B_pixel_reg;
 reg     [8:0] R_pixel_reg1, G_pixel_reg1, B_pixel_reg1;
-reg     [11:0] pixel_index;
+reg     [18:0] pixel_index;
 reg     [14:0] R_shift_L1,G_shift_L1,B_shift_L1;
 reg     [14:0] R_shift_L2,G_shift_L2,B_shift_L2;
 reg     [14:0] R_shift_L3,G_shift_L3,B_shift_L3;
@@ -346,8 +347,8 @@ end
 
 //================ RAM ========================
 ram R_ram(clk,rst,Ram_enable,Ram_R0W1,pixel_index,pixel_in_R,R_ram_output);
-ram G_ram(clk,rst,Ram_enable,Ram_R0W1,pixel_index,pixel_in_R,G_ram_output);
-ram B_ram(clk,rst,Ram_enable,Ram_R0W1,pixel_index,pixel_in_R,B_ram_output);
+ram G_ram(clk,rst,Ram_enable,Ram_R0W1,pixel_index,pixel_in_G,G_ram_output);
+ram B_ram(clk,rst,Ram_enable,Ram_R0W1,pixel_index,pixel_in_B,B_ram_output);
 integer x, y;
 
 always @(*)begin
@@ -625,16 +626,16 @@ always @(*) begin
     end
     
     else begin    
-        R_pixel_reg = 8'd255 - R_ram[posY << 9 + posX];
-        G_pixel_reg = 8'd255 - G_ram[posY << 9 + posX];
-        B_pixel_reg = 8'd255 - B_ram[posY << 9 + posX];
+        R_pixel_reg = 8'd255 - R_ram_output;
+        G_pixel_reg = 8'd255 - G_ram_output;
+        B_pixel_reg = 8'd255 - B_ram_output;
     end
     
     check1_mul1 = cal_reg[pixel_index]; 
     //A - R
-    R_AsubR = 255 - R_ram[posY * 8 + posX];
-    G_AsubR = 255 - G_ram[posY * 8 + posX];
-    B_AsubR = 255 - B_ram[posY * 8 + posX];
+    R_AsubR = 255 - R_ram_output;
+    G_AsubR = 255 - G_ram_output;
+    B_AsubR = 255 - B_ram_output;
     
     R_shift_L1 = (R_AsubR << 1);
     R_shift_L2 = (R_AsubR << 2);
@@ -814,8 +815,8 @@ always @(posedge clk or posedge rst) begin
                 //boundary direct give original pixel
                 if(isBoundary)begin
                     pixel_R = R_ram_output;
-                    pixel_G = R_ram_output;
-                    pixel_B = R_ram_output;
+                    pixel_G = G_ram_output;
+                    pixel_B = B_ram_output;
                 end
                 else begin
                     pixel_R = 255 - R_pixel_reg1;
