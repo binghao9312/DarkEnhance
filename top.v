@@ -21,8 +21,10 @@
 //     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //===================== 0823 version descript =========================
-//||     all process can work, boundary output is right              ||
-//||     but only before pos 26134, might be overflow                ||            
+//||     when posY = 511 should keep load data to ram,               ||
+//||     but now_state changed to wait_for_masking, so               ||
+//||     can't load data into ram. that cause last row is empty      ||
+//||     #126 if condition posY == 512, all value will become 0    || 
 //=====================================================================
 
 
@@ -352,17 +354,28 @@ ram B_ram(clk,rst,Ram_enable,Ram_R0W1,pixel_index,pixel_in_B,B_ram_output);
 integer x, y;
 
 always @(*)begin
-    if(now_state == Load_data && posX != 9'd512)begin
-        Ram_enable = 1'd1;
+    if(now_state == Load_data)begin
         Ram_R0W1   = 1'd0;
     end
-    else if(now_state == data_out && posX != 9'd512)begin
-        Ram_enable = 1'd1;
+    else if(now_state == data_out)begin
         Ram_R0W1   = 1'd1;
     end
     else begin
-        Ram_enable = 1'd0;
         Ram_R0W1   = 1'd1;
+    end
+end
+
+always @(*)begin
+    if(now_state == Load_data || now_state == data_out)begin
+        if(posX == 9'd512)begin
+            Ram_enable = 1'd0;
+        end
+        else begin
+            Ram_enable = 1'd1;
+        end
+    end
+    else begin
+        Ram_enable = 1'd0;
     end
 end
 
@@ -798,7 +811,7 @@ always @(posedge clk or posedge rst) begin
     end
 end
 
-assign isBoundary = (posX <= 10'd512 || posY <= 10'd512 )? 1'd1 : 1'd0;
+assign isBoundary = (posX < 10'd512 || posY < 10'd512 )? 1'd1 : 1'd0;
 
 //================ outputing data ======================
 always @(posedge clk or posedge rst) begin
