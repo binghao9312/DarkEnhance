@@ -352,11 +352,11 @@ ram B_ram(clk,rst,Ram_enable,Ram_R0W1,pixel_index,pixel_in_B,B_ram_output);
 integer x, y;
 
 always @(*)begin
-    if(now_state == Load_data)begin
+    if(now_state == Load_data && posX != 9'd512)begin
         Ram_enable = 1'd1;
         Ram_R0W1   = 1'd0;
     end
-    else if(now_state == data_out)begin
+    else if(now_state == data_out && posX != 9'd512)begin
         Ram_enable = 1'd1;
         Ram_R0W1   = 1'd1;
     end
@@ -798,7 +798,7 @@ always @(posedge clk or posedge rst) begin
     end
 end
 
-assign isBoundary = (posX == 9'd0 || posY == 9'd0 ||posX == 9'd511 || posY == 9'd511)? 1'd1 : 1'd0;
+assign isBoundary = (posX <= 10'd512 || posY <= 10'd512 )? 1'd1 : 1'd0;
 
 //================ outputing data ======================
 always @(posedge clk or posedge rst) begin

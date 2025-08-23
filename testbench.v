@@ -21,7 +21,7 @@ end
 
 
 initial begin
-    $readmemh("output.hex", img_mem);
+    $readmemh("testdata.hex", img_mem);
     $display("img_mem[0]=%h, img_mem[1]=%h", img_mem[0], img_mem[1]);
 end
 
