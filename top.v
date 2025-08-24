@@ -30,15 +30,17 @@
 
 
 module top (
-    input clk,rst,
-    input [7:0] pixel_in_R,
-    input [7:0] pixel_in_G,
-    input [7:0] pixel_in_B,
-    output reg[7:0] pixel_R,
-    output reg[7:0] pixel_G,
-    output reg[7:0] pixel_B,
-    output reg done,R0W1,input_pause,
-    output ready
+    input               clk,rst,enable,
+    input       [7:0]   pixel_in_R,
+    input       [7:0]   pixel_in_G,
+    input       [7:0]   pixel_in_B,
+    input       [18:0]  addr_in,
+    output      [18:0]  addr_out,
+    output reg  [7:0]   pixel_R,
+    output reg  [7:0]   pixel_G,
+    output reg  [7:0]   pixel_B,
+    output reg          done,R0W1,input_pause,ack,
+    output              ready
 );
 
 
@@ -54,11 +56,9 @@ parameter [3:0] //statement
                 delayOneCycle       = 4'd7;
                 
 //================ WIRE ========================
-wire    [7:0] R_value,G_value,B_value,ZZ_value;
-wire    push_to_next_row,mask_start,isBoundary;
 wire    [7:0] R_ram_output,G_ram_output,B_ram_output;
-
-
+wire    push_to_next_row,mask_start,isBoundary,load_end;
+wire    [18:0] addr;
 //================ FOR observe =================
 wire    [7:0] Rm0,Rm1,Rm2,Rm3,Rm4,Rm5,Rm6,Rm7,Rm8;
 wire    [7:0] Gm0,Gm1,Gm2,Gm3,Gm4,Gm5,Gm6,Gm7,Gm8;
@@ -122,8 +122,8 @@ end
 
 always @(*) begin
     case (now_state)
-        IDLE:               next_state = Load_data; 
-        Load_data:          next_state = (posX == 9'd512 && posY == 9'd511)? wait_for_masking : Load_data;
+        IDLE:               next_state = (enable)? Load_data : IDLE; 
+        Load_data:          next_state = (load_end)? wait_for_masking : Load_data;
         wait_for_masking:   next_state = (all_mask_end) ? POS_RESET : wait_for_masking; 
         POS_RESET:          next_state = calculate;
         calculate:          next_state = (cal_end)? POS_RESET2 : calculate;
@@ -134,9 +134,25 @@ always @(*) begin
     endcase
 end
 //============== ready ===============================
-assign ready = (now_state == data_out)? 1'd1 : 1'd0;
-
+assign addr_out     = pixel_index;
+assign addr         = (now_state == data_out)? addr_out : addr_in;
+assign ready        = (now_state == data_out)? 1'd1 : 1'd0;
+assign load_end     = (now_state == Load_data && posX == 511 && posY == 511)? 1'd1 : 1'd0;
 //============== input pause =========================
+always @(posedge clk or posedge rst)begin
+    if(rst)begin
+        ack <= 1'd0;
+    end
+    else begin
+        if(enable) begin
+            ack <= ack + 1;
+        end
+        else begin
+            ack <= ack;
+        end
+    end
+end
+
 always @(posedge clk or posedge rst)begin
     if(rst)begin
         input_pause <= 1'd0;
@@ -348,9 +364,9 @@ always @(posedge clk or posedge rst)begin
 end
 
 //================ RAM ========================
-ram R_ram(clk,rst,Ram_enable,Ram_R0W1,pixel_index,pixel_in_R,R_ram_output);
-ram G_ram(clk,rst,Ram_enable,Ram_R0W1,pixel_index,pixel_in_G,G_ram_output);
-ram B_ram(clk,rst,Ram_enable,Ram_R0W1,pixel_index,pixel_in_B,B_ram_output);
+ram R_ram(clk,rst,Ram_enable,Ram_R0W1,addr,pixel_in_R,R_ram_output);
+ram G_ram(clk,rst,Ram_enable,Ram_R0W1,addr,pixel_in_G,G_ram_output);
+ram B_ram(clk,rst,Ram_enable,Ram_R0W1,addr,pixel_in_B,B_ram_output);
 integer x, y;
 
 always @(*)begin
@@ -458,10 +474,7 @@ always @(*) begin
     end
 end
 
-assign ZZ_value = R1_mask_register[0];
-assign R_value = R_row_register[load_cnt];
-assign G_value = G_row_register[load_cnt];
-assign B_value = B_row_register[load_cnt];
+
 
 
 always @(*)begin
@@ -526,8 +539,7 @@ always @(*)begin
 
         min1 = (min_r8 < min_g8) ? min_r8 : min_g8;
         min2 = (min_b8 < min1) ? min_b8 : min1;
-        pixel_index = (posY << 9) + posX; // calculate pixel index
-    
+        pixel_index = (posY << 9) + posX;
 end
 //======== observe ===========
 assign Rm0 = mask1[0];
