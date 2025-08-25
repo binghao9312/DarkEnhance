@@ -53,7 +53,7 @@ parameter [3:0] //statement
                 POS_RESET           = 4'd4,
                 POS_RESET2          = 4'd5,
                 data_out            = 4'd6,
-                delayOneCycle       = 4'd7;
+                delayTwoCycle       = 4'd7;
                 
 //================ WIRE ========================
 wire    [7:0] R_ram_output,G_ram_output,B_ram_output;
@@ -66,7 +66,7 @@ wire    [7:0] Bm0,Bm1,Bm2,Bm3,Bm4,Bm5,Bm6,Bm7,Bm8;
 
 //================ reg  ========================
 reg     Ram_R0W1,Ram_enable;
-reg     all_mask_end,cal_end;
+reg     all_mask_end,cal_end,delay_end;
 reg     [20:0] index0,index1,index2,index3,index4,index5,index6,index7,index8;
 reg     [20:0]j_reg_index;
 reg     [8:0] R0_mask_register[0:511];
@@ -109,7 +109,7 @@ reg     [14:0] R_shift_L2,G_shift_L2,B_shift_L2;
 reg     [14:0] R_shift_L3,G_shift_L3,B_shift_L3;
 reg     [14:0] R_shift_L4,G_shift_L4,B_shift_L4;
 reg     [14:0] R_shift_L5,G_shift_L5,B_shift_L5;
-reg     [1:0]  pause_cnt;
+reg     [1:0]  pause_cnt,delay_cnt;
 
 //================ State Machine ========================
 always @(posedge clk or posedge rst) begin
@@ -128,8 +128,8 @@ always @(*) begin
         POS_RESET:          next_state = calculate;
         calculate:          next_state = (cal_end)? POS_RESET2 : calculate;
         POS_RESET2:         next_state = data_out; 
-        data_out:           next_state = (done)?  delayOneCycle: data_out;
-        delayOneCycle:      next_state = IDLE;
+        data_out:           next_state = (done)?  delayTwoCycle: data_out;
+        delayTwoCycle:      next_state = IDLE;
         default:            next_state = IDLE; // Default case
     endcase
 end
@@ -138,6 +138,31 @@ assign addr_out     = pixel_index;
 assign addr         = (now_state == data_out)? addr_out : addr_in;
 assign ready        = (now_state == data_out)? 1'd1 : 1'd0;
 assign load_end     = (now_state == Load_data && posX == 511 && posY == 511)? 1'd1 : 1'd0;
+//============== delay two cycele ==================================
+always @(posedge clk or posedge rst)begin
+    if(rst)begin
+        delay_cnt <= 2'd0;
+        delay_end <= 1'd0;
+    end
+    else begin
+        if(now_state == delayTwoCycle)begin
+            if(delay_cnt > 1'd0)begin
+                delay_cnt <= 2'd0;
+                delay_end <= 1'd1;
+            end
+            else begin
+                delay_cnt <= delay_cnt + 1;
+                delay_end <= delay_end;
+            end
+        end
+        else begin
+            delay_cnt <= 2'd0;
+            delay_end <= 1'd0;
+        end
+    end
+
+end
+
 //============== input pause =========================
 always @(posedge clk or posedge rst)begin
     if(rst)begin
@@ -381,17 +406,25 @@ always @(*)begin
     end
 end
 
-always @(*)begin
-    if(now_state == Load_data || now_state == data_out)begin
-        if(posX == 9'd512)begin
-            Ram_enable = 1'd0;
-        end
-        else begin
-            Ram_enable = 1'd1;
-        end
+always @(posedge clk or posedge rst)begin
+    if(rst)begin
+        Ram_enable <= 1'd0;
     end
     else begin
-        Ram_enable = 1'd0;
+        if(now_state == Load_data)begin
+            if(posX == 9'd510)begin
+                Ram_enable <= 1'd0;
+            end
+            else begin
+                Ram_enable <= 1'd1;
+            end
+        end
+        else if(now_state == data_out || delayTwoCycle)begin
+            Ram_enable <= 1'd1;
+        end
+        else begin
+            Ram_enable <= 1'd0;
+        end
     end
 end
 
@@ -782,7 +815,7 @@ end
 
 always @(posedge clk or posedge rst) begin
     if (rst) begin
-        for (x = 0; x < 19'd262143; x = x + 1) begin
+        for (x = 0; x < 19'd262144; x = x + 1) begin
             j_reg[x] <= 8'b0;
         end
     end 
@@ -831,8 +864,8 @@ always @(posedge clk or posedge rst) begin
         done <= 1'b0;
     end 
     else begin
-        if (now_state == data_out) begin
-            if(posX == 9'd510 && posY == 9'd511)begin
+        if (now_state == data_out || now_state == delayTwoCycle) begin
+            if(posX == 9'd511 && posY == 9'd511)begin
                 done <= 1'b1;
             end
             else begin
