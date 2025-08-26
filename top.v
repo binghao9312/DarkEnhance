@@ -20,11 +20,11 @@
 //
 //     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-//===================== 0823 version descript =========================
-//||     when posY = 511 should keep load data to ram,               ||
-//||     but now_state changed to wait_for_masking, so               ||
-//||     can't load data into ram. that cause last row is empty      ||
-//||     #126 if condition posY == 512, all value will become 0    || 
+//===================== 0826 version descript =========================
+//||     image data can input and output, meanwhile no data loss      ||
+//||                                                                  ||
+//||                                                                  ||
+//||                                                                  || 
 //=====================================================================
 
 
@@ -35,12 +35,12 @@ module top (
     input       [7:0]   pixel_in_G,
     input       [7:0]   pixel_in_B,
     input       [18:0]  addr_in,
-    output      [18:0]  addr_out,
+    output reg  [18:0]  addr_out,
     output reg  [7:0]   pixel_R,
     output reg  [7:0]   pixel_G,
     output reg  [7:0]   pixel_B,
-    output reg          done,R0W1,input_pause,ack,
-    output              ready
+    output reg          R0W1,input_pause,ack,
+    output              done,ready
 );
 
 
@@ -57,7 +57,7 @@ parameter [3:0] //statement
                 
 //================ WIRE ========================
 wire    [7:0] R_ram_output,G_ram_output,B_ram_output;
-wire    push_to_next_row,mask_start,isBoundary,load_end;
+wire    push_to_next_row,mask_start,isBoundary;
 wire    [18:0] addr;
 //================ FOR observe =================
 wire    [7:0] Rm0,Rm1,Rm2,Rm3,Rm4,Rm5,Rm6,Rm7,Rm8;
@@ -65,8 +65,8 @@ wire    [7:0] Gm0,Gm1,Gm2,Gm3,Gm4,Gm5,Gm6,Gm7,Gm8;
 wire    [7:0] Bm0,Bm1,Bm2,Bm3,Bm4,Bm5,Bm6,Bm7,Bm8;   
 
 //================ reg  ========================
-reg     Ram_R0W1,Ram_enable;
-reg     all_mask_end,cal_end,delay_end;
+reg     Ram_R0W1,Ram_enable,addr_enable,load_end;
+reg     all_mask_end,cal_end,delay_end,dataout_state_end;
 reg     [20:0] index0,index1,index2,index3,index4,index5,index6,index7,index8;
 reg     [20:0]j_reg_index;
 reg     [8:0] R0_mask_register[0:511];
@@ -128,16 +128,62 @@ always @(*) begin
         POS_RESET:          next_state = calculate;
         calculate:          next_state = (cal_end)? POS_RESET2 : calculate;
         POS_RESET2:         next_state = data_out; 
-        data_out:           next_state = (done)?  delayTwoCycle: data_out;
+        data_out:           next_state = (dataout_state_end)?  delayTwoCycle: data_out;
         delayTwoCycle:      next_state = IDLE;
         default:            next_state = IDLE; // Default case
     endcase
 end
 //============== ready ===============================
-assign addr_out     = pixel_index;
-assign addr         = (now_state == data_out)? addr_out : addr_in;
-assign ready        = (now_state == data_out)? 1'd1 : 1'd0;
-assign load_end     = (now_state == Load_data && posX == 511 && posY == 511)? 1'd1 : 1'd0;
+assign done         = (now_state == delayTwoCycle)? 1'd1 : 1'd0;
+assign addr         = (now_state == data_out)? pixel_index : addr_in;
+assign ready        = (now_state == data_out && addr_enable)? 1'd1 : 1'd0;
+
+//============= load_end =========================================
+always @(posedge clk or posedge rst)begin
+    if(rst)begin
+        load_end <= 1'd0;
+    end
+    else begin
+        if(now_state == Load_data && posX == 511 && posY == 511)begin
+            load_end <= 1'd1;
+        end
+        else begin
+            load_end <= load_end;
+        end
+    end
+
+end
+//============== data_out state ===================================
+always @(posedge clk or posedge rst)begin
+    if(rst)begin
+        dataout_state_end <= 1'd0;
+    end
+    else begin
+        if(now_state == data_out && addr == 262143)begin
+            dataout_state_end <= 1'd1;
+        end
+        else begin
+            dataout_state_end <= dataout_state_end;
+        end
+    end
+end
+//============== addr enable =======================================
+always @(posedge clk or posedge rst)begin
+    if(rst)begin
+        addr_enable <= 1'd0;
+        addr_out    <= 18'd0;
+    end
+    else begin
+        if(now_state == data_out || now_state == delayTwoCycle)begin
+            addr_enable <= 1'd1;
+            addr_out    <= pixel_index;
+        end
+        else begin
+            addr_enable <= 1'd0;
+        end
+    end 
+end
+
 //============== delay two cycele ==================================
 always @(posedge clk or posedge rst)begin
     if(rst)begin
@@ -412,7 +458,7 @@ always @(posedge clk or posedge rst)begin
     end
     else begin
         if(now_state == Load_data)begin
-            if(posX == 9'd510)begin
+            if(posX == 9'd511)begin
                 Ram_enable <= 1'd0;
             end
             else begin
@@ -831,7 +877,7 @@ end
 
 //================ cal_reg_save data ======================
 always @(posedge clk or posedge rst) begin
-    if (rst || (now_state == IDLE) ) begin
+    if (rst) begin
         cal_end     <= 1'b0;   
         for (x = 0; x < 19'd262144; x = x + 1) begin
             cal_reg[x] <= 8'b0;
@@ -859,36 +905,24 @@ end
 assign isBoundary = (posX < 10'd512 || posY < 10'd512 )? 1'd1 : 1'd0;
 
 //================ outputing data ======================
-always @(posedge clk or posedge rst) begin
-    if (rst) begin
-        done <= 1'b0;
-    end 
-    else begin
-        if (now_state == data_out || now_state == delayTwoCycle) begin
-            if(posX == 9'd511 && posY == 9'd511)begin
-                done <= 1'b1;
-            end
-            else begin
-                done <= 1'b0;
-                //boundary direct give original pixel
-                if(isBoundary)begin
-                    pixel_R = R_ram_output;
-                    pixel_G = G_ram_output;
-                    pixel_B = B_ram_output;
-                end
-                else begin
-                    pixel_R = 255 - R_pixel_reg1;
-                    pixel_G = 255 - G_pixel_reg1;
-                    pixel_B = 255 - B_pixel_reg1;
-                end
-            end
+always @(posedge clk)begin
+    if (now_state == data_out || now_state == delayTwoCycle) begin  
+        //boundary direct give original pixel
+        if(isBoundary)begin
+            pixel_R = R_ram_output;
+            pixel_G = G_ram_output;
+            pixel_B = B_ram_output;
         end
         else begin
-            done <= 1'b0;
-            pixel_R <= 8'dz;
-            pixel_G <= 8'dz;
-            pixel_B <= 8'dz;
+            pixel_R = 255 - R_pixel_reg1;
+            pixel_G = 255 - G_pixel_reg1;
+            pixel_B = 255 - B_pixel_reg1;
         end
+    end
+    else begin
+        pixel_R <= 8'dz;
+        pixel_G <= 8'dz;
+        pixel_B <= 8'dz;
     end
 end
 
