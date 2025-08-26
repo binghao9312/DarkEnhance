@@ -465,7 +465,7 @@ always @(posedge clk or posedge rst)begin
                 Ram_enable <= 1'd1;
             end
         end
-        else if(now_state == data_out || delayTwoCycle)begin
+        else if(now_state == data_out || now_state == delayTwoCycle || now_state == calculate)begin
             Ram_enable <= 1'd1;
         end
         else begin
@@ -518,8 +518,6 @@ always @(posedge clk or posedge rst)begin
         end
     end
 end
-
-
 assign mask_start = ((now_state == Load_data || now_state == wait_for_masking) && posX > 0 && posX < 511 && posY > 2 ) ? 1'd1 : 1'd0;
 
 
@@ -536,11 +534,6 @@ always @(*) begin
         index7   = 8'b0;
         index8   = 8'b0;
     end
-    else if(now_state == data_out)begin
-        index0  = 0;
-        index1  = 0;
-        index2  = 0;
-    end
     else if((now_state == Load_data || now_state == wait_for_masking) && mask_start)begin
         index0 = load_cnt - 1;
         index1 = load_cnt;
@@ -552,8 +545,6 @@ always @(*) begin
         index2  = 0;
     end
 end
-
-
 
 
 always @(*)begin
@@ -902,7 +893,7 @@ always @(posedge clk or posedge rst) begin
     end
 end
 
-assign isBoundary = (posX < 10'd512 || posY < 10'd512 )? 1'd1 : 1'd0;
+assign isBoundary = (posX == 8'd0 || posX == 8'd511 || posY == 8'd0 || posY == 8'd511)? 1'd1 : 1'd0;
 
 //================ outputing data ======================
 always @(posedge clk)begin
