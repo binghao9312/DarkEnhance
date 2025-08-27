@@ -610,6 +610,7 @@ always @(*)begin
         min1 = (min_r8 < min_g8) ? min_r8 : min_g8;
         min2 = (min_b8 < min1) ? min_b8 : min1;
         pixel_index = (posY << 9) + posX;
+        j_value = j_reg[j_reg_index]; 
 end
 //======== observe ===========
 assign Rm0 = mask1[0];
@@ -654,58 +655,58 @@ always @(*) begin
     end
     //w = 0.75
     else if(now_state == calculate)begin
-        j_value = j_reg[j_reg_index]; 
-        if      (j_value > 0   || j_value <=   5)begin  t_ans <= 25; end
-        else if (j_value > 5   || j_value <=  10)begin  t_ans <= 27; end
-        else if (j_value > 10  || j_value <=  15)begin  t_ans <= 28; end
-        else if (j_value > 15  || j_value <=  20)begin  t_ans <= 30; end
-        else if (j_value > 20  || j_value <=  25)begin  t_ans <= 31; end
-        else if (j_value > 25  || j_value <=  30)begin  t_ans <= 33; end
-        else if (j_value > 30  || j_value <=  35)begin  t_ans <= 34; end
-        else if (j_value > 35  || j_value <=  40)begin  t_ans <= 36; end
-        else if (j_value > 40  || j_value <=  45)begin  t_ans <= 37; end
-        else if (j_value > 45  || j_value <=  50)begin  t_ans <= 39; end
-        else if (j_value > 50  || j_value <=  55)begin  t_ans <= 40; end
-        else if (j_value > 55  || j_value <=  60)begin  t_ans <= 42; end
-        else if (j_value > 60  || j_value <=  65)begin  t_ans <= 43; end
-        else if (j_value > 65  || j_value <=  70)begin  t_ans <= 44; end
-        else if (j_value > 70  || j_value <=  75)begin  t_ans <= 46; end
-        else if (j_value > 75  || j_value <=  80)begin  t_ans <= 47; end
-        else if (j_value > 80  || j_value <=  85)begin  t_ans <= 49; end
-        else if (j_value > 85  || j_value <=  90)begin  t_ans <= 50; end
-        else if (j_value > 90  || j_value <=  95)begin  t_ans <= 52; end
-        else if (j_value > 95  || j_value <= 100)begin  t_ans <= 53; end
-        else if (j_value > 100 || j_value <= 105)begin  t_ans <= 55; end
-        else if (j_value > 105 || j_value <= 110)begin  t_ans <= 56; end
-        else if (j_value > 110 || j_value <= 115)begin  t_ans <= 58; end
-        else if (j_value > 115 || j_value <= 120)begin  t_ans <= 59; end
-        else if (j_value > 120 || j_value <= 125)begin  t_ans <= 61; end
-        else if (j_value > 125 || j_value <= 130)begin  t_ans <= 62; end
-        else if (j_value > 130 || j_value <= 135)begin  t_ans <= 64; end
-        else if (j_value > 135 || j_value <= 140)begin  t_ans <= 65; end
-        else if (j_value > 140 || j_value <= 145)begin  t_ans <= 67; end
-        else if (j_value > 145 || j_value <= 150)begin  t_ans <= 68; end
-        else if (j_value > 150 || j_value <= 155)begin  t_ans <= 70; end
-        else if (j_value > 155 || j_value <= 160)begin  t_ans <= 71; end
-        else if (j_value > 160 || j_value <= 165)begin  t_ans <= 72; end
-        else if (j_value > 165 || j_value <= 170)begin  t_ans <= 74; end
-        else if (j_value > 170 || j_value <= 175)begin  t_ans <= 75; end
-        else if (j_value > 175 || j_value <= 180)begin  t_ans <= 77; end
-        else if (j_value > 180 || j_value <= 185)begin  t_ans <= 78; end
-        else if (j_value > 185 || j_value <= 190)begin  t_ans <= 80; end
-        else if (j_value > 190 || j_value <= 195)begin  t_ans <= 81; end
-        else if (j_value > 195 || j_value <= 200)begin  t_ans <= 83; end
-        else if (j_value > 200 || j_value <= 205)begin  t_ans <= 84; end
-        else if (j_value > 205 || j_value <= 210)begin  t_ans <= 86; end
-        else if (j_value > 210 || j_value <= 215)begin  t_ans <= 87; end
-        else if (j_value > 215 || j_value <= 220)begin  t_ans <= 89; end
-        else if (j_value > 220 || j_value <= 225)begin  t_ans <= 90; end
-        else if (j_value > 225 || j_value <= 230)begin  t_ans <= 92; end
-        else if (j_value > 230 || j_value <= 235)begin  t_ans <= 93; end
-        else if (j_value > 235 || j_value <= 240)begin  t_ans <= 95; end
-        else if (j_value > 240 || j_value <= 245)begin  t_ans <= 96; end
-        else if (j_value > 245 || j_value <= 250)begin  t_ans <= 97; end
-        else if (j_value > 250 || j_value <= 255)begin  t_ans <= 99; end
+        if      (j_value > 0   && j_value <=   5)begin  t_ans = 25; end
+        else if (j_value > 5   && j_value <=  10)begin  t_ans = 27; end
+        else if (j_value > 10  && j_value <=  15)begin  t_ans = 28; end
+        else if (j_value > 15  && j_value <=  20)begin  t_ans = 30; end
+        else if (j_value > 20  && j_value <=  25)begin  t_ans = 31; end
+        else if (j_value > 25  && j_value <=  30)begin  t_ans = 33; end
+        else if (j_value > 30  && j_value <=  35)begin  t_ans = 34; end
+        else if (j_value > 35  && j_value <=  40)begin  t_ans = 36; end
+        else if (j_value > 40  && j_value <=  45)begin  t_ans = 37; end
+        else if (j_value > 45  && j_value <=  50)begin  t_ans = 39; end
+        else if (j_value > 50  && j_value <=  55)begin  t_ans = 40; end
+        else if (j_value > 55  && j_value <=  60)begin  t_ans = 42; end
+        else if (j_value > 60  && j_value <=  65)begin  t_ans = 43; end
+        else if (j_value > 65  && j_value <=  70)begin  t_ans = 44; end
+        else if (j_value > 70  && j_value <=  75)begin  t_ans = 46; end
+        else if (j_value > 75  && j_value <=  80)begin  t_ans = 47; end
+        else if (j_value > 80  && j_value <=  85)begin  t_ans = 49; end
+        else if (j_value > 85  && j_value <=  90)begin  t_ans = 50; end
+        else if (j_value > 90  && j_value <=  95)begin  t_ans = 52; end
+        else if (j_value > 95  && j_value <= 100)begin  t_ans = 53; end
+        else if (j_value > 100 && j_value <= 105)begin  t_ans = 55; end
+        else if (j_value > 105 && j_value <= 110)begin  t_ans = 56; end
+        else if (j_value > 110 && j_value <= 115)begin  t_ans = 58; end
+        else if (j_value > 115 && j_value <= 120)begin  t_ans = 59; end
+        else if (j_value > 120 && j_value <= 125)begin  t_ans = 61; end
+        else if (j_value > 125 && j_value <= 130)begin  t_ans = 62; end
+        else if (j_value > 130 && j_value <= 135)begin  t_ans = 64; end
+        else if (j_value > 135 && j_value <= 140)begin  t_ans = 65; end
+        else if (j_value > 140 && j_value <= 145)begin  t_ans = 67; end
+        else if (j_value > 145 && j_value <= 150)begin  t_ans = 68; end
+        else if (j_value > 150 && j_value <= 155)begin  t_ans = 70; end
+        else if (j_value > 155 && j_value <= 160)begin  t_ans = 71; end
+        else if (j_value > 160 && j_value <= 165)begin  t_ans = 72; end
+        else if (j_value > 165 && j_value <= 170)begin  t_ans = 74; end
+        else if (j_value > 170 && j_value <= 175)begin  t_ans = 75; end
+        else if (j_value > 175 && j_value <= 180)begin  t_ans = 77; end
+        else if (j_value > 180 && j_value <= 185)begin  t_ans = 78; end
+        else if (j_value > 185 && j_value <= 190)begin  t_ans = 80; end
+        else if (j_value > 190 && j_value <= 195)begin  t_ans = 81; end
+        else if (j_value > 195 && j_value <= 200)begin  t_ans = 83; end
+        else if (j_value > 200 && j_value <= 205)begin  t_ans = 84; end
+        else if (j_value > 205 && j_value <= 210)begin  t_ans = 86; end
+        else if (j_value > 210 && j_value <= 215)begin  t_ans = 87; end
+        else if (j_value > 215 && j_value <= 220)begin  t_ans = 89; end
+        else if (j_value > 220 && j_value <= 225)begin  t_ans = 90; end
+        else if (j_value > 225 && j_value <= 230)begin  t_ans = 92; end
+        else if (j_value > 230 && j_value <= 235)begin  t_ans = 93; end
+        else if (j_value > 235 && j_value <= 240)begin  t_ans = 95; end
+        else if (j_value > 240 && j_value <= 245)begin  t_ans = 96; end
+        else if (j_value > 245 && j_value <= 250)begin  t_ans = 97; end
+        else if (j_value > 250 && j_value <= 255)begin  t_ans = 99; end
+        else begin t_ans = 100; end
     end
 end
 //================ lastest calculation ================
