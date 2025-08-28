@@ -922,7 +922,7 @@ always @(posedge clk or posedge rst) begin
             cal_end <= 1'b0;
         end
         else if (now_state == Load_data) begin
-            if(posX == 9'd510 && posY == 9'd510) begin
+            if(posX == 9'd511 && posY == 9'd511) begin
                 cal_end <= 1'b1;
             end
             else begin
@@ -948,9 +948,9 @@ always @(posedge clk)begin
             pixel_B = B_ram_output;
         end
         else begin
-            pixel_R = cal_reg[addr_out];
-            pixel_G = cal_reg[addr_out];
-            pixel_B = cal_reg[addr_out];
+            pixel_R = R_ram_output - cal_reg[addr_out];
+            pixel_G = G_ram_output - cal_reg[addr_out];
+            pixel_B = B_ram_output - cal_reg[addr_out];
         end
     end
     else begin
