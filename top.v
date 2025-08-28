@@ -278,15 +278,9 @@ always @(posedge clk or posedge rst) begin
     end 
     else begin
         if(now_state == POS_RESET)begin
-            posX <= 12'b1;
-            posY <= 12'b1;
-        end
-
-        else if(now_state == POS_RESET2)begin
             posX <= 12'b0;
             posY <= 12'b0;
         end
-
         else if(now_state == Load_data || now_state == wait_for_masking)begin
             if (posY == 514 && posX == 512) begin
                 posY     <= 12'b1;
@@ -306,7 +300,7 @@ always @(posedge clk or posedge rst) begin
             end
         end
 
-        else if(now_state == data_out || now_state == calculate)begin
+        else if(now_state == data_out)begin
             if (posY == 511 && posX == 511) begin
                 posY     <= 12'b1;
                 posX     <= 12'b1;     
@@ -948,9 +942,9 @@ always @(posedge clk)begin
             pixel_B = B_ram_output;
         end
         else begin
-            pixel_R = R_ram_output - cal_reg[addr_out];
-            pixel_G = G_ram_output - cal_reg[addr_out];
-            pixel_B = B_ram_output - cal_reg[addr_out];
+            pixel_R = R_ram_output + cal_reg[addr_out];
+            pixel_G = G_ram_output + cal_reg[addr_out];
+            pixel_B = B_ram_output + cal_reg[addr_out];
         end
     end
     else begin
