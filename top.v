@@ -59,7 +59,9 @@ parameter [3:0] //statement
 wire    [7:0] R_ram_output,G_ram_output,B_ram_output;
 wire    push_to_next_row,mask_start,isBoundary;
 wire    [18:0] addr;
-
+wire    [15:0] mul_R,mul_G,mul_B;
+wire    [15:0] R_shift_R6,G_shift_R6,B_shift_R6;
+wire    [7:0] pixel_in_subR,pixel_in_subG,pixel_in_subB;
 //================ reg  ========================
 reg     Ram_R0W1,Ram_enable,addr_enable,load_end;
 reg     all_mask_end,cal_end,delay_end,dataout_state_end;
@@ -100,11 +102,6 @@ reg     [3:0] now_state, next_state;
 reg     [8:0] R_pixel_reg, G_pixel_reg, B_pixel_reg;
 reg     [8:0] R_pixel_reg1, G_pixel_reg1, B_pixel_reg1;
 reg     [18:0] pixel_index;
-reg     [14:0] R_shift_L1,G_shift_L1,B_shift_L1;
-reg     [14:0] R_shift_L2,G_shift_L2,B_shift_L2;
-reg     [14:0] R_shift_L3,G_shift_L3,B_shift_L3;
-reg     [14:0] R_shift_L4,G_shift_L4,B_shift_L4;
-reg     [14:0] R_shift_L5,G_shift_L5,B_shift_L5;
 reg     [1:0]  pause_cnt,delay_cnt;
 
 //================ State Machine ========================
@@ -422,9 +419,13 @@ always @(posedge clk or posedge rst)begin
 end
 
 //================ RAM ========================
-ram R_ram(clk,rst,Ram_enable,Ram_R0W1,addr,pixel_in_R,R_ram_output);
-ram G_ram(clk,rst,Ram_enable,Ram_R0W1,addr,pixel_in_G,G_ram_output);
-ram B_ram(clk,rst,Ram_enable,Ram_R0W1,addr,pixel_in_B,B_ram_output);
+assign pixel_in_subR = 255 - pixel_in_R;
+assign pixel_in_subG = 255 - pixel_in_G;
+assign pixel_in_subB = 255 - pixel_in_B;
+
+ram R_ram(clk,rst,Ram_enable,Ram_R0W1,addr,pixel_in_subR,R_ram_output);
+ram G_ram(clk,rst,Ram_enable,Ram_R0W1,addr,pixel_in_subG,G_ram_output);
+ram B_ram(clk,rst,Ram_enable,Ram_R0W1,addr,pixel_in_subB,B_ram_output);
 integer x, y;
 
 always @(*)begin
@@ -932,7 +933,12 @@ always @(posedge clk or posedge rst) begin
 end
 
 assign isBoundary = (posX == 9'd0 || posX == 9'd511 || posY == 9'd0 || posY == 9'd511)? 1'd1 : 1'd0;
-
+assign mul_R = (255 - R_ram_output) * cal_reg[addr];
+assign mul_G = (255 - G_ram_output) * cal_reg[addr];
+assign mul_B = (255 - B_ram_output) * cal_reg[addr];
+assign R_shift_R6 = (mul_R >> 6);
+assign G_shift_R6 = (mul_G >> 6);
+assign B_shift_R6 = (mul_B >> 6);
 //================ outputing data ======================
 always @(posedge clk)begin
     if (now_state == data_out || now_state == delayTwoCycle) begin  
@@ -943,9 +949,9 @@ always @(posedge clk)begin
             pixel_B = B_ram_output;
         end
         else begin
-            pixel_R = 255 - (((255 - R_ram_output) * cal_reg[addr_out]) >> 6) ;
-            pixel_G = 255 - (((255 - G_ram_output) * cal_reg[addr_out]) >> 6) ;
-            pixel_B = 255 - (((255 - B_ram_output) * cal_reg[addr_out]) >> 6) ;
+            pixel_R = 255 - {R_shift_R6[7],R_shift_R6[6],R_shift_R6[5],R_shift_R6[4],R_shift_R6[3],R_shift_R6[2],R_shift_R6[1],R_shift_R6[0]};
+            pixel_G = 255 - {G_shift_R6[7],G_shift_R6[6],G_shift_R6[5],G_shift_R6[4],G_shift_R6[3],G_shift_R6[2],G_shift_R6[1],G_shift_R6[0]};
+            pixel_B = 255 - {B_shift_R6[7],B_shift_R6[6],B_shift_R6[5],B_shift_R6[4],B_shift_R6[3],B_shift_R6[2],B_shift_R6[1],B_shift_R6[0]};
         end
     end
     else begin
