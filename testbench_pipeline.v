@@ -47,13 +47,23 @@ initial begin
     wait(done);
 end
 
+reg ack_delay_one_clk;
+always @(posedge clk or posedge rst) begin
+    if (rst) begin
+        ack_delay_one_clk <= 0;
+    end 
+    else begin
+        ack_delay_one_clk <= chip_ack;
+    end
+end
+
 always @(posedge clk or rst) begin
     if (rst) begin
         addrX <= 0;
         addrY <= 0;
     end 
-    else if (chip_ack && !input_pause) begin
-            if(addrY == 511)begin
+    else if (ack_delay_one_clk && !input_pause) begin
+            if(addrY == 512)begin   //sould be 511
                 addrX <= addrX;
                 addrY <= addrY;
             end
@@ -93,7 +103,6 @@ always @(posedge clk or posedge rst) begin
     end
 end
 
-reg once;
 
 integer rgb_file;
 initial begin
@@ -103,19 +112,7 @@ initial begin
     end
 end
 
-always @(posedge clk or posedge rst)begin
-    if(rst)begin
-        once <= 1'd0;
-    end
-    else begin
-        if (valid) begin 
-            once <= 1'd1;
-        end
-        else begin
-            once <= 1'd0;
-        end
-    end 
-end
+
 
 always @(posedge clk) begin
     if (valid) begin  
@@ -135,9 +132,9 @@ top_pipeline DUT (
     .clk(clk),
     .rst(rst),
     .enable(chip_enable),
-    .data_in_R(pixel_in_R_buf),    
-    .data_in_G(pixel_in_G_buf),    
-    .data_in_B(pixel_in_B_buf),    
+    .data_in_R(pixel_in_R),    
+    .data_in_G(pixel_in_G),    
+    .data_in_B(pixel_in_B),    
     .addr_X(addrX),
     .addr_Y(addrY),
     .addr_out(addr_out),

@@ -13,6 +13,7 @@ parameter [3:0] //statement
                 IDLE                = 4'd0,
                 process             = 4'd1,
                 StopAndPush         = 4'd2;
+reg   [19:0]  addr_YSHIFT;                
 reg   [5:0]   valid_cnt;
 reg   [3:0]   now_state, next_state;
 reg   [7:0]   R_boundary_reg_top       [0:511];
@@ -590,6 +591,11 @@ always @(posedge clk or posedge rst) begin
         end
     end
 end
+
+always @(*)begin
+    addr_YSHIFT = {10'd0, addr_Y};
+end
+
 always @(posedge clk or posedge rst) begin
     if (rst) begin
         addr_out    <= 20'd0;
@@ -599,7 +605,7 @@ always @(posedge clk or posedge rst) begin
     
     end else begin
         if (now_state == process && enable) begin
-            addr_out  <= addrY_FIFO[9] << 9 + addrX_FIFO[9]; 
+            addr_out  <= (addr_YSHIFT << 9) + addr_X; 
             if(isBoundary) begin
                 if(addr_Y == 0)begin
                     data_out_R <= R_boundary_reg_top[addr_X];
