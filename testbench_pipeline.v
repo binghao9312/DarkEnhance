@@ -7,7 +7,6 @@ wire    [7:0] pixel_R, pixel_G, pixel_B;
 wire    [7:0] pixel_in_R, pixel_in_G, pixel_in_B;
 reg     [7:0] pixel_in_R_buf, pixel_in_G_buf, pixel_in_B_buf;
 wire    done;
-
 reg     clk,rst,chip_enable,start;
 reg     [23:0] img_mem [0:262143]; // 512x512
 reg     [18:0] img_idx;
@@ -57,12 +56,13 @@ always @(posedge clk or posedge rst) begin
     end
 end
 
+
 always @(posedge clk or rst) begin
     if (rst) begin
         addrX <= 0;
         addrY <= 0;
     end 
-    else if (ack_delay_one_clk && !input_pause) begin
+    else if (ack_delay_one_clk) begin
             if(addrY == 512)begin   //sould be 511
                 addrX <= addrX;
                 addrY <= addrY;
@@ -143,7 +143,6 @@ top_pipeline DUT (
     .data_out_B(pixel_B),
     .ack(chip_ack),
     .valid(valid),
-    .input_pause(input_pause),
     .done(done)
 );
 
