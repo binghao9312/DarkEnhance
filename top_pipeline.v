@@ -18,18 +18,7 @@ parameter [3:0] //statement
 reg   [19:0]  addr_YSHIFT;                
 reg   [10:0]  valid_cnt;
 reg   [3:0]   now_state, next_state;
-reg   [7:0]   R_boundary_reg_top       [0:511];
-reg   [7:0]   R_boundary_reg_left      [0:511];
-reg   [7:0]   R_boundary_reg_right     [0:511];
-reg   [7:0]   R_boundary_reg_button    [0:511];
-reg   [7:0]   G_boundary_reg_top       [0:511];
-reg   [7:0]   G_boundary_reg_left      [0:511];
-reg   [7:0]   G_boundary_reg_right     [0:511];
-reg   [7:0]   G_boundary_reg_button    [0:511];
-reg   [7:0]   B_boundary_reg_top       [0:511];
-reg   [7:0]   B_boundary_reg_left      [0:511];
-reg   [7:0]   B_boundary_reg_right     [0:511];
-reg   [7:0]   B_boundary_reg_button    [0:511];   
+  
  
 reg   [7:0]   R_row0_register        [0:511];
 reg   [7:0]   R_row1_register        [0:511];
@@ -40,12 +29,12 @@ reg   [7:0]   G_row2_register        [0:511];
 reg   [7:0]   B_row0_register        [0:511];
 reg   [7:0]   B_row1_register        [0:511];
 reg   [7:0]   B_row2_register        [0:511];
-reg   [7:0]   addrX_row0_register    [0:511];
-reg   [7:0]   addrY_row0_register    [0:511];
-reg   [7:0]   addrX_row1_register    [0:511];
-reg   [7:0]   addrY_row1_register    [0:511];
-reg   [7:0]   addrX_row2_register    [0:511];
-reg   [7:0]   addrY_row2_register    [0:511];
+reg   [9:0]   addrX_row0_register    [0:511];
+reg   [9:0]   addrY_row0_register    [0:511];
+reg   [9:0]   addrX_row1_register    [0:511];
+reg   [9:0]   addrY_row1_register    [0:511];
+reg   [9:0]   addrX_row2_register    [0:511];
+reg   [9:0]   addrY_row2_register    [0:511];
 
 
 reg   [7:0]   R_pixel_FIFO           [0:2];
@@ -65,7 +54,7 @@ wire  isBoundary;
 
 
 assign  isBoundary  = (addrX_FIFO[2] == 0 || addrX_FIFO[2] == 511 || addrY_FIFO[2] == 0 || addrY_FIFO[2] == 511) ? 1'b1 : 1'b0;
-assign  done        = (addr_out > 20'd262142)? 1'b1 : 1'b0;
+assign  done        = (addr_out > 20'd262143)? 1'b1 : 1'b0;
 integer k;
 always @(posedge clk or posedge rst) begin
     if (rst) begin
@@ -97,9 +86,9 @@ always @(posedge clk or posedge rst) begin
         end
     end else begin
         if (now_state == process && enable) begin
-            R_pixel_FIFO[0]  <= R_row2_register[511];
-            G_pixel_FIFO[0]  <= R_row2_register[511];
-            B_pixel_FIFO[0]  <= R_row2_register[511];
+            R_pixel_FIFO[0]  <= (255 - R_row2_register[511]);
+            G_pixel_FIFO[0]  <= (255 - G_row2_register[511]);
+            B_pixel_FIFO[0]  <= (255 - B_row2_register[511]);
             addrX_FIFO[0]    <= addrX_row2_register[511];
             addrY_FIFO[0]    <= addrY_row2_register[511];
 
@@ -137,53 +126,6 @@ always @(*) begin
     endcase
 end
 
-//============ boundary_data_in =============
-always @(posedge rst or posedge clk)begin
-    if(rst)begin
-        for (k = 0; k < 512; k = k + 1) begin
-            R_boundary_reg_top   [k] <= 9'd0;
-            G_boundary_reg_top   [k] <= 9'd0;
-            B_boundary_reg_top   [k] <= 9'd0;
-            R_boundary_reg_button[k] <= 9'd0;
-            G_boundary_reg_button[k] <= 9'd0;
-            B_boundary_reg_button[k] <= 9'd0;
-            R_boundary_reg_right [k] <= 9'd0;
-            G_boundary_reg_right [k] <= 9'd0;
-            B_boundary_reg_right [k] <= 9'd0;    
-            R_boundary_reg_left  [k] <= 9'd0;
-            G_boundary_reg_left  [k] <= 9'd0;
-            B_boundary_reg_left  [k] <= 9'd0;
-        end
-    end
-    else begin
-        if(addr_Y == 0)begin
-            R_boundary_reg_top[addr_X] <= data_in_R;
-            G_boundary_reg_top[addr_X] <= data_in_G;
-            B_boundary_reg_top[addr_X] <= data_in_B;
-        end
-        else if(addr_X == 0)begin
-            R_boundary_reg_left[addr_X] <= data_in_R;
-            G_boundary_reg_left[addr_X] <= data_in_G;
-            B_boundary_reg_left[addr_X] <= data_in_B;
-        end
-        else if(addr_X == 511)begin
-            R_boundary_reg_right[addr_X] <= data_in_R;
-            G_boundary_reg_right[addr_X] <= data_in_G;
-            B_boundary_reg_right[addr_X] <= data_in_B;
-        end
-        else if(addr_Y == 511)begin
-            R_boundary_reg_right[addr_X] <= data_in_R;
-            G_boundary_reg_right[addr_X] <= data_in_G;
-            B_boundary_reg_right[addr_X] <= data_in_B;
-        end
-        else begin
-            R_boundary_reg_top[addr_X] <= R_boundary_reg_top[addr_X];
-            G_boundary_reg_top[addr_X] <= G_boundary_reg_top[addr_X];
-            B_boundary_reg_top[addr_X] <= B_boundary_reg_top[addr_X];
-        end
-    end
-end
-
 
 //================== row =========================
 
@@ -209,9 +151,9 @@ always @(posedge rst or posedge clk)begin
     end
     else begin
         if(now_state == process)begin
-            R_row0_register[0]      <= data_in_R;
-            G_row0_register[0]      <= data_in_G;
-            B_row0_register[0]      <= data_in_B;
+            R_row0_register[0]      <= (255 - data_in_R);
+            G_row0_register[0]      <= (255 - data_in_G);
+            B_row0_register[0]      <= (255 - data_in_B);
             addrX_row0_register[0]  <= addr_X;
             addrY_row0_register[0]  <= addr_Y;
             R_row1_register[0]      <= R_row0_register[511];
@@ -228,13 +170,13 @@ always @(posedge rst or posedge clk)begin
             for (k = 1; k < 512; k = k + 1) begin
                 R_row0_register[k]      <= R_row0_register[k - 1];
                 R_row1_register[k]      <= R_row1_register[k - 1];
-                R_row2_register[k]      <= R_row1_register[k - 1];
+                R_row2_register[k]      <= R_row2_register[k - 1];
                 G_row0_register[k]      <= G_row0_register[k - 1];
                 G_row1_register[k]      <= G_row1_register[k - 1];
-                G_row2_register[k]      <= G_row1_register[k - 1];
+                G_row2_register[k]      <= G_row2_register[k - 1];
                 B_row0_register[k]      <= B_row0_register[k - 1];
                 B_row1_register[k]      <= B_row1_register[k - 1];
-                B_row2_register[k]      <= B_row1_register[k - 1];
+                B_row2_register[k]      <= B_row2_register[k - 1];
                 addrX_row0_register[k]  <= addrX_row0_register[k - 1];
                 addrY_row0_register[k]  <= addrY_row0_register[k - 1];
                 addrX_row1_register[k]  <= addrX_row1_register[k - 1];
@@ -583,12 +525,16 @@ always @(posedge clk or posedge rst) begin
         valid_cnt <= 6'd0;
     end 
     else begin
-        if (now_state == process) begin
-            valid_cnt <= valid_cnt + 1;
+        if (done)begin
+            valid <= 1'b0;
+            valid_cnt <= 6'd0;
+        end
+        else if (now_state == process) begin
             if(valid_cnt > 11'd1537) begin
                 valid <= 1'b1;
             end
             else begin
+                valid_cnt <= valid_cnt + 1;
                 valid <= 1'b0;
             end
         end 
@@ -599,7 +545,7 @@ always @(posedge clk or posedge rst) begin
 end
 
 always @(*)begin
-    addr_YSHIFT = addrY_FIFO[2];
+    addr_YSHIFT = addrY_FIFO[1];
 end
 
 always @(posedge clk or posedge rst) begin
