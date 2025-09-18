@@ -32,7 +32,7 @@ initial begin
     rst = 0;          // 拉低 reset 之後才會開始出資料
     wait(done);       // 等待 DUT done
     $display("Simulation finished.");
-    #5;
+    #100;
     $finish;
 end
 

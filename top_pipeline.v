@@ -86,9 +86,9 @@ always @(posedge clk or posedge rst) begin
         end
     end else begin
         if (now_state == process && enable) begin
-            R_pixel_FIFO[0]  <= (255 - R_row2_register[511]);
-            G_pixel_FIFO[0]  <= (255 - G_row2_register[511]);
-            B_pixel_FIFO[0]  <= (255 - B_row2_register[511]);
+            R_pixel_FIFO[0]  <=  R_row2_register[511]; // 更
+            G_pixel_FIFO[0]  <=  G_row2_register[511];
+            B_pixel_FIFO[0]  <=  B_row2_register[511];
             addrX_FIFO[0]    <= addrX_row2_register[511];
             addrY_FIFO[0]    <= addrY_row2_register[511];
 
@@ -530,7 +530,7 @@ always @(posedge clk or posedge rst) begin
             valid_cnt <= 6'd0;
         end
         else if (now_state == process) begin
-            if(valid_cnt > 11'd1537) begin
+            if(valid_cnt > 11'd1538) begin
                 valid <= 1'b1;
             end
             else begin
@@ -559,9 +559,9 @@ always @(posedge clk or posedge rst) begin
         if (now_state == process && enable) begin
             addr_out  <= (addr_YSHIFT << 9) + addrX_FIFO[2];
             if(isBoundary) begin
-                data_out_R <= R_pixel_FIFO[2];
-                data_out_G <= G_pixel_FIFO[2];
-                data_out_B <= B_pixel_FIFO[2];               
+                data_out_R <= 255 - R_pixel_FIFO[2];
+                data_out_G <= 255 - G_pixel_FIFO[2];
+                data_out_B <= 255 - B_pixel_FIFO[2];               
             end
             else begin
                 data_out_R <= {R_shift_R6[7],R_shift_R6[6],R_shift_R6[5],R_shift_R6[4],R_shift_R6[3],R_shift_R6[2],R_shift_R6[1],R_shift_R6[0]};
