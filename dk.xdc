@@ -1,2 +1,0 @@
-set_input_delay -clock [get_clocks clk] -min 1.200 [get_ports 0] -add_delay
-#hehehehehehe
