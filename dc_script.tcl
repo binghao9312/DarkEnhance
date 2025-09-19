@@ -1,15 +1,15 @@
 ################################################
 # File Name    : dc_syn.tcl                    #
-# Author       : BingHao_Yang                    #
+# Author       : BingHao_Yang                  #
 # Description  :                               #
 #                                              #
 #                                              #
 ################################################
 
 #設定檔案路徑
-set Circuit     top.v      ;# 電路設計檔(.v) 若多個檔案用{}包起來
+set Circuit     {top_pipeline.v, find_min.v}      ;# 電路設計檔(.v) 若多個檔案用{}包起來
 set Top_Module  testbench.v      ;# Top Module 名稱
-set Constraints con.sdc    ;# 電路約束檔 （比賽題目會提供）
+set Constraints const.sdc    ;# 電路約束檔 （比賽題目會提供）
 ################################################
 
 ############ Read Files ############

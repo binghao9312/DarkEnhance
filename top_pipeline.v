@@ -19,43 +19,81 @@ reg   [19:0]  addr_YSHIFT;
 reg   [10:0]  valid_cnt;
 reg   [3:0]   now_state, next_state;
   
- 
-reg   [7:0]   R_row0_register        [0:511];
-reg   [7:0]   R_row1_register        [0:511];
-reg   [7:0]   R_row2_register        [0:511];
-reg   [7:0]   G_row0_register        [0:511];
-reg   [7:0]   G_row1_register        [0:511];
-reg   [7:0]   G_row2_register        [0:511];
-reg   [7:0]   B_row0_register        [0:511];
-reg   [7:0]   B_row1_register        [0:511];
-reg   [7:0]   B_row2_register        [0:511];
-reg   [9:0]   addrX_row0_register    [0:511];
-reg   [9:0]   addrY_row0_register    [0:511];
-reg   [9:0]   addrX_row1_register    [0:511];
-reg   [9:0]   addrY_row1_register    [0:511];
-reg   [9:0]   addrX_row2_register    [0:511];
-reg   [9:0]   addrY_row2_register    [0:511];
-
-
+reg    mem_full;
 reg   [7:0]   R_pixel_FIFO           [0:2];
 reg   [7:0]   G_pixel_FIFO           [0:2];
 reg   [7:0]   B_pixel_FIFO           [0:2];
 reg   [9:0]   addrX_FIFO             [0:2];
 reg   [9:0]   addrY_FIFO             [0:2];
-reg   [7:0]   Rm0,Rm1,Rm2,Rm3,Rm4,Rm5,Rm6,Rm7,Rm8;
-reg   [7:0]   Gm0,Gm1,Gm2,Gm3,Gm4,Gm5,Gm6,Gm7,Gm8;
-reg   [7:0]   Bm0,Bm1,Bm2,Bm3,Bm4,Bm5,Bm6,Bm7,Bm8;
 reg   [15:0]  t_ans,mul_R,mul_G,mul_B;
 reg   [7:0]   pixel_R,pixel_G,pixel_B;
+reg   [10:0]  mem_addr,mem_index0,mem_index1,mem_index2,mem_index3,mem_index4,mem_index5,mem_index6,mem_index7,mem_index8;
 
 wire  [15:0]  R_shift_R6,G_shift_R6,B_shift_R6;
-wire  [7:0]   R_min_out,G_min_out,B_min_out,min1,min2,min3;
-wire  isBoundary;
+wire  [7:0]   R_min_out,G_min_out,B_min_out,min1,min2,mem_Rout,mem_Gout,mem_Bout;
+wire  [7:0]   Rm0,Rm1,Rm2,Rm3,Rm4,Rm5,Rm6,Rm7,Rm8;
+wire  [7:0]   Gm0,Gm1,Gm2,Gm3,Gm4,Gm5,Gm6,Gm7,Gm8;
+wire  [7:0]   Bm0,Bm1,Bm2,Bm3,Bm4,Bm5,Bm6,Bm7,Bm8; 
+wire  isBoundary,mem_enable;
 
 
+assign  mem_enable = (now_state == process && ack) ? 1'b1 : 1'b0;
 assign  isBoundary  = (addrX_FIFO[2] == 0 || addrX_FIFO[2] == 511 || addrY_FIFO[2] == 0 || addrY_FIFO[2] == 511) ? 1'b1 : 1'b0;
 assign  done        = (addr_out > 20'd262143)? 1'b1 : 1'b0;
 integer k;
+
+memory R_memory(
+    .clk(clk), .rst(rst),
+    .index0(mem_index0),.index1(mem_index1),.index2(mem_index2),.index3(mem_index3),.index4(mem_index4),.index5(mem_index5),.index6(mem_index6),.index7(mem_index7),.index8(mem_index8),
+    .addr(mem_addr),.data_in(mem_addr), WE(mem_enable),
+    .ori_data_out(mem_Rout),.m0(Rm0),.m1(Rm1),.m2(Rm2),.m3(Rm3),.m4(Rm4),.m5(Rm5),.m6(Rm6),.m7(Rm7),.m8(Rm8),
+);
+memory G_memory(
+    .clk(clk), .rst(rst),
+    .index0(mem_index0),.index1(mem_index1),.index2(mem_index2),.index3(mem_index3),.index4(mem_index4),.index5(mem_index5),.index6(mem_index6),.index7(mem_index7),.index8(mem_index8),
+    .addr(mem_addr),.data_in(mem_addr), WE(mem_enable),
+    .ori_data_out(mem_Gout),.m0(Gm0),.m1(Gm1),.m2(Gm2),.m3(Gm3),.m4(Gm4),.m5(Gm5),.m6(Gm6),.m7(Gm7),.m8(Gm8),
+);
+memory B_memory(
+    .clk(clk), .rst(rst),
+    .index0(mem_index0),.index1(mem_index1),.index2(mem_index2),.index3(mem_index3),.index4(mem_index4),.index5(mem_index5),.index6(mem_index6),.index7(mem_index7),.index8(mem_index8),
+    .addr(mem_addr),.data_in(mem_addr), WE(mem_enable),
+    .ori_data_out(mem_Bout),.m0(Bm0),.m1(Bm1),.m2(Bm2),.m3(Bm3),.m4(Bm4),.m5(Bm5),.m6(Bm6),.m7(Bm7),.m8(Bm8),
+);
+
+
+
+
+always @(posedge clk or posedge rst)begin
+    if(rst)begin
+        mem_addr    <= 11'd0;
+        mem_index0  <= 11'd0;
+        mem_index1  <= 11'd1;
+        mem_index2  <= 11'd2;
+        mem_index3  <= 11'd512;
+        mem_index4  <= 11'd513;
+        mem_index5  <= 11'd514;
+        mem_index6  <= 11'd1024;
+        mem_index7  <= 11'd1025;
+        mem_index8  <= 11'd1026;
+    end
+    else begin
+        if(now_state == process && ack)begin
+            mem_addr    <= (mem_addr == 11'd1026)   ? 11'd0 : mem_addr + 1;
+            mem_index0  <= (mem_index0 == 11'd1026) ? 11'd0 : mem_index0 + 1;
+            mem_index1  <= (mem_index1 == 11'd1026) ? 11'd0 : mem_index1 + 1;
+            mem_index2  <= (mem_index2 == 11'd1026) ? 11'd0 : mem_index2 + 1;
+            mem_index3  <= (mem_index3 == 11'd1026) ? 11'd0 : mem_index3 + 1;
+            mem_index4  <= (mem_index4 == 11'd1026) ? 11'd0 : mem_index4 + 1;
+            mem_index5  <= (mem_index5 == 11'd1026) ? 11'd0 : mem_index5 + 1;
+            mem_index6  <= (mem_index6 == 11'd1026) ? 11'd0 : mem_index6 + 1;
+            mem_index7  <= (mem_index7 == 11'd1026) ? 11'd0 : mem_index7 + 1;
+            mem_index8  <= (mem_index8 == 11'd1026) ? 11'd0 : mem_index8 + 1;
+        end
+    end
+
+end
+
 always @(posedge clk or posedge rst) begin
     if (rst) begin
         ack <= 1'b0;
@@ -73,7 +111,6 @@ always @(posedge clk or posedge rst) begin
     end
 end
 
-
 //=============== FIFO ===============
 always @(posedge clk or posedge rst) begin
     if (rst) begin
@@ -86,9 +123,9 @@ always @(posedge clk or posedge rst) begin
         end
     end else begin
         if (now_state == process && enable) begin
-            R_pixel_FIFO[0]  <=  R_row2_register[511]; // 更
-            G_pixel_FIFO[0]  <=  G_row2_register[511];
-            B_pixel_FIFO[0]  <=  B_row2_register[511];
+            R_pixel_FIFO[0]  <= mem_Rout; // 更
+            G_pixel_FIFO[0]  <= mem_Gout;
+            B_pixel_FIFO[0]  <= mem_Bout;
             addrX_FIFO[0]    <= addrX_row2_register[511];
             addrY_FIFO[0]    <= addrY_row2_register[511];
 
@@ -126,101 +163,6 @@ always @(*) begin
     endcase
 end
 
-
-//================== row =========================
-
-always @(posedge rst or posedge clk)begin
-    if(rst)begin
-        for (k = 0; k < 512; k = k + 1) begin
-            R_row0_register[k] <= 8'd0;
-            R_row1_register[k] <= 8'd0;
-            R_row2_register[k] <= 8'd0;
-            G_row0_register[k] <= 8'd0;
-            G_row1_register[k] <= 8'd0;
-            G_row2_register[k] <= 8'd0;
-            B_row0_register[k] <= 8'd0;
-            B_row1_register[k] <= 8'd0;
-            B_row2_register[k] <= 8'd0;
-            addrY_row1_register[k] <= 8'd0;
-            addrY_row0_register[k] <= 8'd0;
-            addrY_row2_register[k] <= 8'd0;
-            addrX_row1_register[k] <= 8'd0;
-            addrX_row0_register[k] <= 8'd0;
-            addrX_row2_register[k] <= 8'd0;
-        end
-    end
-    else begin
-        if(now_state == process)begin
-            R_row0_register[0]      <= (255 - data_in_R);
-            G_row0_register[0]      <= (255 - data_in_G);
-            B_row0_register[0]      <= (255 - data_in_B);
-            addrX_row0_register[0]  <= addr_X;
-            addrY_row0_register[0]  <= addr_Y;
-            R_row1_register[0]      <= R_row0_register[511];
-            R_row2_register[0]      <= R_row1_register[511];
-            G_row1_register[0]      <= G_row0_register[511];
-            G_row2_register[0]      <= G_row1_register[511];
-            B_row1_register[0]      <= B_row0_register[511];
-            B_row2_register[0]      <= B_row1_register[511];
-            addrX_row1_register[0]  <= addrX_row0_register[511];
-            addrY_row1_register[0]  <= addrY_row0_register[511];
-            addrX_row2_register[0]  <= addrX_row1_register[511];
-            addrY_row2_register[0]  <= addrY_row1_register[511];
-            
-            for (k = 1; k < 512; k = k + 1) begin
-                R_row0_register[k]      <= R_row0_register[k - 1];
-                R_row1_register[k]      <= R_row1_register[k - 1];
-                R_row2_register[k]      <= R_row2_register[k - 1];
-                G_row0_register[k]      <= G_row0_register[k - 1];
-                G_row1_register[k]      <= G_row1_register[k - 1];
-                G_row2_register[k]      <= G_row2_register[k - 1];
-                B_row0_register[k]      <= B_row0_register[k - 1];
-                B_row1_register[k]      <= B_row1_register[k - 1];
-                B_row2_register[k]      <= B_row2_register[k - 1];
-                addrX_row0_register[k]  <= addrX_row0_register[k - 1];
-                addrY_row0_register[k]  <= addrY_row0_register[k - 1];
-                addrX_row1_register[k]  <= addrX_row1_register[k - 1];
-                addrY_row1_register[k]  <= addrY_row1_register[k - 1];
-                addrX_row2_register[k]  <= addrX_row2_register[k - 1];
-                addrY_row2_register[k]  <= addrY_row2_register[k - 1];
-            end
-        end
-        
-    end
-end
-//=========================== MASKING ===========================
-always @(*)begin
-    Rm0 = R_row0_register[511];
-    Rm1 = R_row0_register[510];
-    Rm2 = R_row0_register[509];
-    Rm3 = R_row1_register[511];
-    Rm4 = R_row1_register[510];
-    Rm5 = R_row1_register[509];
-    Rm6 = R_row2_register[511];
-    Rm7 = R_row2_register[510];
-    Rm8 = R_row2_register[509];
-
-    Gm0 = G_row0_register[511];
-    Gm1 = G_row0_register[510];
-    Gm2 = G_row0_register[509];
-    Gm3 = G_row1_register[511];
-    Gm4 = G_row1_register[510];
-    Gm5 = G_row1_register[509];
-    Gm6 = G_row2_register[511];
-    Gm7 = G_row2_register[510];
-    Gm8 = G_row2_register[509];
-
-    Bm0 = B_row0_register[511];
-    Bm1 = B_row0_register[510];
-    Bm2 = B_row0_register[509];
-    Bm3 = B_row1_register[511];
-    Bm4 = B_row1_register[510];
-    Bm5 = B_row1_register[509];
-    Bm6 = B_row2_register[511];
-    Bm7 = B_row2_register[510];
-    Bm8 = B_row2_register[509];
-end
-
 find_min Rmin(.D0(Rm0), .D1(Rm1), .D2(Rm2), .D3(Rm3), .D4(Rm4), .D5(Rm5), .D6(Rm6), .D7(Rm7), .D8(Rm8), .D_out(R_min_out));
 find_min Gmin(.D0(Gm0), .D1(Gm1), .D2(Gm2), .D3(Gm3), .D4(Gm4), .D5(Gm5), .D6(Gm6), .D7(Gm7), .D8(Gm8), .D_out(G_min_out));
 find_min Bmin(.D0(Bm0), .D1(Bm1), .D2(Bm2), .D3(Bm3), .D4(Bm4), .D5(Bm5), .D6(Bm6), .D7(Bm7), .D8(Bm8), .D_out(B_min_out));
@@ -229,7 +171,7 @@ assign min1 = (R_min_out < G_min_out) ? R_min_out : G_min_out;
 assign min2 = (min1 < B_min_out) ? min1 : B_min_out;
 
 
-//===================== MIN TO OUT ============================
+//===================== MIN TO T_ans ============================
 always @(posedge clk or posedge rst) begin
     if(rst)begin
         t_ans <= 16'd0;
