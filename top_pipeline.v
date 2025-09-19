@@ -61,7 +61,19 @@ memory B_memory(
     .ori_data_out(mem_Bout),.m0(Bm0),.m1(Bm1),.m2(Bm2),.m3(Bm3),.m4(Bm4),.m5(Bm5),.m6(Bm6),.m7(Bm7),.m8(Bm8),
 );
 
-
+always @(posedge rst or posedge clk)begin
+    if(rst)begin
+        mem_full <= 1'b0;
+    end
+    else begin
+        if(mem_addr == 11'd1026 && now_state == process)begin
+            mem_full <= 1'b1;
+        end
+        else begin
+            mem_full <= mem_full;
+        end
+    end    
+end
 
 
 always @(posedge clk or posedge rst)begin
@@ -80,15 +92,28 @@ always @(posedge clk or posedge rst)begin
     else begin
         if(now_state == process && ack)begin
             mem_addr    <= (mem_addr == 11'd1026)   ? 11'd0 : mem_addr + 1;
-            mem_index0  <= (mem_index0 == 11'd1026) ? 11'd0 : mem_index0 + 1;
-            mem_index1  <= (mem_index1 == 11'd1026) ? 11'd0 : mem_index1 + 1;
-            mem_index2  <= (mem_index2 == 11'd1026) ? 11'd0 : mem_index2 + 1;
-            mem_index3  <= (mem_index3 == 11'd1026) ? 11'd0 : mem_index3 + 1;
-            mem_index4  <= (mem_index4 == 11'd1026) ? 11'd0 : mem_index4 + 1;
-            mem_index5  <= (mem_index5 == 11'd1026) ? 11'd0 : mem_index5 + 1;
-            mem_index6  <= (mem_index6 == 11'd1026) ? 11'd0 : mem_index6 + 1;
-            mem_index7  <= (mem_index7 == 11'd1026) ? 11'd0 : mem_index7 + 1;
-            mem_index8  <= (mem_index8 == 11'd1026) ? 11'd0 : mem_index8 + 1;
+            if(mem_full)begin
+                mem_index0  <= (mem_index0 == 11'd1026) ? 11'd0 : mem_index0 + 1;
+                mem_index1  <= (mem_index1 == 11'd1026) ? 11'd0 : mem_index1 + 1;
+                mem_index2  <= (mem_index2 == 11'd1026) ? 11'd0 : mem_index2 + 1;
+                mem_index3  <= (mem_index3 == 11'd1026) ? 11'd0 : mem_index3 + 1;
+                mem_index4  <= (mem_index4 == 11'd1026) ? 11'd0 : mem_index4 + 1;
+                mem_index5  <= (mem_index5 == 11'd1026) ? 11'd0 : mem_index5 + 1;
+                mem_index6  <= (mem_index6 == 11'd1026) ? 11'd0 : mem_index6 + 1;
+                mem_index7  <= (mem_index7 == 11'd1026) ? 11'd0 : mem_index7 + 1;
+                mem_index8  <= (mem_index8 == 11'd1026) ? 11'd0 : mem_index8 + 1;
+            end
+            else begin
+                mem_index0  <= 11'd0;
+                mem_index1  <= 11'd1;
+                mem_index2  <= 11'd2;
+                mem_index3  <= 11'd512;
+                mem_index4  <= 11'd513;
+                mem_index5  <= 11'd514;
+                mem_index6  <= 11'd1024;
+                mem_index7  <= 11'd1025;
+                mem_index8  <= 11'd1026;
+            end
         end
     end
 
@@ -123,7 +148,7 @@ always @(posedge clk or posedge rst) begin
         end
     end else begin
         if (now_state == process && enable) begin
-            R_pixel_FIFO[0]  <= mem_Rout; // 更
+            R_pixel_FIFO[0]  <= mem_Rout;
             G_pixel_FIFO[0]  <= mem_Gout;
             B_pixel_FIFO[0]  <= mem_Bout;
             addrX_FIFO[0]    <= addrX_row2_register[511];
