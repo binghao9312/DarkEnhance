@@ -19,7 +19,6 @@ reg   [19:0]  addr_YSHIFT;
 reg   [10:0]  valid_cnt;
 reg   [3:0]   now_state, next_state;
   
-reg    mem_full;
 reg   [7:0]   R_pixel_FIFO           [0:2];
 reg   [7:0]   G_pixel_FIFO           [0:2];
 reg   [7:0]   B_pixel_FIFO           [0:2];
@@ -28,7 +27,7 @@ reg   [9:0]   addrY_FIFO             [0:2];
 reg   [15:0]  t_ans,mul_R,mul_G,mul_B;
 reg   [7:0]   pixel_R,pixel_G,pixel_B;
 reg   [10:0]  mem_addr,mem_index0,mem_index1,mem_index2,mem_index3,mem_index4,mem_index5,mem_index6,mem_index7,mem_index8;
-
+wire  [10:0]  addrX_MEMout,addrY_MEMout;
 wire  [15:0]  R_shift_R6,G_shift_R6,B_shift_R6;
 wire  [7:0]   R_min_out,G_min_out,B_min_out,min1,min2,mem_Rout,mem_Gout,mem_Bout;
 wire  [7:0]   Rm0,Rm1,Rm2,Rm3,Rm4,Rm5,Rm6,Rm7,Rm8;
@@ -45,36 +44,31 @@ integer k;
 memory R_memory(
     .clk(clk), .rst(rst),
     .index0(mem_index0),.index1(mem_index1),.index2(mem_index2),.index3(mem_index3),.index4(mem_index4),.index5(mem_index5),.index6(mem_index6),.index7(mem_index7),.index8(mem_index8),
-    .addr(mem_addr),.data_in(mem_addr), WE(mem_enable),
+    .addr(mem_addr),.data_in(data_in_R), WE(mem_enable),
     .ori_data_out(mem_Rout),.m0(Rm0),.m1(Rm1),.m2(Rm2),.m3(Rm3),.m4(Rm4),.m5(Rm5),.m6(Rm6),.m7(Rm7),.m8(Rm8),
 );
 memory G_memory(
     .clk(clk), .rst(rst),
     .index0(mem_index0),.index1(mem_index1),.index2(mem_index2),.index3(mem_index3),.index4(mem_index4),.index5(mem_index5),.index6(mem_index6),.index7(mem_index7),.index8(mem_index8),
-    .addr(mem_addr),.data_in(mem_addr), WE(mem_enable),
+    .addr(mem_addr),.data_in(data_in_G), WE(mem_enable),
     .ori_data_out(mem_Gout),.m0(Gm0),.m1(Gm1),.m2(Gm2),.m3(Gm3),.m4(Gm4),.m5(Gm5),.m6(Gm6),.m7(Gm7),.m8(Gm8),
 );
 memory B_memory(
     .clk(clk), .rst(rst),
     .index0(mem_index0),.index1(mem_index1),.index2(mem_index2),.index3(mem_index3),.index4(mem_index4),.index5(mem_index5),.index6(mem_index6),.index7(mem_index7),.index8(mem_index8),
-    .addr(mem_addr),.data_in(mem_addr), WE(mem_enable),
+    .addr(mem_addr),.data_in(data_in_B), WE(mem_enable),
     .ori_data_out(mem_Bout),.m0(Bm0),.m1(Bm1),.m2(Bm2),.m3(Bm3),.m4(Bm4),.m5(Bm5),.m6(Bm6),.m7(Bm7),.m8(Bm8),
 );
-
-always @(posedge rst or posedge clk)begin
-    if(rst)begin
-        mem_full <= 1'b0;
-    end
-    else begin
-        if(mem_addr == 11'd1026 && now_state == process)begin
-            mem_full <= 1'b1;
-        end
-        else begin
-            mem_full <= mem_full;
-        end
-    end    
-end
-
+addr_memory addr_memX(
+    .clk(clk), .rst(rst),
+    .data_in(addr_X), .WE(mem_enable),
+    .data_out(addrX_MEMout)
+);
+addr_memory addr_memY(
+    .clk(clk), .rst(rst),
+    .data_in(addr_Y), .WE(mem_enable),
+    .data_out(addrY_MEMout)
+);
 
 always @(posedge clk or posedge rst)begin
     if(rst)begin
@@ -92,31 +86,28 @@ always @(posedge clk or posedge rst)begin
     else begin
         if(now_state == process && ack)begin
             mem_addr    <= (mem_addr == 11'd1026)   ? 11'd0 : mem_addr + 1;
-            if(mem_full)begin
-                mem_index0  <= (mem_index0 == 11'd1026) ? 11'd0 : mem_index0 + 1;
-                mem_index1  <= (mem_index1 == 11'd1026) ? 11'd0 : mem_index1 + 1;
-                mem_index2  <= (mem_index2 == 11'd1026) ? 11'd0 : mem_index2 + 1;
-                mem_index3  <= (mem_index3 == 11'd1026) ? 11'd0 : mem_index3 + 1;
-                mem_index4  <= (mem_index4 == 11'd1026) ? 11'd0 : mem_index4 + 1;
-                mem_index5  <= (mem_index5 == 11'd1026) ? 11'd0 : mem_index5 + 1;
-                mem_index6  <= (mem_index6 == 11'd1026) ? 11'd0 : mem_index6 + 1;
-                mem_index7  <= (mem_index7 == 11'd1026) ? 11'd0 : mem_index7 + 1;
-                mem_index8  <= (mem_index8 == 11'd1026) ? 11'd0 : mem_index8 + 1;
-            end
-            else begin
-                mem_index0  <= 11'd0;
-                mem_index1  <= 11'd1;
-                mem_index2  <= 11'd2;
-                mem_index3  <= 11'd512;
-                mem_index4  <= 11'd513;
-                mem_index5  <= 11'd514;
-                mem_index6  <= 11'd1024;
-                mem_index7  <= 11'd1025;
-                mem_index8  <= 11'd1026;
-            end
+            mem_index0  <= (mem_index0 == 11'd1026) ? 11'd0 : mem_index0 + 1;
+            mem_index1  <= (mem_index1 == 11'd1026) ? 11'd0 : mem_index1 + 1;
+            mem_index2  <= (mem_index2 == 11'd1026) ? 11'd0 : mem_index2 + 1;
+            mem_index3  <= (mem_index3 == 11'd1026) ? 11'd0 : mem_index3 + 1;
+            mem_index4  <= (mem_index4 == 11'd1026) ? 11'd0 : mem_index4 + 1;
+            mem_index5  <= (mem_index5 == 11'd1026) ? 11'd0 : mem_index5 + 1;
+            mem_index6  <= (mem_index6 == 11'd1026) ? 11'd0 : mem_index6 + 1;
+            mem_index7  <= (mem_index7 == 11'd1026) ? 11'd0 : mem_index7 + 1;
+            mem_index8  <= (mem_index8 == 11'd1026) ? 11'd0 : mem_index8 + 1;
+        end
+        else begin
+            mem_index0  <= 11'd0;
+            mem_index1  <= 11'd1;
+            mem_index2  <= 11'd2;
+            mem_index3  <= 11'd512;
+            mem_index4  <= 11'd513;
+            mem_index5  <= 11'd514;
+            mem_index6  <= 11'd1024;
+            mem_index7  <= 11'd1025;
+            mem_index8  <= 11'd1026;
         end
     end
-
 end
 
 always @(posedge clk or posedge rst) begin
@@ -151,8 +142,8 @@ always @(posedge clk or posedge rst) begin
             R_pixel_FIFO[0]  <= mem_Rout;
             G_pixel_FIFO[0]  <= mem_Gout;
             B_pixel_FIFO[0]  <= mem_Bout;
-            addrX_FIFO[0]    <= addrX_row2_register[511];
-            addrY_FIFO[0]    <= addrY_row2_register[511];
+            addrX_FIFO[0]    <= addrX_MEMout;
+            addrY_FIFO[0]    <= addrY_MEMout;
 
             for (k = 1; k < 3; k = k + 1) begin
                 R_pixel_FIFO[k]  <= R_pixel_FIFO[k - 1];
@@ -497,7 +488,7 @@ always @(posedge clk or posedge rst) begin
             valid_cnt <= 6'd0;
         end
         else if (now_state == process) begin
-            if(valid_cnt > 11'd1538) begin
+            if(valid_cnt > 11'd1030) begin
                 valid <= 1'b1;
             end
             else begin

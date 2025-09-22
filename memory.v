@@ -8,8 +8,8 @@ module memory (
     output reg  [7:0]   ori_data_out,m0,m1,m2,m3,m4,m5,m6,m7,m8
 );
     
-reg [7:0] mem_array [0:1026];
-
+reg  [7:0]  mem_array [0:1026];
+reg  [10:0] addr_out;
 always @(posedge clk or posedge rst) begin
     if (rst) begin
         integer i;
@@ -21,6 +21,13 @@ always @(posedge clk or posedge rst) begin
     end
 end
 
+always @(*) begin
+    if(addr == 11'd1026)
+        addr_out = 11'd0;
+    else begin
+        addr_out = addr + 1;
+    end
+end
 
 always @(posedge clk or posedge rst) begin
     if (rst) begin
@@ -34,9 +41,8 @@ always @(posedge clk or posedge rst) begin
         m6 <= 8'b0;
         m7 <= 8'b0;
         m8 <= 8'b0;
-        
     end else begin
-        ori_data_out    <= mem_array[addr+1];
+        ori_data_out    <= mem_array[addr_out];
         m0              <= mem_array[index0];
         m1              <= mem_array[index1];
         m2              <= mem_array[index2];
