@@ -44,20 +44,20 @@ integer k;
 memory R_memory(
     .clk(clk), .rst(rst),
     .index0(mem_index0),.index1(mem_index1),.index2(mem_index2),.index3(mem_index3),.index4(mem_index4),.index5(mem_index5),.index6(mem_index6),.index7(mem_index7),.index8(mem_index8),
-    .addr(mem_addr),.data_in(data_in_R), WE(mem_enable),
-    .ori_data_out(mem_Rout),.m0(Rm0),.m1(Rm1),.m2(Rm2),.m3(Rm3),.m4(Rm4),.m5(Rm5),.m6(Rm6),.m7(Rm7),.m8(Rm8),
+    .addr(mem_addr),.data_in(data_in_R), .WE(mem_enable),
+    .ori_data_out(mem_Rout),.m0(Rm0),.m1(Rm1),.m2(Rm2),.m3(Rm3),.m4(Rm4),.m5(Rm5),.m6(Rm6),.m7(Rm7),.m8(Rm8)
 );
 memory G_memory(
     .clk(clk), .rst(rst),
     .index0(mem_index0),.index1(mem_index1),.index2(mem_index2),.index3(mem_index3),.index4(mem_index4),.index5(mem_index5),.index6(mem_index6),.index7(mem_index7),.index8(mem_index8),
-    .addr(mem_addr),.data_in(data_in_G), WE(mem_enable),
-    .ori_data_out(mem_Gout),.m0(Gm0),.m1(Gm1),.m2(Gm2),.m3(Gm3),.m4(Gm4),.m5(Gm5),.m6(Gm6),.m7(Gm7),.m8(Gm8),
+    .addr(mem_addr),.data_in(data_in_G), .WE(mem_enable),
+    .ori_data_out(mem_Gout),.m0(Gm0),.m1(Gm1),.m2(Gm2),.m3(Gm3),.m4(Gm4),.m5(Gm5),.m6(Gm6),.m7(Gm7),.m8(Gm8)
 );
 memory B_memory(
     .clk(clk), .rst(rst),
     .index0(mem_index0),.index1(mem_index1),.index2(mem_index2),.index3(mem_index3),.index4(mem_index4),.index5(mem_index5),.index6(mem_index6),.index7(mem_index7),.index8(mem_index8),
-    .addr(mem_addr),.data_in(data_in_B), WE(mem_enable),
-    .ori_data_out(mem_Bout),.m0(Bm0),.m1(Bm1),.m2(Bm2),.m3(Bm3),.m4(Bm4),.m5(Bm5),.m6(Bm6),.m7(Bm7),.m8(Bm8),
+    .addr(mem_addr),.data_in(data_in_B), .WE(mem_enable),
+    .ori_data_out(mem_Bout),.m0(Bm0),.m1(Bm1),.m2(Bm2),.m3(Bm3),.m4(Bm4),.m5(Bm5),.m6(Bm6),.m7(Bm7),.m8(Bm8)
 );
 addr_memory addr_memX(
     .clk(clk), .rst(rst),

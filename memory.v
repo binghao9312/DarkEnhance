@@ -10,14 +10,19 @@ module memory (
     
 reg  [7:0]  mem_array [0:1026];
 reg  [10:0] addr_out;
+integer i;
 always @(posedge clk or posedge rst) begin
     if (rst) begin
-        integer i;
+        
         for (i = 0; i < 1027; i = i + 1) begin
             mem_array[i] <= 8'b0;
         end
-    end else if (WE) begin
+    end 
+    else if (WE) begin
         mem_array[addr] <= data_in;
+    end
+    else begin
+        mem_array[addr] <= mem_array[addr];
     end
 end
 

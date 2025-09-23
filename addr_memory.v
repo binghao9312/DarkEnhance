@@ -26,15 +26,18 @@ always @(posedge clk or posedge rst) begin
             addr <= addr + 1;
     end
 end
-
+integer i;
 always @(posedge clk or posedge rst) begin
     if (rst) begin
-        integer i;
         for (i = 0; i < 1027; i = i + 1) begin
             mem_array[i] <= 10'b0;
         end
-    end else if (WE) begin
+    end 
+    else if (WE) begin
         mem_array[addr] <= data_in;
+    end
+    else begin
+        mem_array[addr] <= mem_array[addr];
     end
 end
 
