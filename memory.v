@@ -7,10 +7,12 @@ module memory (
     input               WE, // write enable
     output reg  [7:0]   ori_data_out,m0,m1,m2,m3,m4,m5,m6,m7,m8
 );
-    
+wire [7:0]  data_in_r;
 reg  [7:0]  mem_array [0:1026];
 reg  [10:0] addr_out;
 integer i;
+
+assign data_in_r = 255 - data_in;
 always @(posedge clk or posedge rst) begin
     if (rst) begin
         
@@ -19,7 +21,7 @@ always @(posedge clk or posedge rst) begin
         end
     end 
     else if (WE) begin
-        mem_array[addr] <= data_in;
+        mem_array[addr] <= data_in_r;
     end
     else begin
         mem_array[addr] <= mem_array[addr];

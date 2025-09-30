@@ -1,15 +1,15 @@
 module addr_memory (
     input                clk,
     input                rst,
-    input       [10:0]   data_in,
+    input       [10:0]   data_in, //addr X or addr Y
     input                WE, // write enable
-    output reg  [10:0]   data_out
+    output reg  [10:0]   data_out 
 );
-reg [10:0] addr,addr_out;
+reg [10:0] addr,addr_out; // 寫入位址 ， 丟出位址
 reg [10:0] mem_array [0:1026];
 
 always @(*)begin
-    if(addr < 11'd1026)
+    if(addr == 11'd1026)
         addr_out = 11'd0;
     else
         addr_out = addr + 1;
@@ -26,6 +26,7 @@ always @(posedge clk or posedge rst) begin
             addr <= addr + 1;
     end
 end
+
 integer i;
 always @(posedge clk or posedge rst) begin
     if (rst) begin

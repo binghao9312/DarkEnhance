@@ -7,7 +7,7 @@ module top_pipeline(
     output reg  [19:0]  addr_out,
     output reg  [7:0]   data_out_R,data_out_G,data_out_B,
     output reg          ack,valid,
-    output              done
+    output           done
 );
 
 
@@ -19,11 +19,11 @@ reg   [19:0]  addr_YSHIFT;
 reg   [10:0]  valid_cnt;
 reg   [3:0]   now_state, next_state;
   
-reg   [7:0]   R_pixel_FIFO           [0:2];
-reg   [7:0]   G_pixel_FIFO           [0:2];
-reg   [7:0]   B_pixel_FIFO           [0:2];
-reg   [9:0]   addrX_FIFO             [0:2];
-reg   [9:0]   addrY_FIFO             [0:2];
+reg   [7:0]   R_pixel_FIFO           [0:3];
+reg   [7:0]   G_pixel_FIFO           [0:3];
+reg   [7:0]   B_pixel_FIFO           [0:3];
+reg   [9:0]   addrX_FIFO             [0:3];
+reg   [9:0]   addrY_FIFO             [0:3];
 reg   [15:0]  t_ans,mul_R,mul_G,mul_B;
 reg   [7:0]   pixel_R,pixel_G,pixel_B;
 reg   [10:0]  mem_addr,mem_index0,mem_index1,mem_index2,mem_index3,mem_index4,mem_index5,mem_index6,mem_index7,mem_index8;
@@ -32,14 +32,16 @@ wire  [15:0]  R_shift_R6,G_shift_R6,B_shift_R6;
 wire  [7:0]   R_min_out,G_min_out,B_min_out,min1,min2,mem_Rout,mem_Gout,mem_Bout;
 wire  [7:0]   Rm0,Rm1,Rm2,Rm3,Rm4,Rm5,Rm6,Rm7,Rm8;
 wire  [7:0]   Gm0,Gm1,Gm2,Gm3,Gm4,Gm5,Gm6,Gm7,Gm8;
-wire  [7:0]   Bm0,Bm1,Bm2,Bm3,Bm4,Bm5,Bm6,Bm7,Bm8; 
+wire  [7:0]   Bm0,Bm1,Bm2,Bm3,Bm4,Bm5,Bm6,Bm7,Bm8;
 wire  isBoundary,mem_enable;
 
 
 assign  mem_enable = (now_state == process && ack) ? 1'b1 : 1'b0;
-assign  isBoundary  = (addrX_FIFO[2] == 0 || addrX_FIFO[2] == 511 || addrY_FIFO[2] == 0 || addrY_FIFO[2] == 511) ? 1'b1 : 1'b0;
-assign  done        = (addr_out > 20'd262143)? 1'b1 : 1'b0;
+assign  isBoundary  = (addrX_FIFO[3] == 0 || addrX_FIFO[3] == 511 || addrY_FIFO[3] == 0 || addrY_FIFO[3] == 511) ? 1'b1 : 1'b0;
+assign  done  = (addr_out > 20'd262143)? 1'b1 : 1'b0;
 integer k;
+
+
 
 memory R_memory(
     .clk(clk), .rst(rst),
@@ -130,7 +132,7 @@ end
 //=============== FIFO ===============
 always @(posedge clk or posedge rst) begin
     if (rst) begin
-        for (k = 0; k < 3; k = k + 1) begin
+        for (k = 0; k < 4; k = k + 1) begin
             R_pixel_FIFO[k]  <= 8'd0;
             G_pixel_FIFO[k]  <= 8'd0;
             B_pixel_FIFO[k]  <= 8'd0;
@@ -145,7 +147,7 @@ always @(posedge clk or posedge rst) begin
             addrX_FIFO[0]    <= addrX_MEMout;
             addrY_FIFO[0]    <= addrY_MEMout;
 
-            for (k = 1; k < 3; k = k + 1) begin
+            for (k = 1; k < 4; k = k + 1) begin
                 R_pixel_FIFO[k]  <= R_pixel_FIFO[k - 1];
                 G_pixel_FIFO[k]  <= G_pixel_FIFO[k - 1];
                 B_pixel_FIFO[k]  <= B_pixel_FIFO[k - 1];
@@ -153,7 +155,7 @@ always @(posedge clk or posedge rst) begin
                 addrY_FIFO[k]    <= addrY_FIFO[k - 1];
             end
         end else begin
-            for (k = 0; k < 3; k = k + 1) begin
+            for (k = 0; k < 4; k = k + 1) begin
                 R_pixel_FIFO[k]  <= R_pixel_FIFO[k];
                 G_pixel_FIFO[k]  <= G_pixel_FIFO[k];
                 B_pixel_FIFO[k]  <= B_pixel_FIFO[k];
@@ -455,9 +457,9 @@ always @(posedge clk or posedge rst) begin
 end
 //===================== calulate ============================
 always @(*)begin
-    pixel_R = R_pixel_FIFO[1];
-    pixel_G = G_pixel_FIFO[1];
-    pixel_B = B_pixel_FIFO[1];
+    pixel_R = R_pixel_FIFO[2];
+    pixel_G = G_pixel_FIFO[2];
+    pixel_B = B_pixel_FIFO[2];
 end
 
 always @(posedge clk or posedge rst) begin
@@ -503,7 +505,7 @@ always @(posedge clk or posedge rst) begin
 end
 
 always @(*)begin
-    addr_YSHIFT = addrY_FIFO[1];
+    addr_YSHIFT = addrY_FIFO[2];
 end
 
 always @(posedge clk or posedge rst) begin
@@ -515,11 +517,11 @@ always @(posedge clk or posedge rst) begin
     
     end else begin
         if (now_state == process && enable) begin
-            addr_out  <= (addr_YSHIFT << 9) + addrX_FIFO[2];
+            addr_out  <= (addr_YSHIFT << 9) + addrX_FIFO[3];
             if(isBoundary) begin
-                data_out_R <= 255 - R_pixel_FIFO[2];
-                data_out_G <= 255 - G_pixel_FIFO[2];
-                data_out_B <= 255 - B_pixel_FIFO[2];               
+                data_out_R <= 255 - R_pixel_FIFO[3];
+                data_out_G <= 255 - G_pixel_FIFO[3];
+                data_out_B <= 255 - B_pixel_FIFO[3];               
             end
             else begin
                 data_out_R <= {R_shift_R6[7],R_shift_R6[6],R_shift_R6[5],R_shift_R6[4],R_shift_R6[3],R_shift_R6[2],R_shift_R6[1],R_shift_R6[0]};
