@@ -13,6 +13,9 @@
 
 ## Step3 硬體設計  
 將演算法用Verilog實現
+<img width="399" height="242" alt="image" src="https://github.com/user-attachments/assets/56572256-094a-481f-ad1e-ea97e218b86a" />
+
+
 
 ## Step4 nWave 硬體驗證(當前階段)    
 在Modelsim 中讓Testbench讀取hex，  
