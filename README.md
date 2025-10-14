@@ -2,15 +2,13 @@
 
 
 ## Step 1 軟體驗證    
-執行 test.py檢視暗部增強的演算法。  
+執行test.py裁切圖片及驗證驗算法  
+```python test.py ```  
   
 <img width="1468" height="585" alt="image" src="https://github.com/user-attachments/assets/65d5e6ab-3993-4cc9-b723-bf7cb3e11ffc" />
 
 
 ## Step2 影像前處理  
-執行test.py裁切圖像及驗證驗算法  
-```python test.py ```  
-
 執行image2hex將hex轉換為jpg來看實驗結果  
 ```python image2hex.py ```  
 並將裁切完成的影像轉換成Hex檔  
