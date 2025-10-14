@@ -13,8 +13,8 @@
 
 ## Step3 硬體設計  
 將演算法用Verilog實現  
-<img width="1468" height="585" alt="image" src="https://github.com/user-attachments/assets/56572256-094a-481f-ad1e-ea97e218b86a" />
-
+  
+<img width="1920" height="1080" alt="project_flow (1)" src="https://github.com/user-attachments/assets/9cdedb67-2e08-4148-afb4-ae39b86c823f" />
 
 
 ## Step4 nWave 硬體驗證(當前階段)    
