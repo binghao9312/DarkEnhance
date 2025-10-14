@@ -12,7 +12,7 @@
 並將裁切完成的影像轉換成Hex檔
 
 ## Step3 硬體設計  
-將演算法用Verilog實現
+將演算法用Verilog實現  
 <img width="399" height="242" alt="image" src="https://github.com/user-attachments/assets/56572256-094a-481f-ad1e-ea97e218b86a" />
 
 
@@ -31,8 +31,8 @@
 
 ##  Step7 ADFP APR  
 gate level netlist report
-<img width="429" height="149" alt="image" src="https://github.com/user-attachments/assets/776de22b-d0c4-4147-a221-33b3e0e83a0a" />
-<img width="405" height="108" alt="image" src="https://github.com/user-attachments/assets/15aac27d-6ea6-41cf-9a65-193ea1afaaec" />
-<img width="405" height="116" alt="image" src="https://github.com/user-attachments/assets/1076bc71-9f6f-410a-ad93-ddb168ecb877" />
+<img width="429" height="149" alt="image" src="https://github.com/user-attachments/assets/776de22b-d0c4-4147-a221-33b3e0e83a0a" />  
+<img width="405" height="108" alt="image" src="https://github.com/user-attachments/assets/15aac27d-6ea6-41cf-9a65-193ea1afaaec" />  
+<img width="405" height="116" alt="image" src="https://github.com/user-attachments/assets/1076bc71-9f6f-410a-ad93-ddb168ecb877" />  
 
 
