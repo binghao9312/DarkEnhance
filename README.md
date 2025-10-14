@@ -14,7 +14,7 @@
 ## Step3 硬體設計  
 將演算法用Verilog實現
 
-## Step4 Modelsim 硬體驗證(當前階段)    
+## Step4 nWave 硬體驗證(當前階段)    
 在Modelsim 中讓Testbench讀取hex，  
 驗證波型輸出是否達成效果
 
@@ -25,3 +25,11 @@
 
 ##  Step6 在AMD PYNQ-Z2 上驗證硬體設計   
 <img width="2442" height="915" alt="image" src="https://github.com/user-attachments/assets/6f2a7935-27c9-4ab6-90f2-31ad00e0baca" />  
+
+##  Step7 ADFP APR  
+gate level netlist report
+<img width="429" height="149" alt="image" src="https://github.com/user-attachments/assets/776de22b-d0c4-4147-a221-33b3e0e83a0a" />
+<img width="405" height="108" alt="image" src="https://github.com/user-attachments/assets/15aac27d-6ea6-41cf-9a65-193ea1afaaec" />
+<img width="405" height="116" alt="image" src="https://github.com/user-attachments/assets/1076bc71-9f6f-410a-ad93-ddb168ecb877" />
+
+
