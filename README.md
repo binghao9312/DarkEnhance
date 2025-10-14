@@ -8,21 +8,29 @@
 
 
 ## Step2 影像前處理  
-執行 image2hex將影像切割成 512*512，  
-並將裁切完成的影像轉換成Hex檔
+執行test.py裁切圖像及驗證驗算法  
+```python test.py ```  
+
+執行 image2hex將影像切割成 512*512， 
+
+執行image2hex將hex轉換為jpg來看實驗結果  
+```python image2hex.py ```  
+並將裁切完成的影像轉換成Hex檔  
   
 <img width="584" height="420" alt="image" src="https://github.com/user-attachments/assets/9aed9483-273e-4707-8c53-96f4fd5701fe" />
-
+  
 
 ## Step3 硬體設計  
-將演算法用Verilog實現  
+將演算法用RTL_CODE實現  
   
 <img width="1920" height="1080" alt="project_flow (1)" src="https://github.com/user-attachments/assets/9cdedb67-2e08-4148-afb4-ae39b86c823f" />
 
 
-## Step4 nWave 硬體驗證   
-在Modelsim 中讓Testbench讀取hex，  
-驗證波型輸出是否達成效果
+## Step4 硬體驗證   
+在VCS 驗證， 讓Testbench讀取output.hex，  
+使用nWave驗證波型輸出是否達成效果。  
+執行hex2image將verilog_output.hex轉換為jpg來看實驗結果  
+```python hex2image.py ``` 
 
 ## Step5 Constraint 撰寫  
 避免slack為負
