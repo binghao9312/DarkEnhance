@@ -25,6 +25,7 @@
 ## Step4 硬體驗證   
 在VCS 驗證， 讓Testbench讀取output.hex，  
 使用nWave驗證波型輸出是否達成效果。  
+  
 執行hex2image將verilog_output.hex轉換為jpg來看實驗結果  
 ```python hex2image.py ``` 
 
