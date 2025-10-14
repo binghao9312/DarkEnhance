@@ -11,8 +11,6 @@
 執行test.py裁切圖像及驗證驗算法  
 ```python test.py ```  
 
-執行 image2hex將影像切割成 512*512， 
-
 執行image2hex將hex轉換為jpg來看實驗結果  
 ```python image2hex.py ```  
 並將裁切完成的影像轉換成Hex檔  
