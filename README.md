@@ -10,6 +10,9 @@
 ## Step2 影像前處理  
 執行 image2hex將影像切割成 512*512，  
 並將裁切完成的影像轉換成Hex檔
+  
+<img width="584" height="420" alt="image" src="https://github.com/user-attachments/assets/9aed9483-273e-4707-8c53-96f4fd5701fe" />
+
 
 ## Step3 硬體設計  
 將演算法用Verilog實現  
