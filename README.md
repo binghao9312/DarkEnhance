@@ -29,15 +29,10 @@
 執行hex2image將verilog_output.hex轉換為jpg來看實驗結果  
 ```python hex2image.py ``` 
 
-## Step5 Constraint 撰寫  
-避免slack為負
-(slack為負時，表示clock比資料晚到，無法滿足Setup、Hold time)  
-
-
-##  Step6 在AMD PYNQ-Z2 上驗證硬體設計   
+##  Step5 在AMD PYNQ-Z2 上驗證硬體設計   
 <img width="2442" height="915" alt="image" src="https://github.com/user-attachments/assets/6f2a7935-27c9-4ab6-90f2-31ad00e0baca" />  
 
-##  Step7 ADFP APR  (當前階段)   
+##  Step6 ADFP APR  (當前階段)   
 gate level netlist report  
 <img width="429" height="149" alt="image" src="https://github.com/user-attachments/assets/776de22b-d0c4-4147-a221-33b3e0e83a0a" />  
 <img width="405" height="108" alt="image" src="https://github.com/user-attachments/assets/15aac27d-6ea6-41cf-9a65-193ea1afaaec" />  
