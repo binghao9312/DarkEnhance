@@ -39,7 +39,8 @@ gate level netlist report
 <img width="405" height="116" alt="image" src="https://github.com/user-attachments/assets/1076bc71-9f6f-410a-ad93-ddb168ecb877" />  
 
 ##  PSNR  
-PNSR = 36.7196  
+使用Matelab 計算軟體演算法與verilog模擬結果的 PSNR  
+# PNSR = 36.7196  
 <img width="671" height="287" alt="image" src="https://github.com/user-attachments/assets/6b9b5cc9-81fb-402e-b555-78239f818acd" />
 
 
