@@ -141,4 +141,4 @@ plt.axis('off')
 plt.tight_layout()
 plt.show()
 
-print("結果已儲存為 original_output.jpg 與 enhanced_output.jpg (已裁切/補齊為512x512)")
+print("結果已儲存為 original_output.jpg 與 enhanced_output.jpg")

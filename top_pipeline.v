@@ -1,11 +1,18 @@
 module top_pipeline(
     input               clk,rst,enable, 
-    input       [7:0]   data_in_R,data_in_G,data_in_B,
-    input       [9:0]   addr_X,addr_Y,
-    output reg  [19:0]  addr_out,
-    output reg  [7:0]   data_out_R,data_out_G,data_out_B,
+    input       [31:0]   data_in_R,data_in_G,data_in_B,
+    input       [31:0]   addr_X,addr_Y,
+    input               transition_end,
+    output reg  [31:0]  addr_out,
+    output reg  [31:0]   data_out_R,data_out_G,data_out_B,
+    
+    // ========== BRAM Port B 控制信號 ==========
+    output wire [31:0]  bram_addrb,    // BRAM 寫入位址
+    output wire         bram_web,      // BRAM 寫入致能
+    output wire         bram_enb,      // BRAM 致能
+    
     output reg          ack,valid,
-    output           done
+    output              done
 );
 
 
@@ -16,6 +23,9 @@ parameter [3:0] //statement
 reg   [19:0]  addr_YSHIFT;                
 reg   [10:0]  valid_cnt;
 reg   [3:0]   now_state, next_state;
+
+// ========== BRAM 寫入位址計數器 ==========
+reg   [31:0]  bram_write_addr;  // 追蹤寫入到 BRAM 的第幾個位置
   
 reg   [7:0]   R_pixel_FIFO           [0:3];
 reg   [7:0]   G_pixel_FIFO           [0:3];
@@ -24,9 +34,8 @@ reg   [9:0]   addrX_FIFO             [0:3];
 reg   [9:0]   addrY_FIFO             [0:3];
 reg   [15:0]  t_ans,mul_R,mul_G,mul_B;
 reg   [7:0]   pixel_R,pixel_G,pixel_B;
-reg   [10:0]  mem_addr,mem_index0,mem_index1,mem_index2,mem_index3,mem_index4,mem_index5,mem_index6,mem_index7,mem_index8;
 wire  [10:0]  addrX_MEMout,addrY_MEMout;
-wire  [15:0]  R_shift_R6,G_shift_R6,B_shift_R6;
+reg   [15:0]  R_shift_R6,G_shift_R6,B_shift_R6;
 wire  [7:0]   R_max_out,G_max_out,B_max_out,max1,max2,mem_Rout,mem_Gout,mem_Bout;
 wire  [7:0]   Rm0,Rm1,Rm2,Rm3,Rm4,Rm5,Rm6,Rm7,Rm8;
 wire  [7:0]   Gm0,Gm1,Gm2,Gm3,Gm4,Gm5,Gm6,Gm7,Gm8;
@@ -36,81 +45,85 @@ wire  isBoundary,mem_enable;
 
 assign  mem_enable = (now_state == process && ack) ? 1'b1 : 1'b0;
 assign  isBoundary  = (addrX_FIFO[3] == 0 || addrX_FIFO[3] == 511 || addrY_FIFO[3] == 0 || addrY_FIFO[3] == 511) ? 1'b1 : 1'b0;
-assign  done  = (addr_out > 20'd262143)? 1'b1 : 1'b0;
+assign  done  = (addr_out > 32'd262143)? 1'b1 : 1'b0;
 integer k;
 
+reg [7:0] R_MEMin,G_MEMin,B_MEMin;
+always @(*)begin
+    if(transition_end)begin
+        R_MEMin = 8'd0;
+        G_MEMin = 8'd0;
+        B_MEMin = 8'd0;
+    end
+    else begin
+        R_MEMin = data_in_R[7:0];
+        G_MEMin = data_in_G[7:0];
+        B_MEMin = data_in_B[7:0];
+    end
+end
 
+FIFO R_FIFO(
+   .clk(clk),
+   .reset(rst),
+   .en(mem_enable),
+   .data_in(R_MEMin),
+   .mask_00(Rm0),
+   .mask_01(Rm1),
+   .mask_02(Rm2),
+   .mask_10(Rm3),
+   .mask_11(Rm4),
+   .mask_12(Rm5),
+   .mask_20(Rm6),
+   .mask_21(Rm7),
+   .mask_22(Rm8),
+   .pixel_out(mem_Rout)
+);
+FIFO G_FIFO(
+   .clk(clk),
+   .reset(rst),
+   .en(mem_enable),
+   .data_in(G_MEMin),
+   .mask_00(Gm0),
+   .mask_01(Gm1),
+   .mask_02(Gm2),
+   .mask_10(Gm3),
+   .mask_11(Gm4),
+   .mask_12(Gm5),
+   .mask_20(Gm6),
+   .mask_21(Gm7),
+   .mask_22(Gm8),
+   .pixel_out(mem_Gout)
+);
+FIFO B_FIFO(
+   .clk(clk),
+   .reset(rst),
+   .en(mem_enable),
+   .data_in(B_MEMin),
+   .mask_00(Bm0),
+   .mask_01(Bm1),
+   .mask_02(Bm2),
+   .mask_10(Bm3),
+   .mask_11(Bm4),
+   .mask_12(Bm5),
+   .mask_20(Bm6),
+   .mask_21(Bm7),
+   .mask_22(Bm8),
+   .pixel_out(mem_Bout)
+);
 
-memory R_memory(
-    .clk(clk), .rst(rst),
-    .index0(mem_index0),.index1(mem_index1),.index2(mem_index2),.index3(mem_index3),.index4(mem_index4),.index5(mem_index5),.index6(mem_index6),.index7(mem_index7),.index8(mem_index8),
-    .addr(mem_addr),.data_in(data_in_R), .WE(mem_enable),
-    .ori_data_out(mem_Rout),.m0(Rm0),.m1(Rm1),.m2(Rm2),.m3(Rm3),.m4(Rm4),.m5(Rm5),.m6(Rm6),.m7(Rm7),.m8(Rm8)
-);
-memory G_memory(
-    .clk(clk), .rst(rst),
-    .index0(mem_index0),.index1(mem_index1),.index2(mem_index2),.index3(mem_index3),.index4(mem_index4),.index5(mem_index5),.index6(mem_index6),.index7(mem_index7),.index8(mem_index8),
-    .addr(mem_addr),.data_in(data_in_G), .WE(mem_enable),
-    .ori_data_out(mem_Gout),.m0(Gm0),.m1(Gm1),.m2(Gm2),.m3(Gm3),.m4(Gm4),.m5(Gm5),.m6(Gm6),.m7(Gm7),.m8(Gm8)
-);
-memory B_memory(
-    .clk(clk), .rst(rst),
-    .index0(mem_index0),.index1(mem_index1),.index2(mem_index2),.index3(mem_index3),.index4(mem_index4),.index5(mem_index5),.index6(mem_index6),.index7(mem_index7),.index8(mem_index8),
-    .addr(mem_addr),.data_in(data_in_B), .WE(mem_enable),
-    .ori_data_out(mem_Bout),.m0(Bm0),.m1(Bm1),.m2(Bm2),.m3(Bm3),.m4(Bm4),.m5(Bm5),.m6(Bm6),.m7(Bm7),.m8(Bm8)
-);
 addr_memory addr_memX(
     .clk(clk), .rst(rst),
-    .data_in(addr_X), .WE(mem_enable),
+    .data_in({1'b0,addr_X[9:0]}), .WE(mem_enable),
     .data_out(addrX_MEMout)
 );
 addr_memory addr_memY(
     .clk(clk), .rst(rst),
-    .data_in(addr_Y), .WE(mem_enable),
+    .data_in({1'b0,addr_Y[9:0]}), .WE(mem_enable),
     .data_out(addrY_MEMout)
 );
 
-always @(posedge clk or posedge rst)begin
-    if(rst)begin
-        mem_addr    <= 11'd0;
-        mem_index0  <= 11'd0;
-        mem_index1  <= 11'd1;
-        mem_index2  <= 11'd2;
-        mem_index3  <= 11'd512;
-        mem_index4  <= 11'd513;
-        mem_index5  <= 11'd514;
-        mem_index6  <= 11'd1024;
-        mem_index7  <= 11'd1025;
-        mem_index8  <= 11'd1026;
-    end
-    else begin
-        if(now_state == process && ack)begin
-            mem_addr    <= (mem_addr == 11'd1026)   ? 11'd0 : mem_addr + 1;
-            mem_index0  <= (mem_index0 == 11'd1026) ? 11'd0 : mem_index0 + 1;
-            mem_index1  <= (mem_index1 == 11'd1026) ? 11'd0 : mem_index1 + 1;
-            mem_index2  <= (mem_index2 == 11'd1026) ? 11'd0 : mem_index2 + 1;
-            mem_index3  <= (mem_index3 == 11'd1026) ? 11'd0 : mem_index3 + 1;
-            mem_index4  <= (mem_index4 == 11'd1026) ? 11'd0 : mem_index4 + 1;
-            mem_index5  <= (mem_index5 == 11'd1026) ? 11'd0 : mem_index5 + 1;
-            mem_index6  <= (mem_index6 == 11'd1026) ? 11'd0 : mem_index6 + 1;
-            mem_index7  <= (mem_index7 == 11'd1026) ? 11'd0 : mem_index7 + 1;
-            mem_index8  <= (mem_index8 == 11'd1026) ? 11'd0 : mem_index8 + 1;
-        end
-        else begin
-            mem_index0  <= 11'd0;
-            mem_index1  <= 11'd1;
-            mem_index2  <= 11'd2;
-            mem_index3  <= 11'd512;
-            mem_index4  <= 11'd513;
-            mem_index5  <= 11'd514;
-            mem_index6  <= 11'd1024;
-            mem_index7  <= 11'd1025;
-            mem_index8  <= 11'd1026;
-        end
-    end
-end
 
-always @(posedge clk or posedge rst) begin
+always @(posedge clk) begin
     if (rst) begin
         ack <= 1'b0;
     end 
@@ -128,7 +141,7 @@ always @(posedge clk or posedge rst) begin
 end
 
 //=============== FIFO ===============
-always @(posedge clk or posedge rst) begin
+always @(posedge clk) begin
     if (rst) begin
         for (k = 0; k < 4; k = k + 1) begin
             R_pixel_FIFO[k]  <= 8'd0;
@@ -164,7 +177,7 @@ always @(posedge clk or posedge rst) begin
     end
 end
 //============ STATE MACHINE =========
-always @(posedge clk or posedge rst) begin
+always @(posedge clk) begin
     if (rst) begin
         now_state <= 4'd0;
     end else begin
@@ -188,7 +201,7 @@ assign max2 = (max1 > B_max_out) ? max1 : B_max_out;
 
 
 //===================== max TO T_ans ============================
-always @(posedge clk or posedge rst) begin
+always @(posedge clk) begin
     if(rst)begin
         t_ans <= 16'd0;
     end
@@ -460,7 +473,7 @@ always @(*)begin
     pixel_B = B_pixel_FIFO[2];
 end
 
-always @(posedge clk or posedge rst) begin
+always @(posedge clk) begin
     if (rst) begin
         mul_R <= 0;
         mul_G <= 0;
@@ -472,12 +485,14 @@ always @(posedge clk or posedge rst) begin
         mul_B <= pixel_B * t_ans;//(8'd255 - pixel_B) * t_ans; // maybe need some reg to delay
     end
 end
-assign R_shift_R6 = (mul_R >> 6) < 8'd255 ? (mul_R >> 6) : 8'd255;
-assign G_shift_R6 = (mul_G >> 6) < 8'd255 ? (mul_G >> 6) : 8'd255;
-assign B_shift_R6 = (mul_B >> 6) < 8'd255 ? (mul_B >> 6) : 8'd255;
 
+always @(*)begin
+    R_shift_R6 = (mul_R >> 6) < 8'd255 ? (mul_R >> 6) : 8'd255;
+    G_shift_R6 = (mul_G >> 6) < 8'd255 ? (mul_G >> 6) : 8'd255;
+    B_shift_R6 = (mul_B >> 6) < 8'd255 ? (mul_B >> 6) : 8'd255;
+end
 //===================== OUTPUT ==============================
-always @(posedge clk or posedge rst) begin
+always @(posedge clk) begin
     if (rst) begin
         valid <= 1'b0;
         valid_cnt <= 6'd0;
@@ -502,29 +517,47 @@ always @(posedge clk or posedge rst) begin
     end
 end
 
+//========== BRAM 寫入位址管理 ==========
+always @(posedge clk) begin
+    if (rst) begin
+        bram_write_addr <= 32'd0;
+    end else begin
+        if (done) begin
+            bram_write_addr <= 32'd0;  // 完成後重置
+        end else if (valid && (now_state == process)) begin
+            bram_write_addr <= bram_write_addr + 1'b1;  // 每次 valid=1 就增加
+        end
+    end
+end
+
+// BRAM Port B 控制信號
+assign bram_addrb = bram_write_addr;       // 使用計數器作為位址
+assign bram_web   = valid;                  // 當 valid=1 時寫入
+assign bram_enb   = 1'b1;                   // 永遠致能
+
 always @(*)begin
     addr_YSHIFT = addrY_FIFO[2];
 end
 
-always @(posedge clk or posedge rst) begin
+always @(posedge clk) begin
     if (rst) begin
-        addr_out    <= 20'd0;
-        data_out_R  <= 8'd0;
-        data_out_G  <= 8'd0;
-        data_out_B  <= 8'd0;        
+        addr_out    <= 32'd0;
+        data_out_R  <= 32'd0;
+        data_out_G  <= 32'd0;
+        data_out_B  <= 32'd0;        
     
     end else begin
         if (now_state == process && enable) begin
-            addr_out  <= (addr_YSHIFT << 9) + addrX_FIFO[3];
+            addr_out  <= {22'b0,(addr_YSHIFT << 9) + addrX_FIFO[3]};
             if(isBoundary) begin
-                data_out_R <= R_pixel_FIFO[3]; //255 - R_pixel_FIFO[3];
-                data_out_G <= G_pixel_FIFO[3]; //255 - G_pixel_FIFO[3];
-                data_out_B <= B_pixel_FIFO[3]; //255 - B_pixel_FIFO[3];               
+                data_out_R <= {24'b0,R_pixel_FIFO[3]}; //255 - R_pixel_FIFO[3];
+                data_out_G <= {24'b0,G_pixel_FIFO[3]}; //255 - G_pixel_FIFO[3];
+                data_out_B <= {24'b0,B_pixel_FIFO[3]}; //255 - B_pixel_FIFO[3];               
             end
             else begin
-                data_out_R <= {R_shift_R6[7],R_shift_R6[6],R_shift_R6[5],R_shift_R6[4],R_shift_R6[3],R_shift_R6[2],R_shift_R6[1],R_shift_R6[0]};
-                data_out_G <= {G_shift_R6[7],G_shift_R6[6],G_shift_R6[5],G_shift_R6[4],G_shift_R6[3],G_shift_R6[2],G_shift_R6[1],G_shift_R6[0]};
-                data_out_B <= {B_shift_R6[7],B_shift_R6[6],B_shift_R6[5],B_shift_R6[4],B_shift_R6[3],B_shift_R6[2],B_shift_R6[1],B_shift_R6[0]};
+                data_out_R <= {24'b0,R_shift_R6[7],R_shift_R6[6],R_shift_R6[5],R_shift_R6[4],R_shift_R6[3],R_shift_R6[2],R_shift_R6[1],R_shift_R6[0]};
+                data_out_G <= {24'b0,G_shift_R6[7],G_shift_R6[6],G_shift_R6[5],G_shift_R6[4],G_shift_R6[3],G_shift_R6[2],G_shift_R6[1],G_shift_R6[0]};
+                data_out_B <= {24'b0,B_shift_R6[7],B_shift_R6[6],B_shift_R6[5],B_shift_R6[4],B_shift_R6[3],B_shift_R6[2],B_shift_R6[1],B_shift_R6[0]};
             end
             
         end 

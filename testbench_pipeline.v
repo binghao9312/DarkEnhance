@@ -9,10 +9,11 @@ reg     [7:0] pixel_in_R_buf, pixel_in_G_buf, pixel_in_B_buf;
 wire    done;
 reg     clk,rst,chip_enable,start;
 reg     [23:0] img_mem [0:262143]; // 512x512
-reg     [18:0] img_idx;
+reg     [19:0] img_idx;
 wire    [19:0] addr_out;  // 修正：應該是 19:0，與模組定義一致
 reg     [9:0]  addrX, addrY;
 wire    valid;
+reg     transition_end;
 
 // ===== Clock generator: 10ns period
 initial begin
@@ -47,7 +48,7 @@ initial begin
 end
 
 reg ack_delay_one_clk;
-always @(posedge clk or posedge rst) begin
+always @(posedge clk) begin
     if (rst) begin
         ack_delay_one_clk <= 0;
     end 
@@ -57,19 +58,27 @@ always @(posedge clk or posedge rst) begin
 end
 
 
-always @(posedge clk or rst) begin
+always @(posedge clk) begin
     if (rst) begin
         addrX <= 0;
         addrY <= 0;
+        transition_end <= 0;
     end 
     else if (ack_delay_one_clk) begin
             if(addrY == 512)begin   //sould be 511
                 addrX <= addrX;
                 addrY <= addrY;
+                transition_end <= transition_end;
+            end
+            else if(addrX == 511 && addrY == 511)begin //sould be 511
+                transition_end <= 1;
+                addrX <= 0;
+                addrY <= addrY + 1;
             end
             else if(addrX == 511)begin
                 addrX <= 0;
                 addrY <= addrY + 1;
+
             end
             else begin
                 addrX <= addrX + 1;
@@ -86,6 +95,26 @@ always @(*)begin
     img_idx = addrY * 512 + addrX;
 end
 
+
+always @(posedge clk)begin
+    if(rst) begin
+        pixel_in_R_buf <= 8'd0;
+        pixel_in_G_buf <= 8'd0;
+        pixel_in_B_buf <= 8'd0;
+    end
+    else begin
+        if(done==0) begin
+            pixel_in_R_buf <= pixel_in_R;
+            pixel_in_G_buf <= pixel_in_G;
+            pixel_in_B_buf <= pixel_in_B;
+        end
+        else begin
+            pixel_in_R_buf <= pixel_in_R;
+            pixel_in_G_buf <= pixel_in_G;
+            pixel_in_B_buf <= pixel_in_B;
+        end
+    end
+end
 assign pixel_in_R  =  (done)? 8'dz : img_mem[img_idx][23:16];
 assign pixel_in_G  =  (done)? 8'dz : img_mem[img_idx][15: 8];
 assign pixel_in_B  =  (done)? 8'dz : img_mem[img_idx][ 7: 0];
@@ -143,7 +172,8 @@ top_pipeline DUT (
     .data_out_B(pixel_B),
     .ack(chip_ack),
     .valid(valid),
-    .done(done)
+    .done(done),
+    .transition_end(transition_end)
 );
 
 
