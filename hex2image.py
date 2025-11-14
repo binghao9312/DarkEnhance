@@ -20,4 +20,4 @@ if len(img_data) != W * H:
 
 img_array = np.array(img_data, dtype=np.uint8).reshape((H, W, 3))
 img = Image.fromarray(img_array)
-img.save('output.jpg')
+img.save('h2i_output.jpg')
