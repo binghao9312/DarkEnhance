@@ -38,4 +38,7 @@ gate level netlist report
 <img width="405" height="108" alt="image" src="https://github.com/user-attachments/assets/15aac27d-6ea6-41cf-9a65-193ea1afaaec" />  
 <img width="405" height="116" alt="image" src="https://github.com/user-attachments/assets/1076bc71-9f6f-410a-ad93-ddb168ecb877" />  
 
+##  PSNR  
+<img width="671" height="287" alt="image" src="https://github.com/user-attachments/assets/6b9b5cc9-81fb-402e-b555-78239f818acd" />
+
 
