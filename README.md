@@ -43,6 +43,7 @@
 ##  PSNR  
 使用Matelab 計算軟體演算法與verilog模擬結果的 PSNR  
 ### PNSR = 36.7196  
-<img width="671" height="287" alt="image" src="https://github.com/user-attachments/assets/6b9b5cc9-81fb-402e-b555-78239f818acd" />
+<img width="669" height="266" alt="image" src="https://github.com/user-attachments/assets/3e474af1-0f66-4bb9-be8a-77c1886a07b1" />
+
 
 
