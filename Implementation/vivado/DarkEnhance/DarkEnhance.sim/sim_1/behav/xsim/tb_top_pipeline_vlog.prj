@@ -1,0 +1,13 @@
+# compile verilog/system verilog design source files
+verilog xil_defaultlib  --include "../../../../DarkEnhance.gen/sources_1/bd/DarkEnhance/ipshared/ec67/hdl" --include "../../../../DarkEnhance.gen/sources_1/bd/DarkEnhance/ipshared/86fe/hdl" --include "../../../../DarkEnhance.gen/sources_1/bd/DarkEnhance/ipshared/f0b6/hdl/verilog" --include "../../../../DarkEnhance.gen/sources_1/bd/DarkEnhance/ipshared/0127/hdl/verilog" --include "E:/software/AMD/Vivado/Vivado/2024.2/data/xilinx_vip/include" \
+"../../../../DarkEnhance.srcs/sources_1/imports/verilog/FIFO.v" \
+"../../../../DarkEnhance.srcs/sources_1/imports/verilog/addr_memory.v" \
+"../../../../DarkEnhance.srcs/sources_1/imports/verilog/find_max.v" \
+"../../../../DarkEnhance.srcs/sources_1/imports/verilog/top_pipeline.v" \
+"../../../../DarkEnhance.srcs/sim_1/imports/verilog/tb_top_pipeline.v" \
+
+# compile glbl module
+verilog xil_defaultlib "glbl.v"
+
+# Do not sort compile order
+nosort
