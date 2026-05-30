@@ -1,0 +1,13 @@
+vhdl xil_defaultlib  \
+"../../../../DarkEnhance.gen/sources_1/bd/DarkEnhance/ip/DarkEnhance_smartconnect_0_0_1/bd_0/ip/ip_1/sim/bd_7e88_psr_aclk_0.vhd" \
+"../../../../DarkEnhance.gen/sources_1/bd/DarkEnhance/ip/DarkEnhance_rst_ps7_0_50M_0_1/sim/DarkEnhance_rst_ps7_0_50M_0.vhd" \
+"../../../../DarkEnhance.gen/sources_1/bd/DarkEnhance/ip/DarkEnhance_axi_gpio_0_0_1/sim/DarkEnhance_axi_gpio_0_0.vhd" \
+"../../../../DarkEnhance.gen/sources_1/bd/DarkEnhance/ip/DarkEnhance_axi_gpio_1_0/sim/DarkEnhance_axi_gpio_1_0.vhd" \
+"../../../../DarkEnhance.gen/sources_1/bd/DarkEnhance/ip/DarkEnhance_axi_bram_ctrl_0_0/sim/DarkEnhance_axi_bram_ctrl_0_0.vhd" \
+"../../../../DarkEnhance.gen/sources_1/bd/DarkEnhance/ip/DarkEnhance_axi_gpio_1_1/sim/DarkEnhance_axi_gpio_1_1.vhd" \
+"../../../../DarkEnhance.gen/sources_1/bd/DarkEnhance/ip/DarkEnhance_axi_cdma_0_0/sim/DarkEnhance_axi_cdma_0_0.vhd" \
+"../../../../DarkEnhance.gen/sources_1/bd/DarkEnhance/ip/DarkEnhance_axi_gpio_1_2/sim/DarkEnhance_axi_gpio_1_2.vhd" \
+"../../../../DarkEnhance.gen/sources_1/bd/DarkEnhance/ip/DarkEnhance_axi_bram_ctrl_0_2/sim/DarkEnhance_axi_bram_ctrl_0_2.vhd" \
+
+# Do not sort compile order
+nosort
