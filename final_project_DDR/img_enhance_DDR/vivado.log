@@ -1,0 +1,27 @@
+#-----------------------------------------------------------
+# Vivado v2024.2 (64-bit)
+# SW Build 5239630 on Fri Nov 08 22:35:27 MST 2024
+# IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+# SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+# Start of session at: Tue Jun 23 13:46:32 2026
+# Process ID         : 22604
+# Current directory  : D:/FPGA/final_project/final_project_DDR/img_enhance_DDR
+# Command line       : vivado.exe -gui_launcher_event rodinguilauncherevent4676 D:\FPGA\final_project\final_project_DDR\img_enhance_DDR\img_enhance_DDR.xpr
+# Log file           : D:/FPGA/final_project/final_project_DDR/img_enhance_DDR/vivado.log
+# Journal file       : D:/FPGA/final_project/final_project_DDR/img_enhance_DDR\vivado.jou
+# Running On         : DESKTOP-9EIAL9G
+# Platform           : Windows Server 2016 or Windows 10
+# Operating System   : 19045
+# Processor Detail   : AMD Ryzen 5 1600 Six-Core Processor            
+# CPU Frequency      : 3194 MHz
+# CPU Physical cores : 6
+# CPU Logical cores  : 12
+# Host memory        : 17108 MB
+# Swap memory        : 7784 MB
+# Total Virtual      : 24893 MB
+# Available Virtual  : 6802 MB
+#-----------------------------------------------------------
+start_gui
+WARNING: [Board 49-26] cannot add Board Part xilinx.com:zcu208ld:part0:2.0 available at D:/vivado/Vivado/2024.2/data/xhub/boards/XilinxBoardStore/boards/Xilinx/zcu208ld/production/2.0/board.xml as part xczu58dr-fsvg1517-2-i specified in board_part file is either invalid or not available
+WWARNING: [Board 49-26] cannot add Board Part xilinx.com:zcu216ld:part0:2.0 available at D:/vivado/Vivado/2024.2/data/xhub/boards/XilinxBoardStore/boards/Xilinx/zcu216ld/production/2.0/board.xml as part xczu59dr-ffvf1760-2-i specified in board_part file is either invalid or not availableWWARNING: [Board 49-26] cannot add Board Part xilinx.com:zcu670ld:part0:1.0 available at D:/vivado/Vivado/2024.2/data/xhub/boards/XilinxBoardStore/boards/Xilinx/zcu670ld/1.0/board.xml as part xczu57dr-fsve1156-2-i specified in board_part file is either invalid or not availableeexit
+INFO: [Common 17-206] Exiting Vivado at Tue Jun 23 13:48:43 2026...

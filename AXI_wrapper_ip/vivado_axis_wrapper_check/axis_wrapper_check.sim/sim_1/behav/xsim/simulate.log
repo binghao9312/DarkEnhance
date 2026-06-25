@@ -1,0 +1,5 @@
+Vivado Simulator 2018.3
+Time resolution is 1 ps
+TEST PASSED: sent=262144 received=262144 cycles=263189
+INFO: wrote 262144 words to D:/FPGA/final_project/AXI_wrapper_ip/verilog_output.hex
+$finish called at time : 2632095 ns : File "D:/FPGA/final_project/AXI_wrapper_ip/sim/tb_top_pipeline_axis_wrapper.v" Line 238

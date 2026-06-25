@@ -1,0 +1,15 @@
+INFO: [VRFC 10-2263] Analyzing Verilog file "D:/FPGA/final_project/AXI_wrapper_ip/src/FIFO.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module FIFO
+INFO: [VRFC 10-311] analyzing module MEMORY
+INFO: [VRFC 10-2263] Analyzing Verilog file "D:/FPGA/final_project/AXI_wrapper_ip/src/addr_memory.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module addr_memory
+INFO: [VRFC 10-2263] Analyzing Verilog file "D:/FPGA/final_project/AXI_wrapper_ip/src/find_max.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module find_max
+INFO: [VRFC 10-2263] Analyzing Verilog file "D:/FPGA/final_project/AXI_wrapper_ip/src/top_pipeline.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module top_pipeline
+INFO: [VRFC 10-2263] Analyzing Verilog file "D:/FPGA/final_project/AXI_wrapper_ip/src/top_pipeline_axis_wrapper.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module top_pipeline_axis_wrapper
+INFO: [VRFC 10-2263] Analyzing Verilog file "D:/FPGA/final_project/AXI_wrapper_ip/sim/tb_top_pipeline_axis_wrapper.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module tb_top_pipeline_axis_wrapper
+INFO: [VRFC 10-2263] Analyzing Verilog file "D:/FPGA/final_project/AXI_wrapper_ip/vivado_axis_wrapper_check/axis_wrapper_check.sim/sim_1/behav/xsim/glbl.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module glbl
