@@ -1,0 +1,282 @@
+#-----------------------------------------------------------
+# Vivado v2018.3 (64-bit)
+# SW Build 2405991 on Thu Dec  6 23:38:27 MST 2018
+# IP Build 2404404 on Fri Dec  7 01:43:56 MST 2018
+# Start of session at: Thu Jun 18 17:17:03 2026
+# Process ID: 17968
+# Current directory: D:/FPGA/final_project/final_project_DDR/img_enhance_DDR
+# Command line: vivado.exe -mode batch -source D:\FPGA\final_project\final_project_DDR\scripts\write_bit_from_routed_checkpoint.tcl
+# Log file: D:/FPGA/final_project/final_project_DDR/img_enhance_DDR/vivado.log
+# Journal file: D:/FPGA/final_project/final_project_DDR/img_enhance_DDR\vivado.jou
+#-----------------------------------------------------------
+CRITICAL WARNING: [Common 17-741] No write access right to the local Tcl store at 'C'. XilinxTclStore is reverted to the installation area. If you want to use local Tcl Store, please change the access right and relaunch Vivado.
+source {D:\FPGA\final_project\final_project_DDR\scripts\write_bit_from_routed_checkpoint.tcl}
+# set project_dir "D:/FPGA/final_project/final_project_DDR/img_enhance_DDR"
+# set impl_dir "$project_dir/img_enhance_DDR.runs/impl_1"
+# set top_name "img_enhance_DDR_wrapper"
+# open_checkpoint "$impl_dir/${top_name}_routed.dcp"
+Command: open_checkpoint D:/FPGA/final_project/final_project_DDR/img_enhance_DDR/img_enhance_DDR.runs/impl_1/img_enhance_DDR_wrapper_routed.dcp
+
+Starting open_checkpoint Task
+
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.306 . Memory (MB): peak = 248.988 ; gain = 0.000
+INFO: [Netlist 29-17] Analyzing 327 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-479] Netlist was created with Vivado 2018.3
+INFO: [Device 21-403] Loading part xc7z020clg400-1
+INFO: [Project 1-570] Preparing netlist for logic optimization
+INFO: [Timing 38-478] Restoring timing data from binary archive.
+INFO: [Timing 38-479] Binary timing data restore complete.
+INFO: [Project 1-856] Restoring constraints from binary archive.
+INFO: [Project 1-853] Binary constraint restore complete.
+Reading XDEF placement.
+Reading placer database...
+Reading XDEF routing.
+Read XDEF File: Time (s): cpu = 00:00:02 ; elapsed = 00:00:02 . Memory (MB): peak = 1249.277 ; gain = 0.000
+Restored from archive | CPU: 2.000000 secs | Memory: 0.000000 MB |
+Finished XDEF File Restore: Time (s): cpu = 00:00:02 ; elapsed = 00:00:02 . Memory (MB): peak = 1249.277 ; gain = 0.000
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.016 . Memory (MB): peak = 1249.277 ; gain = 0.000
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 151 instances were transformed.
+  RAM16X1D => RAM32X1D (RAMD32, RAMD32): 1 instances
+  RAM32M => RAM32M (RAMD32, RAMD32, RAMD32, RAMD32, RAMD32, RAMD32, RAMS32, RAMS32): 140 instances
+  RAM64M => RAM64M (RAMD64E, RAMD64E, RAMD64E, RAMD64E): 10 instances
+
+INFO: [Project 1-604] Checkpoint was created with Vivado v2018.3 (64-bit) build 2405991
+open_checkpoint: Time (s): cpu = 00:00:27 ; elapsed = 00:00:29 . Memory (MB): peak = 1249.277 ; gain = 1000.289
+# report_timing_summary -file "$impl_dir/${top_name}_timing_summary_fclk50_dma23.rpt" -warn_on_violation
+INFO: [Timing 38-91] UpdateTimingParams: Speed grade: -1, Delay Type: min_max.
+INFO: [Timing 38-191] Multithreading enabled for timing update using a maximum of 2 CPUs
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+INFO: [Common 17-14] Message 'Designutils 20-3303' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+# write_bitstream -force "$impl_dir/${top_name}.bit"
+Command: write_bitstream -force D:/FPGA/final_project/final_project_DDR/img_enhance_DDR/img_enhance_DDR.runs/impl_1/img_enhance_DDR_wrapper.bit
+Attempting to get a license for feature 'Implementation' and/or device 'xc7z020'
+INFO: [Common 17-349] Got license for feature 'Implementation' and/or device 'xc7z020'
+Running DRC as a precondition to command write_bitstream
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'C:/Xilinx/Vivado/2018.3/data/ip'.
+INFO: [DRC 23-27] Running DRC with 2 threads
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+WARNING: [Designutils 20-3303] unexpected site type 'IOPAD' in HDPYFinalizeIO
+INFO: [Common 17-14] Message 'Designutils 20-3303' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+WARNING: [DRC DPOP-2] MREG Output pipelining: DSP img_enhance_DDR_i/img_enhance_ip/inst/u_top_pipeline/mul_B_reg multiplier stage img_enhance_DDR_i/img_enhance_ip/inst/u_top_pipeline/mul_B_reg/P[47:0] is not pipelined (MREG=0). Pipelining the multiplier function will improve performance and will save significant power so it is suggested whenever possible to fully pipeline this function.  If this multiplier was inferred, it is suggested to describe an additional register stage after this function.  If there is no registered adder/accumulator following the multiply function, two pipeline stages are suggested to allow both the MREG and PREG registers to be used.  If the DSP48 was instantiated in the design, it is suggested to set both the MREG and PREG attributes to 1 when performing multiply functions.
+WARNING: [DRC DPOP-2] MREG Output pipelining: DSP img_enhance_DDR_i/img_enhance_ip/inst/u_top_pipeline/mul_G_reg multiplier stage img_enhance_DDR_i/img_enhance_ip/inst/u_top_pipeline/mul_G_reg/P[47:0] is not pipelined (MREG=0). Pipelining the multiplier function will improve performance and will save significant power so it is suggested whenever possible to fully pipeline this function.  If this multiplier was inferred, it is suggested to describe an additional register stage after this function.  If there is no registered adder/accumulator following the multiply function, two pipeline stages are suggested to allow both the MREG and PREG registers to be used.  If the DSP48 was instantiated in the design, it is suggested to set both the MREG and PREG attributes to 1 when performing multiply functions.
+WARNING: [DRC DPOP-2] MREG Output pipelining: DSP img_enhance_DDR_i/img_enhance_ip/inst/u_top_pipeline/mul_R_reg multiplier stage img_enhance_DDR_i/img_enhance_ip/inst/u_top_pipeline/mul_R_reg/P[47:0] is not pipelined (MREG=0). Pipelining the multiplier function will improve performance and will save significant power so it is suggested whenever possible to fully pipeline this function.  If this multiplier was inferred, it is suggested to describe an additional register stage after this function.  If there is no registered adder/accumulator following the multiply function, two pipeline stages are suggested to allow both the MREG and PREG registers to be used.  If the DSP48 was instantiated in the design, it is suggested to set both the MREG and PREG attributes to 1 when performing multiply functions.
+INFO: [DRC REQP-181] writefirst: Synchronous clocking is detected for BRAM (img_enhance_DDR_i/axi_dma_0/U0/I_PRMRY_DATAMOVER/GEN_MM2S_FULL.I_MM2S_FULL_WRAPPER/GEN_INCLUDE_MM2S_SF.I_RD_SF/I_DATA_FIFO/BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_instance.xpm_fifo_sync_inst/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg) in SDP mode with WRITE_FIRST write-mode. This is the preferred mode for best power characteristics, however it may exhibit address collisions if the same address appears on both read and write ports resulting in unknown or corrupted read data. It is suggested to confirm via simulation that an address collision never occurs and if so it is suggested to try and avoid this situation. If address collisions cannot be avoided, the write-mode may be set to READ_FIRST which guarantees that the read data is the prior contents of the memory at the cost of additional power in the design. See the FPGA Memory Resources User Guide for additional information.
+INFO: [DRC REQP-181] writefirst: Synchronous clocking is detected for BRAM (img_enhance_DDR_i/axi_dma_0/U0/I_PRMRY_DATAMOVER/GEN_S2MM_FULL.I_S2MM_FULL_WRAPPER/GEN_ENABLE_INDET_BTT_SF.I_INDET_BTT/I_DATA_FIFO/BLK_MEM.I_SYNC_FIFOGEN_FIFO/xpm_fifo_instance.xpm_fifo_sync_inst/xpm_fifo_base_inst/gen_sdpram.xpm_memory_base_inst/gen_wr_a.gen_word_narrow.mem_reg) in SDP mode with WRITE_FIRST write-mode. This is the preferred mode for best power characteristics, however it may exhibit address collisions if the same address appears on both read and write ports resulting in unknown or corrupted read data. It is suggested to confirm via simulation that an address collision never occurs and if so it is suggested to try and avoid this situation. If address collisions cannot be avoided, the write-mode may be set to READ_FIRST which guarantees that the read data is the prior contents of the memory at the cost of additional power in the design. See the FPGA Memory Resources User Guide for additional information.
+INFO: [Vivado 12-3199] DRC finished with 0 Errors, 3 Warnings, 2 Advisories
+INFO: [Vivado 12-3200] Please refer to the DRC report (report_drc) for more information.
+INFO: [Designutils 20-2272] Running write_bitstream with 2 threads.
+Loading data files...
+Loading site data...
+Loading route data...
+Processing options...
+Creating bitmap...
+Creating bitstream...
+Writing bitstream D:/FPGA/final_project/final_project_DDR/img_enhance_DDR/img_enhance_DDR.runs/impl_1/img_enhance_DDR_wrapper.bit...
+INFO: [Vivado 12-1842] Bitgen Completed Successfully.
+INFO: [Project 1-120] WebTalk data collection is mandatory when using a WebPACK part without a full Vivado license. To see the specific WebTalk data collected for your design, open the usage_statistics_webtalk.html or usage_statistics_webtalk.xml file in the implementation directory.
+INFO: [Common 17-83] Releasing license: Implementation
+14 Infos, 103 Warnings, 0 Critical Warnings and 0 Errors encountered.
+write_bitstream completed successfully
+write_bitstream: Time (s): cpu = 00:00:35 ; elapsed = 00:00:34 . Memory (MB): peak = 1797.789 ; gain = 517.207
+INFO: [Common 17-206] Exiting Vivado at Thu Jun 18 17:18:11 2026...

@@ -1,0 +1,14 @@
+# compile verilog/system verilog design source files
+verilog xil_defaultlib  \
+"../../../../../verilog_file/FIFO.v" \
+"../../../../../verilog_file/addr_memory.v" \
+"../../../../../verilog_file/find_max.v" \
+"../../../../../verilog_file/top_pipeline.v" \
+"../../../../my_ip.srcs/sources_1/new/top_pipeline_wrapper.v" \
+"../../../../my_ip.srcs/sim_1/new/tb_top_pipeline_wrapper.v" \
+
+# compile glbl module
+verilog xil_defaultlib "glbl.v"
+
+# Do not sort compile order
+nosort

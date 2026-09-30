@@ -1,0 +1,11 @@
+0.6
+2018.3
+Dec  7 2018
+00:33:28
+D:/FPGA/final_project/my_ip/my_ip.sim/sim_1/behav/xsim/glbl.v,1544155481,verilog,,,,glbl,,,,,,,,
+D:/FPGA/final_project/my_ip/my_ip.srcs/sim_1/new/tb_top_pipeline_wrapper.v,1781589661,verilog,,,,tb_top_pipeline_wrapper,,,,,,,,
+D:/FPGA/final_project/my_ip/my_ip.srcs/sources_1/new/top_pipeline_wrapper.v,1781584800,verilog,,D:/FPGA/final_project/my_ip/my_ip.srcs/sim_1/new/tb_top_pipeline_wrapper.v,,top_pipeline_wrapper,,,,,,,,
+D:/FPGA/final_project/verilog_file/FIFO.v,1780468565,verilog,D:/FPGA/final_project/my_ip/my_ip.srcs/sim_1/new/tb_top_pipeline_wrapper.v;D:/FPGA/final_project/my_ip/my_ip.srcs/sources_1/new/top_pipeline_wrapper.v;D:/FPGA/final_project/verilog_file/addr_memory.v;D:/FPGA/final_project/verilog_file/find_max.v;D:/FPGA/final_project/verilog_file/top_pipeline.v,D:/FPGA/final_project/verilog_file/addr_memory.v,,$unit_FIFO_v;FIFO;MEMORY,,,,,,,,
+D:/FPGA/final_project/verilog_file/addr_memory.v,1780468565,verilog,,D:/FPGA/final_project/verilog_file/find_max.v,,addr_memory,,,,,,,,
+D:/FPGA/final_project/verilog_file/find_max.v,1780468565,verilog,,D:/FPGA/final_project/verilog_file/top_pipeline.v,,find_max,,,,,,,,
+D:/FPGA/final_project/verilog_file/top_pipeline.v,1781582597,verilog,,D:/FPGA/final_project/my_ip/my_ip.srcs/sources_1/new/top_pipeline_wrapper.v,,top_pipeline,,,,,,,,

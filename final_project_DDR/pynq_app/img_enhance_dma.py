@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 import argparse
+import time
 from pathlib import Path
 
 import numpy as np
 from pynq import Overlay, allocate
 
 
-APP_DIR = Path(__file__).resolve().parent
+try:
+    APP_DIR = Path(__file__).resolve().parent
+except NameError:
+    APP_DIR = Path.cwd()
 IMG_W = 512
 IMG_H = 512
 FRAME_PIXELS = IMG_W * IMG_H
@@ -206,13 +210,27 @@ def run_dma(bitfile, input_hex, output_hex, output_image, comparison_image, disp
         out_buf.flush()
 
         print(f"Starting DMA, frame bytes = {FRAME_BYTES}")
+        dma_start = time.perf_counter()
         dma.recvchannel.transfer(out_buf)
         dma.sendchannel.transfer(in_buf)
 
         dma.sendchannel.wait()
         dma.recvchannel.wait()
+        dma_elapsed = time.perf_counter() - dma_start
 
         out_buf.invalidate()
+
+        frame_mib = FRAME_BYTES / (1024 * 1024)
+        mpixels_per_sec = FRAME_PIXELS / dma_elapsed / 1_000_000
+        mib_per_sec = frame_mib / dma_elapsed
+        fps = 1.0 / dma_elapsed
+        print(
+            "FPGA DMA+compute time: "
+            f"{dma_elapsed * 1000:.3f} ms, "
+            f"{fps:.2f} FPS, "
+            f"{mpixels_per_sec:.2f} Mpixel/s, "
+            f"{mib_per_sec:.2f} MiB/s"
+        )
 
         print(f"Saving output hex: {output_hex}")
         save_rgb_hex(output_hex, out_buf)

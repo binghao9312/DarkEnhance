@@ -1,0 +1,6 @@
+Vivado Simulator 2018.3
+Time resolution is 1 ps
+input_mem[0] = 00020609
+input_mem[1] = 00020609
+Wrapper simulation finished.
+$finish called at time : 2631995 ns : File "D:/FPGA/final_project/my_ip/my_ip.srcs/sim_1/new/tb_top_pipeline_wrapper.v" Line 161

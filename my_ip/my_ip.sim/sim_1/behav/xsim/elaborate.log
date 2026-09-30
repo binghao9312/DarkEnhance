@@ -1,0 +1,8 @@
+Vivado Simulator 2018.3
+Copyright 1986-1999, 2001-2018 Xilinx, Inc. All Rights Reserved.
+Running: C:/Xilinx/Vivado/2018.3/bin/unwrapped/win64.o/xelab.exe -wto b5ef609028894636a6b0e0b7bc0d8cca --incr --debug typical --relax --mt 2 -L xil_defaultlib -L unisims_ver -L unimacro_ver -L secureip --snapshot tb_top_pipeline_wrapper_behav xil_defaultlib.tb_top_pipeline_wrapper xil_defaultlib.glbl -log elaborate.log 
+Using 2 slave threads.
+Starting static elaboration
+WARNING: [VRFC 10-696] first argument of $fatal is invalid, expecting 0, 1 or 2 [D:/FPGA/final_project/my_ip/my_ip.srcs/sim_1/new/tb_top_pipeline_wrapper.v:150]
+Completed static elaboration
+INFO: [XSIM 43-4323] No Change in HDL. Linking previously generated obj files to create kernel

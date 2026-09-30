@@ -1,0 +1,189 @@
+#-----------------------------------------------------------
+# Vivado v2024.2 (64-bit)
+# SW Build 5239630 on Fri Nov 08 22:35:27 MST 2024
+# IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+# SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+# Start of session at: Wed Jun 17 16:26:59 2026
+# Process ID         : 16612
+# Current directory  : D:/FPGA/final_project/final_project_imp
+# Command line       : vivado.exe -gui_launcher_event rodinguilauncherevent22132 D:\FPGA\final_project\final_project_imp\final_project_imp.xpr
+# Log file           : D:/FPGA/final_project/final_project_imp/vivado.log
+# Journal file       : D:/FPGA/final_project/final_project_imp\vivado.jou
+# Running On         : DESKTOP-9EIAL9G
+# Platform           : Windows Server 2016 or Windows 10
+# Operating System   : 19045
+# Processor Detail   : AMD Ryzen 5 1600 Six-Core Processor            
+# CPU Frequency      : 3194 MHz
+# CPU Physical cores : 6
+# CPU Logical cores  : 12
+# Host memory        : 17108 MB
+# Swap memory        : 9316 MB
+# Total Virtual      : 26425 MB
+# Available Virtual  : 5171 MB
+#-----------------------------------------------------------
+start_gui
+open_project D:/FPGA/final_project/final_project_imp/final_project_imp.xpr
+WARNING: [Board 49-26] cannot add Board Part xilinx.com:zcu208ld:part0:2.0 available at D:/vivado/Vivado/2024.2/data/xhub/boards/XilinxBoardStore/boards/Xilinx/zcu208ld/production/2.0/board.xml as part xczu58dr-fsvg1517-2-i specified in board_part file is either invalid or not available
+WARNING: [Board 49-26] cannot add Board Part xilinx.com:zcu216ld:part0:2.0 available at D:/vivado/Vivado/2024.2/data/xhub/boards/XilinxBoardStore/boards/Xilinx/zcu216ld/production/2.0/board.xml as part xczu59dr-ffvf1760-2-i specified in board_part file is either invalid or not available
+WARNING: [Board 49-26] cannot add Board Part xilinx.com:zcu670ld:part0:1.0 available at D:/vivado/Vivado/2024.2/data/xhub/boards/XilinxBoardStore/boards/Xilinx/zcu670ld/1.0/board.xml as part xczu57dr-fsve1156-2-i specified in board_part file is either invalid or not available
+Scanning sources...
+Finished scanning sources
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1700] Loaded user IP repository 'd:/FPGA/final_project/ip_repo'.
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'D:/vivado/Vivado/2024.2/data/ip'.
+WARNING: [BD 41-1661] One or more IPs have been locked in the design 'img_enh.bd'. Please run report_ip_status for more details and recommendations on how to fix this issue.
+List of locked IPs:
+img_enh_proc_sys_reset_0_0
+img_enh_axi_gpio_0_0
+img_enh_processing_system7_0_0
+img_enh_blk_mem_gen_1_0
+img_enh_axi_bram_ctrl_0_0
+img_enh_smartconnect_0_0
+img_enh_axi_bram_ctrl_1_0
+img_enh_blk_mem_gen_0_0
+img_enh_xlconstant_0_1
+
+INFO: [Project 1-230] Project 'final_project_imp.xpr' upgraded for this version of Vivado.
+INFO: [Project 1-5579] Found utility IPs instantiated in one or more block designs which have equivalent inline hdl with improved performance and reduced diskspace. It is recommended to migrate these utility IPs to inline hdl using the command upgrade_project -migrate_to_inline_hdl. The utility IPs may be deprecated in future releases. More information on inline hdl is available in UG994.
+open_project: Time (s): cpu = 00:00:30 ; elapsed = 00:00:19 . Memory (MB): peak = 1612.270 ; gain = 366.730
+upgrade_project -migrate_output_products
+WARNING: [IP_Flow 19-2162] IP 'img_enh_processing_system7_0_0' is locked:
+* This IP has board specific outputs. Current project board 'unset' and the board 'tul.com.tw:pynq-z2:part0:1.0' used to customize the IP 'img_enh_processing_system7_0_0' do not match.
+INFO: [BD 41-2710] Migrated 'img_enh_processing_system7_0_0.xci'
+  Source files are located in 'd:/FPGA/final_project/final_project_imp/final_project_imp.srcs/sources_1/bd/img_enh/ip/img_enh_processing_system7_0_0'
+  Output files are located in 'd:/FPGA/final_project/final_project_imp/final_project_imp.gen/sources_1/bd/img_enh/ip/img_enh_processing_system7_0_0'.
+INFO: [BD 41-2710] Migrated 'img_enh_top_pipeline_wrapper_0_0.xci'
+  Source files are located in 'd:/FPGA/final_project/final_project_imp/final_project_imp.srcs/sources_1/bd/img_enh/ip/img_enh_top_pipeline_wrapper_0_0'
+  Output files are located in 'd:/FPGA/final_project/final_project_imp/final_project_imp.gen/sources_1/bd/img_enh/ip/img_enh_top_pipeline_wrapper_0_0'.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_one_0' is locked:
+* IP definition 'Constant (1.1)' for IP 'bd_f756_one_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_psr_aclk_0' is locked:
+* IP definition 'Processor System Reset (5.0)' for IP 'bd_f756_psr_aclk_0' (customized with software release 2018.3) has a different revision in the IP Catalog. * This IP has board specific outputs. Current project board 'unset' and the board 'tul.com.tw:pynq-z2:part0:1.0' used to customize the IP 'bd_f756_psr_aclk_0' do not match.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_arsw_0' is locked:
+* IP definition 'SmartConnect Switchboard (1.0)' for IP 'bd_f756_arsw_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_rsw_0' is locked:
+* IP definition 'SmartConnect Switchboard (1.0)' for IP 'bd_f756_rsw_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_awsw_0' is locked:
+* IP definition 'SmartConnect Switchboard (1.0)' for IP 'bd_f756_awsw_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_wsw_0' is locked:
+* IP definition 'SmartConnect Switchboard (1.0)' for IP 'bd_f756_wsw_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_bsw_0' is locked:
+* IP definition 'SmartConnect Switchboard (1.0)' for IP 'bd_f756_bsw_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_s00mmu_0' is locked:
+* IP definition 'SC MMU (1.0)' for IP 'bd_f756_s00mmu_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_s00tr_0' is locked:
+* IP definition 'SC TRANSACTION_REGULATOR (1.0)' for IP 'bd_f756_s00tr_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_s00sic_0' is locked:
+* IP definition 'SC SI_CONVERTER (1.0)' for IP 'bd_f756_s00sic_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_s00a2s_0' is locked:
+* IP definition 'SmartConnect AXI2SC Bridge (1.0)' for IP 'bd_f756_s00a2s_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_sarn_0' is locked:
+* IP definition 'SmartConnect Node (1.0)' for IP 'bd_f756_sarn_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_srn_0' is locked:
+* IP definition 'SmartConnect Node (1.0)' for IP 'bd_f756_srn_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_sawn_0' is locked:
+* IP definition 'SmartConnect Node (1.0)' for IP 'bd_f756_sawn_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_swn_0' is locked:
+* IP definition 'SmartConnect Node (1.0)' for IP 'bd_f756_swn_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_sbn_0' is locked:
+* IP definition 'SmartConnect Node (1.0)' for IP 'bd_f756_sbn_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_m00s2a_0' is locked:
+* IP definition 'SmartConnect SC2AXI Bridge (1.0)' for IP 'bd_f756_m00s2a_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_m00arn_0' is locked:
+* IP definition 'SmartConnect Node (1.0)' for IP 'bd_f756_m00arn_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_m00rn_0' is locked:
+* IP definition 'SmartConnect Node (1.0)' for IP 'bd_f756_m00rn_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_m00awn_0' is locked:
+* IP definition 'SmartConnect Node (1.0)' for IP 'bd_f756_m00awn_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_m00wn_0' is locked:
+* IP definition 'SmartConnect Node (1.0)' for IP 'bd_f756_m00wn_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_m00bn_0' is locked:
+* IP definition 'SmartConnect Node (1.0)' for IP 'bd_f756_m00bn_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_m00e_0' is locked:
+* IP definition 'SC EXIT (1.0)' for IP 'bd_f756_m00e_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_m01s2a_0' is locked:
+* IP definition 'SmartConnect SC2AXI Bridge (1.0)' for IP 'bd_f756_m01s2a_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_m01arn_0' is locked:
+* IP definition 'SmartConnect Node (1.0)' for IP 'bd_f756_m01arn_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_m01rn_0' is locked:
+* IP definition 'SmartConnect Node (1.0)' for IP 'bd_f756_m01rn_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_m01awn_0' is locked:
+* IP definition 'SmartConnect Node (1.0)' for IP 'bd_f756_m01awn_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_m01wn_0' is locked:
+* IP definition 'SmartConnect Node (1.0)' for IP 'bd_f756_m01wn_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_m01bn_0' is locked:
+* IP definition 'SmartConnect Node (1.0)' for IP 'bd_f756_m01bn_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_m01e_0' is locked:
+* IP definition 'SC EXIT (1.0)' for IP 'bd_f756_m01e_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_m02s2a_0' is locked:
+* IP definition 'SmartConnect SC2AXI Bridge (1.0)' for IP 'bd_f756_m02s2a_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_m02arn_0' is locked:
+* IP definition 'SmartConnect Node (1.0)' for IP 'bd_f756_m02arn_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_m02rn_0' is locked:
+* IP definition 'SmartConnect Node (1.0)' for IP 'bd_f756_m02rn_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_m02awn_0' is locked:
+* IP definition 'SmartConnect Node (1.0)' for IP 'bd_f756_m02awn_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_m02wn_0' is locked:
+* IP definition 'SmartConnect Node (1.0)' for IP 'bd_f756_m02wn_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_m02bn_0' is locked:
+* IP definition 'SmartConnect Node (1.0)' for IP 'bd_f756_m02bn_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'bd_f756_m02e_0' is locked:
+* IP definition 'SC EXIT (1.0)' for IP 'bd_f756_m02e_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+WARNING: [IP_Flow 19-2162] IP 'img_enh_smartconnect_0_0' is locked:
+* IP definition 'AXI SmartConnect (1.0)' for IP 'img_enh_smartconnect_0_0' (customized with software release 2018.3) has a different revision in the IP Catalog. * IP 'img_enh_smartconnect_0_0' contains one or more locked subcores.
+INFO: [BD 41-2710] Migrated 'img_enh_smartconnect_0_0.xci'
+  Source files are located in 'd:/FPGA/final_project/final_project_imp/final_project_imp.srcs/sources_1/bd/img_enh/ip/img_enh_smartconnect_0_0'
+  Output files are located in 'd:/FPGA/final_project/final_project_imp/final_project_imp.gen/sources_1/bd/img_enh/ip/img_enh_smartconnect_0_0'.
+WARNING: [IP_Flow 19-2162] IP 'img_enh_axi_gpio_0_0' is locked:
+* IP definition 'AXI GPIO (2.0)' for IP 'img_enh_axi_gpio_0_0' (customized with software release 2018.3) has a different revision in the IP Catalog. * This IP has board specific outputs. Current project board 'unset' and the board 'tul.com.tw:pynq-z2:part0:1.0' used to customize the IP 'img_enh_axi_gpio_0_0' do not match.
+INFO: [BD 41-2710] Migrated 'img_enh_axi_gpio_0_0.xci'
+  Source files are located in 'd:/FPGA/final_project/final_project_imp/final_project_imp.srcs/sources_1/bd/img_enh/ip/img_enh_axi_gpio_0_0'
+  Output files are located in 'd:/FPGA/final_project/final_project_imp/final_project_imp.gen/sources_1/bd/img_enh/ip/img_enh_axi_gpio_0_0'.
+WARNING: [IP_Flow 19-2162] IP 'img_enh_axi_bram_ctrl_0_0' is locked:
+* IP definition 'AXI BRAM Controller (4.1)' for IP 'img_enh_axi_bram_ctrl_0_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+INFO: [BD 41-2710] Migrated 'img_enh_axi_bram_ctrl_0_0.xci'
+  Source files are located in 'd:/FPGA/final_project/final_project_imp/final_project_imp.srcs/sources_1/bd/img_enh/ip/img_enh_axi_bram_ctrl_0_0'
+  Output files are located in 'd:/FPGA/final_project/final_project_imp/final_project_imp.gen/sources_1/bd/img_enh/ip/img_enh_axi_bram_ctrl_0_0'.
+WARNING: [IP_Flow 19-2162] IP 'img_enh_axi_bram_ctrl_1_0' is locked:
+* IP definition 'AXI BRAM Controller (4.1)' for IP 'img_enh_axi_bram_ctrl_1_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+INFO: [BD 41-2710] Migrated 'img_enh_axi_bram_ctrl_1_0.xci'
+  Source files are located in 'd:/FPGA/final_project/final_project_imp/final_project_imp.srcs/sources_1/bd/img_enh/ip/img_enh_axi_bram_ctrl_1_0'
+  Output files are located in 'd:/FPGA/final_project/final_project_imp/final_project_imp.gen/sources_1/bd/img_enh/ip/img_enh_axi_bram_ctrl_1_0'.
+WARNING: [IP_Flow 19-2162] IP 'img_enh_blk_mem_gen_0_0' is locked:
+* IP definition 'Block Memory Generator (8.4)' for IP 'img_enh_blk_mem_gen_0_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+INFO: [BD 41-2710] Migrated 'img_enh_blk_mem_gen_0_0.xci'
+  Source files are located in 'd:/FPGA/final_project/final_project_imp/final_project_imp.srcs/sources_1/bd/img_enh/ip/img_enh_blk_mem_gen_0_0'
+  Output files are located in 'd:/FPGA/final_project/final_project_imp/final_project_imp.gen/sources_1/bd/img_enh/ip/img_enh_blk_mem_gen_0_0'.
+WARNING: [IP_Flow 19-2162] IP 'img_enh_blk_mem_gen_1_0' is locked:
+* IP definition 'Block Memory Generator (8.4)' for IP 'img_enh_blk_mem_gen_1_0' (customized with software release 2018.3) has a different revision in the IP Catalog.
+INFO: [BD 41-2710] Migrated 'img_enh_blk_mem_gen_1_0.xci'
+  Source files are located in 'd:/FPGA/final_project/final_project_imp/final_project_imp.srcs/sources_1/bd/img_enh/ip/img_enh_blk_mem_gen_1_0'
+  Output files are located in 'd:/FPGA/final_project/final_project_imp/final_project_imp.gen/sources_1/bd/img_enh/ip/img_enh_blk_mem_gen_1_0'.
+WARNING: [IP_Flow 19-2162] IP 'img_enh_proc_sys_reset_0_0' is locked:
+* IP definition 'Processor System Reset (5.0)' for IP 'img_enh_proc_sys_reset_0_0' (customized with software release 2018.3) has a different revision in the IP Catalog. * This IP has board specific outputs. Current project board 'unset' and the board 'tul.com.tw:pynq-z2:part0:1.0' used to customize the IP 'img_enh_proc_sys_reset_0_0' do not match.
+INFO: [BD 41-2710] Migrated 'img_enh_proc_sys_reset_0_0.xci'
+  Source files are located in 'd:/FPGA/final_project/final_project_imp/final_project_imp.srcs/sources_1/bd/img_enh/ip/img_enh_proc_sys_reset_0_0'
+  Output files are located in 'd:/FPGA/final_project/final_project_imp/final_project_imp.gen/sources_1/bd/img_enh/ip/img_enh_proc_sys_reset_0_0'.
+WARNING: [IP_Flow 19-2162] IP 'img_enh_xlconstant_0_1' is locked:
+* IP definition 'Constant (1.1)' for IP 'img_enh_xlconstant_0_1' (customized with software release 2018.3) has a different revision in the IP Catalog.
+INFO: [BD 41-2710] Migrated 'img_enh_xlconstant_0_1.xci'
+  Source files are located in 'd:/FPGA/final_project/final_project_imp/final_project_imp.srcs/sources_1/bd/img_enh/ip/img_enh_xlconstant_0_1'
+  Output files are located in 'd:/FPGA/final_project/final_project_imp/final_project_imp.gen/sources_1/bd/img_enh/ip/img_enh_xlconstant_0_1'.
+update_compile_order -fileset sources_1
+open_bd_design {d:/FPGA/final_project/final_project_imp/final_project_imp.srcs/sources_1/bd/img_enh/img_enh.bd}
+Reading block design file <d:/FPGA/final_project/final_project_imp/final_project_imp.srcs/sources_1/bd/img_enh/img_enh.bd>...
+Adding component instance block -- xilinx.com:ip:processing_system7:5.5 - processing_system7_0
+Adding component instance block -- xilinx.com:user:top_pipeline_wrapper:1.0 - img_enhance_ip
+Adding component instance block -- xilinx.com:ip:smartconnect:1.0 - smartconnect_0
+Adding component instance block -- xilinx.com:ip:axi_gpio:2.0 - axi_gpio_0
+Adding component instance block -- xilinx.com:ip:axi_bram_ctrl:4.1 - axi_bram_ctrl_0
+Adding component instance block -- xilinx.com:ip:axi_bram_ctrl:4.1 - axi_bram_ctrl_1
+Adding component instance block -- xilinx.com:ip:blk_mem_gen:8.4 - blk_mem_input
+Adding component instance block -- xilinx.com:ip:blk_mem_gen:8.4 - blk_mem_output
+Adding component instance block -- xilinx.com:ip:proc_sys_reset:5.0 - proc_sys_reset_0
+Adding component instance block -- xilinx.com:ip:xlconstant:1.1 - xlconstant_0
+Successfully read diagram <img_enh> from block design file <d:/FPGA/final_project/final_project_imp/final_project_imp.srcs/sources_1/bd/img_enh/img_enh.bd>
+open_bd_design: Time (s): cpu = 00:00:03 ; elapsed = 00:00:07 . Memory (MB): peak = 1663.906 ; gain = 6.930
+report_ip_status -name ip_status 
+exit
+INFO: [Common 17-206] Exiting Vivado at Wed Jun 17 16:29:18 2026...

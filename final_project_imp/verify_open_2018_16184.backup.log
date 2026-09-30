@@ -1,0 +1,28 @@
+#-----------------------------------------------------------
+# Vivado v2018.3 (64-bit)
+# SW Build 2405991 on Thu Dec  6 23:38:27 MST 2018
+# IP Build 2404404 on Fri Dec  7 01:43:56 MST 2018
+# Start of session at: Wed Jun 17 16:37:07 2026
+# Process ID: 16184
+# Current directory: D:/FPGA/final_project/final_project_imp
+# Command line: vivado.exe -mode batch -source verify_open_2018.tcl -nojournal -log verify_open_2018.log
+# Log file: D:/FPGA/final_project/final_project_imp/verify_open_2018.log
+# Journal file: 
+#-----------------------------------------------------------
+CRITICAL WARNING: [Common 17-741] No write access right to the local Tcl store at 'C'. XilinxTclStore is reverted to the installation area. If you want to use local Tcl Store, please change the access right and relaunch Vivado.
+source verify_open_2018.tcl
+# open_project ./final_project_imp.xpr
+ERROR: [Project 1-208] No val for DA Elab Attr
+ERROR: [Project 1-208] No val for DA Elab Attr
+ERROR: [Project 1-208] No val for DA Elab Attr
+ERROR: [Project 1-208] No val for DA Elab Attr
+Scanning sources...
+Finished scanning sources
+WARNING: [Project 1-509] GeneratedRun file for 'synth_1' not found
+CRITICAL WARNING: [Project 1-505] Unrecognized Option Name DcpsUptoDate
+ERROR: [Common 17-39] 'open_project' failed due to earlier errors.
+
+    while executing
+"open_project ./final_project_imp.xpr"
+    (file "verify_open_2018.tcl" line 1)
+INFO: [Common 17-206] Exiting Vivado at Wed Jun 17 16:37:15 2026...

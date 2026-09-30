@@ -1,0 +1,11 @@
+0.6
+2018.3
+Dec  7 2018
+00:33:28
+D:/FPGA/final_project/AXI_wrapper_ip_100M/sim/tb_top_pipeline_axis_wrapper.v,1782187912,verilog,,,,tb_top_pipeline_axis_wrapper,,,,,,,,
+D:/FPGA/final_project/AXI_wrapper_ip_100M/src/FIFO.v,1781598671,verilog,D:/FPGA/final_project/AXI_wrapper_ip_100M/sim/tb_top_pipeline_axis_wrapper.v;D:/FPGA/final_project/AXI_wrapper_ip_100M/src/addr_memory.v;D:/FPGA/final_project/AXI_wrapper_ip_100M/src/find_max.v;D:/FPGA/final_project/AXI_wrapper_ip_100M/src/top_pipeline.v;D:/FPGA/final_project/AXI_wrapper_ip_100M/src/top_pipeline_axis_wrapper.v,D:/FPGA/final_project/AXI_wrapper_ip_100M/src/addr_memory.v,,$unit_FIFO_v;FIFO;MEMORY,,,,,,,,
+D:/FPGA/final_project/AXI_wrapper_ip_100M/src/addr_memory.v,1781598671,verilog,,D:/FPGA/final_project/AXI_wrapper_ip_100M/src/find_max.v,,addr_memory,,,,,,,,
+D:/FPGA/final_project/AXI_wrapper_ip_100M/src/find_max.v,1782189210,verilog,,D:/FPGA/final_project/AXI_wrapper_ip_100M/src/top_pipeline.v,,find_max,,,,,,,,
+D:/FPGA/final_project/AXI_wrapper_ip_100M/src/top_pipeline.v,1782190799,verilog,,D:/FPGA/final_project/AXI_wrapper_ip_100M/src/top_pipeline_axis_wrapper.v,,top_pipeline,,,,,,,,
+D:/FPGA/final_project/AXI_wrapper_ip_100M/src/top_pipeline_axis_wrapper.v,1781754746,verilog,,D:/FPGA/final_project/AXI_wrapper_ip_100M/sim/tb_top_pipeline_axis_wrapper.v,,top_pipeline_axis_wrapper,,,,,,,,
+D:/FPGA/final_project/AXI_wrapper_ip_100M/vivado_axis_wrapper_sim/axis_wrapper_sim.sim/sim_1/behav/xsim/glbl.v,1544155481,verilog,,,,glbl,,,,,,,,
